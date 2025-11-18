@@ -9,7 +9,7 @@
     <style>
         .cards-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 1rem;
             width: 100%;
         }
@@ -35,7 +35,27 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            padding: 0px 4px;
+            padding: 4px;
+        }
+
+        .card-skills {
+            font-size: 10px;
+            padding: 4px;
+            color: #2c3e50;
+        }
+
+        .skill-section {
+            margin-bottom: 4px;
+        }
+
+        .skill-label {
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .skill-list {
+            font-size: 9px;
+            line-height: 1.2;
         }
 
         .loading {
@@ -115,6 +135,10 @@
 
                     const typeIcon = typeMap[card.type];
 
+                    // Get skills data
+                    const eventSkills = card.event_skills || [];
+                    const hintSkills = card.hints?.hint_skills || [];
+
                     cardElement.innerHTML = `
                         <div class="card-image-container">
                             <img src="https://gametora.com/images/umamusume/supports/support_card_s_${formattedId}.png" 
@@ -123,6 +147,20 @@
                                  alt="${card.type}" class="card-type-icon">` : ''}
                         </div>
                         <div class="card-name">${card.char_name}</div>
+                        <div class="card-skills">
+                            ${hintSkills.length > 0 ? `
+                                <div class="skill-section">
+                                    <div class="skill-label">Hint Skills</div>
+                                    <div class="skill-list">${hintSkills.join(', ')}</div>
+                                </div>
+                            ` : ''}
+                            ${eventSkills.length > 0 ? `
+                                <div class="skill-section">
+                                    <div class="skill-label">Event Skills</div>
+                                    <div class="skill-list">${eventSkills.join(', ')}</div>
+                                </div>
+                            ` : ''}
+                        </div>
                     `;
 
                     container.appendChild(cardElement);
