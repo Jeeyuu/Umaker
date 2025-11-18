@@ -35,8 +35,8 @@
                 document.getElementById('footer-placeholder').innerHTML = data;
             });
 
-        // Fetch and display support cards
-        fetch('docs/data/support-cards.json')
+        // Fetch and display support cards - using correct GitHub Pages path
+        fetch('https://jeeyuu.github.io/Umaker/docs/data/support-cards.json')
             .then(response => response.json())
             .then(supportCards => {
                 const container = document.getElementById('cards-container');
