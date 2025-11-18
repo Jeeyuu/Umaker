@@ -51,15 +51,26 @@
         .skill-label {
             font-weight: bold;
             color: #3498db;
+            margin-bottom: 2px;
         }
 
         .skill-list {
             font-size: 9px;
             line-height: 1.2;
+            max-height: 60px;
+            overflow-y: auto;
         }
 
         .skill-number {
             display: block;
+            padding: 1px 2px;
+            border-radius: 2px;
+            cursor: help;
+            transition: background-color 0.2s;
+        }
+
+        .skill-number:hover {
+            background-color: #f0f0f0;
         }
 
         .loading {
@@ -143,9 +154,11 @@
                     const eventSkills = card.event_skills || [];
                     const hintSkills = card.hints?.hint_skills || [];
 
-                    // Format skills with each number on its own line
+                    // Format skills with tooltip-ready elements
                     const formatSkills = (skills) => {
-                        return skills.map(skill => `<span class="skill-number">${skill}</span>`).join('');
+                        return skills.map(skill =>
+                            `<span class="skill-number" title="Skill ID: ${skill}" data-skill-id="${skill}">${skill}</span>`
+                        ).join('');
                     };
 
                     cardElement.innerHTML = `
