@@ -73,55 +73,30 @@
                 document.getElementById('footer-placeholder').innerHTML = data;
             });
 
-        // Try different possible paths for GitHub Pages
         fetch('./data/support-cards.json')
-            .then(response => {
-                if (!response.ok) throw new Error('Not found');
-                return response.json();
-            })
-            .then(supportCards => {
-                const container = document.getElementById('cards-container');
-                container.innerHTML = '';
+                .then(response => {
+                    if (!response.ok) throw new Error('Not found');
+                    return response.json();
+                })
+                .then(supportCards => {
+                    const container = document.getElementById('cards-container');
+                    container.innerHTML = '';
 
-                supportCards.forEach(card => {
-                    const cardElement = document.createElement('div');
-                    cardElement.className = 'card';
+                    supportCards.forEach(card => {
+                        const cardElement = document.createElement('div');
+                        cardElement.className = 'card';
 
-                    const formattedId = card.support_id.toString().padStart(5, '0');
+                        const formattedId = card.support_id.toString().padStart(5, '0');
 
-                    cardElement.innerHTML = `
-                        <img src="https://gametora.com/images/umamusume/supports/support_card_s_${formattedId}.png" 
-                             alt="${card.char_name}" class="card-image">
-                        <div class="card-name">${card.char_name}</div>
-                    `;
+                        cardElement.innerHTML = `
+                <img src="https://gametora.com/images/umamusume/supports/support_card_s_${formattedId}.png" 
+                     alt="${card.char_name}" class="card-image">
+                <div class="card-name">${card.char_name}</div>
+            `;
 
-                    container.appendChild(cardElement);
-                });
-            })
-            .catch(() => {
-                // If first path fails, try absolute path
-                fetch('/Umaker/data/support-cards.json')
-                    .then(response => response.json())
-                    .then(supportCards => {
-                        const container = document.getElementById('cards-container');
-                        container.innerHTML = '';
-
-                        supportCards.forEach(card => {
-                            const cardElement = document.createElement('div');
-                            cardElement.className = 'card';
-
-                            const formattedId = card.support_id.toString().padStart(5, '0');
-
-                            cardElement.innerHTML = `
-                                <img src="https://gametora.com/images/umamusume/supports/support_card_s_${formattedId}.png" 
-                                     alt="${card.char_name}" class="card-image">
-                                <div class="card-name">${card.char_name}</div>
-                            `;
-
-                            container.appendChild(cardElement);
-                        });
+                        container.appendChild(cardElement);
                     });
-            });
+                });
     </script>
 </body>
 
