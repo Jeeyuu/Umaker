@@ -58,6 +58,10 @@
             line-height: 1.2;
         }
 
+        .skill-number {
+            display: block;
+        }
+
         .loading {
             text-align: center;
             padding: 2rem;
@@ -139,6 +143,11 @@
                     const eventSkills = card.event_skills || [];
                     const hintSkills = card.hints?.hint_skills || [];
 
+                    // Format skills with each number on its own line
+                    const formatSkills = (skills) => {
+                        return skills.map(skill => `<span class="skill-number">${skill}</span>`).join('');
+                    };
+
                     cardElement.innerHTML = `
                         <div class="card-image-container">
                             <img src="https://gametora.com/images/umamusume/supports/support_card_s_${formattedId}.png" 
@@ -151,13 +160,13 @@
                             ${hintSkills.length > 0 ? `
                                 <div class="skill-section">
                                     <div class="skill-label">Hint Skills</div>
-                                    <div class="skill-list">${hintSkills.join(', ')}</div>
+                                    <div class="skill-list">${formatSkills(hintSkills)}</div>
                                 </div>
                             ` : ''}
                             ${eventSkills.length > 0 ? `
                                 <div class="skill-section">
                                     <div class="skill-label">Event Skills</div>
-                                    <div class="skill-list">${eventSkills.join(', ')}</div>
+                                    <div class="skill-list">${formatSkills(eventSkills)}</div>
                                 </div>
                             ` : ''}
                         </div>
