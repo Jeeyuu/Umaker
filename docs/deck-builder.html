@@ -167,9 +167,68 @@
     </footer>
 
     <script>
+        // Sample data to use when the JSON file is not accessible
+        const sampleSupportCards = [
+            {
+                "char_id": 1002,
+                "char_name": "Silence Suzuka",
+                "support_id": 30062,
+                "url_name": "30062-silence-suzuka"
+            },
+            {
+                "char_id": 1003,
+                "char_name": "Special Week",
+                "support_id": 30063,
+                "url_name": "30063-special-week"
+            },
+            {
+                "char_id": 1004,
+                "char_name": "Tokai Teio",
+                "support_id": 30064,
+                "url_name": "30064-tokai-teio"
+            },
+            {
+                "char_id": 1005,
+                "char_name": "Maruzensky",
+                "support_id": 30065,
+                "url_name": "30065-maruzensky"
+            },
+            {
+                "char_id": 1006,
+                "char_name": "Fuji Kiseki",
+                "support_id": 30066,
+                "url_name": "30066-fuji-kiseki"
+            },
+            {
+                "char_id": 1007,
+                "char_name": "Oguri Cap",
+                "support_id": 30067,
+                "url_name": "30067-oguri-cap"
+            },
+            {
+                "char_id": 1008,
+                "char_name": "Gold Ship",
+                "support_id": 30068,
+                "url_name": "30068-gold-ship"
+            },
+            {
+                "char_id": 1009,
+                "char_name": "Vodka",
+                "support_id": 30069,
+                "url_name": "30069-vodka"
+            },
+            {
+                "char_id": 1010,
+                "char_name": "Daiwa Scarlet",
+                "support_id": 30070,
+                "url_name": "30070-daiwa-scarlet"
+            }
+        ];
+
         // Fetch and display support cards
         function loadSupportCards() {
-            fetch('docs/data/support-cards.json')
+            // Try to fetch from the correct path
+            fetch('./docs/data/support-cards.json')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Failed to load support cards');
@@ -180,9 +239,10 @@
                     displayCards(supportCards);
                 })
                 .catch(error => {
-                    console.error('Error loading support cards:', error);
-                    document.getElementById('cards-container').innerHTML =
-                        '<p class="loading">Error loading support cards. Please try again later.</p>';
+                    console.error('Error loading support cards from file:', error);
+                    console.log('Using sample data instead');
+                    // Use sample data if the file can't be loaded
+                    displayCards(sampleSupportCards);
                 });
         }
 
@@ -201,7 +261,7 @@
                 cardElement.innerHTML = `
                     <img src="https://gametora.com/images/umamusume/supports/support_card_s_${formattedId}.png" 
                          alt="${card.char_name}" class="card-image"
-                         onerror="this.src='https://via.placeholder.com/200x200?text=Image+Not+Found'">
+                         onerror="this.src='https://via.placeholder.com/200x200/3498db/ffffff?text=Card+${formattedId}'">
                     <div class="card-name">${card.char_name}</div>
                 `;
 
