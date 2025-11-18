@@ -91,10 +91,7 @@
             });
 
         fetch('./data/support-cards.json')
-            .then(response => {
-                if (!response.ok) throw new Error('Not found');
-                return response.json();
-            })
+            .then(response => response.json())
             .then(supportCards => {
                 const container = document.getElementById('cards-container');
                 container.innerHTML = '';
@@ -105,7 +102,6 @@
 
                     const formattedId = card.support_id.toString().padStart(5, '0');
 
-                    // Map type to icon number
                     const typeMap = {
                         'speed': '00',
                         'stamina': '01',
@@ -116,17 +112,17 @@
                         'group': '06'
                     };
 
-                    const typeIcon = typeMap[card.type] || '00'; // Default to speed if type not found
+                    const typeIcon = typeMap[card.type];
 
                     cardElement.innerHTML = `
-                <div class="card-image-container">
-                    <img src="https://gametora.com/images/umamusume/supports/support_card_s_${formattedId}.png" 
-                         alt="${card.char_name}" class="card-image">
-                    <img src="https://gametora.com/images/umamusume/icons/utx_ico_obtain_${typeIcon}.png" 
-                         alt="${card.type}" class="card-type-icon">
-                </div>
-                <div class="card-name">${card.char_name}</div>
-            `;
+                        <div class="card-image-container">
+                            <img src="https://gametora.com/images/umamusume/supports/support_card_s_${formattedId}.png" 
+                                 alt="${card.char_name}" class="card-image">
+                            ${typeIcon ? `<img src="https://gametora.com/images/umamusume/icons/utx_ico_obtain_${typeIcon}.png" 
+                                 alt="${card.type}" class="card-type-icon">` : ''}
+                        </div>
+                        <div class="card-name">${card.char_name}</div>
+                    `;
 
                     container.appendChild(cardElement);
                 });
