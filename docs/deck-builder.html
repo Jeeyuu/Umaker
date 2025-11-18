@@ -19,12 +19,12 @@
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            aspect-ratio: 3/4; /* This maintains the card proportions */
+            aspect-ratio: 3/4;
         }
 
         .card-image {
             width: 100%;
-            height: auto; /* Change from fixed height to auto */
+            height: auto;
             object-fit: cover;
             display: block;
         }
@@ -41,33 +41,6 @@
             padding: 2rem;
             color: #7f8c8d;
             grid-column: 1 / -1;
-        }
-
-        @media (max-width: 768px) {
-            .cards-container {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 0.75rem;
-            }
-
-            .card-image {
-                height: 150px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .cards-container {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-                gap: 0.5rem;
-            }
-
-            .card-image {
-                height: 120px;
-            }
-
-            .card-name {
-                padding: 0.5rem;
-                font-size: 0.9rem;
-            }
         }
     </style>
 </head>
