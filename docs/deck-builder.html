@@ -45,21 +45,21 @@
         }
 
         .card-image-container {
-    position: relative;
-    display: inline-block;
-    width: 100%;
-}
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
 
-.card-type-icon {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 24px;
-    height: 24px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 4px;
-    padding: 2px;
-}
+        .card-type-icon {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 4px;
+            padding: 2px;
+        }
     </style>
 </head>
 
@@ -91,32 +91,34 @@
             });
 
         fetch('./data/support-cards.json')
-                .then(response => {
-                    if (!response.ok) throw new Error('Not found');
-                    return response.json();
-                })
-                .then(supportCards => {
-                    const container = document.getElementById('cards-container');
-                    container.innerHTML = '';
+            .then(response => {
+                if (!response.ok) throw new Error('Not found');
+                return response.json();
+            })
+            .then(supportCards => {
+                const container = document.getElementById('cards-container');
+                container.innerHTML = '';
 
-                    supportCards.forEach(card => {
-                        const cardElement = document.createElement('div');
-                        cardElement.className = 'card';
+                supportCards.forEach(card => {
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'card';
 
-                        const formattedId = card.support_id.toString().padStart(5, '0');
+                    const formattedId = card.support_id.toString().padStart(5, '0');
 
-                        // Map type to icon number
-                        const typeMap = {
-                            'speed': '00',
-                            'stamina': '01',
-                            'power': '02',
-                            'guts': '03',
-                            'intelligence': '04',
-                            'friend': '05',
-                            'group': '06'
-                        };
-                        
-                        cardElement.innerHTML = `
+                    // Map type to icon number
+                    const typeMap = {
+                        'speed': '00',
+                        'stamina': '01',
+                        'power': '02',
+                        'guts': '03',
+                        'intelligence': '04',
+                        'friend': '05',
+                        'group': '06'
+                    };
+
+                    const typeIcon = typeMap[card.type] || '00'; // Default to speed if type not found
+
+                    cardElement.innerHTML = `
                 <div class="card-image-container">
                     <img src="https://gametora.com/images/umamusume/supports/support_card_s_${formattedId}.png" 
                          alt="${card.char_name}" class="card-image">
@@ -126,9 +128,9 @@
                 <div class="card-name">${card.char_name}</div>
             `;
 
-                        container.appendChild(cardElement);
-                    });
+                    container.appendChild(cardElement);
                 });
+            });
     </script>
 </body>
 
