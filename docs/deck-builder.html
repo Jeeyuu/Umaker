@@ -19,11 +19,12 @@
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            aspect-ratio: 3/4; /* This maintains the card proportions */
         }
 
         .card-image {
             width: 100%;
-            height: 180px;
+            height: auto; /* Change from fixed height to auto */
             object-fit: cover;
             display: block;
         }
