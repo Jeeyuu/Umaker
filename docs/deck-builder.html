@@ -167,83 +167,49 @@
     </footer>
 
     <script>
-        // Sample data to use when the JSON file is not accessible
-        const sampleSupportCards = [
-            {
-                "char_id": 1002,
-                "char_name": "Silence Suzuka",
-                "support_id": 30062,
-                "url_name": "30062-silence-suzuka"
-            },
-            {
-                "char_id": 1003,
-                "char_name": "Special Week",
-                "support_id": 30063,
-                "url_name": "30063-special-week"
-            },
-            {
-                "char_id": 1004,
-                "char_name": "Tokai Teio",
-                "support_id": 30064,
-                "url_name": "30064-tokai-teio"
-            },
-            {
-                "char_id": 1005,
-                "char_name": "Maruzensky",
-                "support_id": 30065,
-                "url_name": "30065-maruzensky"
-            },
-            {
-                "char_id": 1006,
-                "char_name": "Fuji Kiseki",
-                "support_id": 30066,
-                "url_name": "30066-fuji-kiseki"
-            },
-            {
-                "char_id": 1007,
-                "char_name": "Oguri Cap",
-                "support_id": 30067,
-                "url_name": "30067-oguri-cap"
-            },
-            {
-                "char_id": 1008,
-                "char_name": "Gold Ship",
-                "support_id": 30068,
-                "url_name": "30068-gold-ship"
-            },
-            {
-                "char_id": 1009,
-                "char_name": "Vodka",
-                "support_id": 30069,
-                "url_name": "30069-vodka"
-            },
-            {
-                "char_id": 1010,
-                "char_name": "Daiwa Scarlet",
-                "support_id": 30070,
-                "url_name": "30070-daiwa-scarlet"
-            }
-        ];
-
         // Fetch and display support cards
         function loadSupportCards() {
-            // Try to fetch from the correct path
-            fetch('./docs/data/support-cards.json')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to load support cards');
-                    }
-                    return response.json();
-                })
-                .then(supportCards => {
-                    displayCards(supportCards);
-                })
-                .catch(error => {
-                    console.error('Error loading support cards from file:', error);
-                    console.log('Using sample data instead');
-                    // Use sample data if the file can't be loaded
-                    displayCards(sampleSupportCards);
-                });
+            // Try multiple possible paths for the JSON file
+            const possiblePaths = [
+                '../data/support-cards.json',
+                './docs/data/support-cards.json',
+                'docs/data/support-cards.json',
+                '../docs/data/support-cards.json',
+                'data/support-cards.json'
+            ];
+
+            let fetchAttempts = 0;
+
+            function tryFetch(pathIndex) {
+                if (pathIndex >= possiblePaths.length) {
+                    console.error('All fetch attempts failed');
+                    useSampleData();
+                    return;
+                }
+
+                const path = possiblePaths[pathIndex];
+                console.log(`Attempting to fetch from: ${path}`);
+
+                fetch(path)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(supportCards => {
+                        console.log(`Successfully loaded from: ${path}`);
+                        console.log(`Found ${supportCards.length} cards`);
+                        displayCards(supportCards);
+                    })
+                    .catch(error => {
+                        console.error(`Failed to load from ${path}:`, error);
+                        fetchAttempts++;
+                        tryFetch(pathIndex + 1);
+                    });
+            }
+
+            tryFetch(0);
         }
 
         // Function to display cards
@@ -251,7 +217,19 @@
             const container = document.getElementById('cards-container');
             container.innerHTML = ''; // Clear loading message
 
+            if (!Array.isArray(supportCards)) {
+                console.error('Support cards data is not an array:', supportCards);
+                container.innerHTML = '<div class="loading">Error: Invalid data format</div>';
+                return;
+            }
+
             supportCards.forEach(card => {
+                // Validate required fields
+                if (!card.support_id || !card.char_name) {
+                    console.warn('Skipping card with missing data:', card);
+                    return;
+                }
+
                 const cardElement = document.createElement('div');
                 cardElement.className = 'card';
 
@@ -267,6 +245,28 @@
 
                 container.appendChild(cardElement);
             });
+
+            console.log(`Displayed ${container.children.length} cards`);
+        }
+
+        // Fallback to sample data
+        function useSampleData() {
+            console.log('Using sample data as fallback');
+            const sampleCards = [
+                {
+                    "char_id": 1026,
+                    "char_name": "Mihono Bourbon",
+                    "support_id": 30277,
+                    "url_name": "30277-mihono-bourbon"
+                },
+                {
+                    "char_id": 1002,
+                    "char_name": "Silence Suzuka",
+                    "support_id": 30062,
+                    "url_name": "30062-silence-suzuka"
+                }
+            ];
+            displayCards(sampleCards);
         }
 
         // Load cards when page is ready
