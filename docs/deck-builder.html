@@ -259,22 +259,37 @@
             text-align: center;
             min-width: 90px;
             min-height: 120px;
+            max-width: 90px;
+            max-height: 120px;
         }
 
         .deck-slot.filled {
             border-style: solid;
             border-color: #3498db;
-            padding: 2px;
+            padding: 1px;
         }
 
         .deck-slot .card {
             width: 100%;
             height: 100%;
+            padding: 0;
+        }
+
+        .deck-slot .card-image-container {
+            width: 100%;
+            height: auto;
         }
 
         .deck-slot .card-image {
             width: 100%;
             height: auto;
+            border-radius: 6px;
+        }
+
+        .deck-slot .card-name {
+            font-size: 9px;
+            padding: 2px;
+            margin: 0;
         }
 
         /* Filters Section */
