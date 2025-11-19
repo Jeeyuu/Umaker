@@ -351,19 +351,30 @@
                     <h4>Affinity Conditions</h4>
                     <div class="filter-options">
                         <label class="filter-option"><input type="checkbox"> No condition</label>
-                        <label class="filter-option"><input type="checkbox"> Front / Pace / Late / End</label>
-                        <label class="filter-option"><input type="checkbox"> Short / Mile / Medium / Long</label>
-                        <label class="filter-option"><input type="checkbox"> Dirt / Turf</label>
+                        <label class="filter-option"><input type="checkbox"> Front</label>
+                        <label class="filter-option"><input type="checkbox"> Pace</label>
+                        <label class="filter-option"><input type="checkbox"> Late</label>
+                        <label class="filter-option"><input type="checkbox"> End</label>
+                        <label class="filter-option"><input type="checkbox"> Short</label>
+                        <label class="filter-option"><input type="checkbox"> Mile</label>
+                        <label class="filter-option"><input type="checkbox"> Medium</label>
+                        <label class="filter-option"><input type="checkbox"> Long</label>
+                        <label class="filter-option"><input type="checkbox"> Dirt</label>
+                        <label class="filter-option"><input type="checkbox"> Turf</label>
                     </div>
                 </div>
 
                 <div class="filter-group">
                     <h4>Trigger Conditions</h4>
                     <div class="filter-options">
-                        <label class="filter-option"><input type="checkbox"> Early-race / Mid-race / Late-race / Last
-                            spurt</label>
-                        <label class="filter-option"><input type="checkbox"> Corner / Straight / Final corner / Final
-                            straight</label>
+                        <label class="filter-option"><input type="checkbox"> Early-race</label>
+                        <label class="filter-option"><input type="checkbox"> Mid-race</label>
+                        <label class="filter-option"><input type="checkbox"> Late-race</label>
+                        <label class="filter-option"><input type="checkbox"> Last Spurt</label>
+                        <label class="filter-option"><input type="checkbox"> Corner</label>
+                        <label class="filter-option"><input type="checkbox"> Straight</label>
+                        <label class="filter-option"><input type="checkbox"> Final Corner</label>
+                        <label class="filter-option"><input type="checkbox"> Final Straight</label>
                         <label class="filter-option"><input type="checkbox"> Uphill or Downhill</label>
                     </div>
                 </div>
@@ -397,7 +408,6 @@
     <div id="footer-placeholder"></div>
 
     <script>
-        // Global variables
         let allSupportCards = [];
         let allCharacters = [];
         let skillsMap = new Map();
@@ -406,7 +416,6 @@
         let usedCharacterIds = new Set();
         let currentSearchTerm = '';
 
-        // Initialize the page
         fetch('header.html')
             .then(response => response.text())
             .then(data => {
@@ -439,7 +448,6 @@
             return skillName;
         }
 
-        // Search functionality
         function setupSearch() {
             const searchInput = document.getElementById('skill-search');
             searchInput.addEventListener('input', (e) => {
@@ -452,24 +460,20 @@
             currentSearchTerm = searchTerm;
 
             if (!searchTerm) {
-                // Show all cards if no search term
                 renderCards(allSupportCards);
                 return;
             }
 
             const filteredCards = allSupportCards.filter(card => {
-                // Check event skills
                 const eventSkills = card.event_skills || [];
                 const hasEventSkill = eventSkills.some(skillId => {
                     const skillData = skillsMap.get(skillId);
                     if (!skillData) return false;
                     const skillName = getSkillName(skillData).toLowerCase();
-                    // Exact word matching for strictness
                     return skillName.includes(searchTerm) &&
                         (!skillName.includes('non-') || searchTerm.includes('non-'));
                 });
 
-                // Check hint skills
                 const hintSkills = card.hints?.hint_skills || [];
                 const hasHintSkill = hintSkills.some(skillId => {
                     const skillData = skillsMap.get(skillId);
@@ -485,7 +489,6 @@
             renderCards(filteredCards);
         }
 
-        // Character picker functionality
         async function openCharacterPicker() {
             if (allCharacters.length === 0) {
                 await loadCharacters();
@@ -525,7 +528,6 @@
         }
 
         function selectCharacter(character) {
-            // Remove previous character if exists
             if (selectedCharacter) {
                 usedCharacterIds.delete(selectedCharacter.char_id);
             }
@@ -563,7 +565,6 @@
             }
         }
 
-        // Deck functionality
         function setupDeckSlots() {
             const slots = document.getElementById('deck-slots');
             slots.innerHTML = '';
@@ -627,7 +628,6 @@
         }
 
         function updateCardDisplay() {
-            // Apply current search filter when updating display
             if (currentSearchTerm) {
                 filterCardsBySkill(currentSearchTerm);
             } else {
@@ -635,7 +635,6 @@
             }
         }
 
-        // Main card rendering
         function renderCards(cards) {
             const container = document.getElementById('cards-container');
             container.innerHTML = '';
@@ -649,7 +648,6 @@
                 if (!isDuplicate) {
                     cardElement.onclick = () => addCardToDeck(card);
                 } else if (isInDeck) {
-                    // If card is in deck, clicking removes it
                     cardElement.onclick = () => {
                         const deckIndex = deck.findIndex(deckCard => deckCard.support_id === card.support_id);
                         if (deckIndex !== -1) {
@@ -704,7 +702,6 @@
             });
         }
 
-        // Main initialization
         async function loadCardsWithSkills() {
             const [skillsData, supportCardsResponse] = await Promise.all([
                 loadSkillsData(),
@@ -720,7 +717,6 @@
 
         loadCardsWithSkills();
 
-        // Close modal when clicking outside
         window.onclick = function (event) {
             const modal = document.getElementById('character-modal');
             if (event.target === modal) {
