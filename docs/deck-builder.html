@@ -9,7 +9,7 @@
     <style>
         .cards-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
             gap: 1rem;
             width: 100%;
         }
@@ -17,7 +17,30 @@
         .card {
             background: white;
             border-radius: 12px 12px 8px 8px;
-            padding: 0px 4px;
+            padding: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .card.dimmed {
+            opacity: 0.5;
+            position: relative;
+        }
+
+        .card.dimmed::before {
+            content: "DUPLICATE";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: orange;
+            color: white;
+            font-size: 8px;
+            font-weight: bold;
+            text-align: center;
+            padding: 2px;
+            border-radius: 8px 8px 0 0;
+            z-index: 2;
         }
 
         .card-image {
@@ -99,6 +122,181 @@
             border-radius: 4px;
             padding: 2px;
         }
+
+        /* Control Sections */
+        .control-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .control-section {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .control-section h3 {
+            margin: 0 0 1rem 0;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        /* Search Section */
+        #skill-search {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* Character Picker */
+        .character-picker-btn {
+            width: 100%;
+            padding: 8px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .character-picker-btn:hover {
+            background: #2980b9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .characters-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .character-card {
+            background: white;
+            border-radius: 8px;
+            padding: 4px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .character-card.selected {
+            border: 2px solid #3498db;
+        }
+
+        .character-portrait {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+
+        .character-name {
+            font-size: 10px;
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Deck Section */
+        .deck-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .deck-slot {
+            aspect-ratio: 3/4;
+            background: #ecf0f1;
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #7f8c8d;
+            text-align: center;
+        }
+
+        .deck-slot.filled {
+            border-style: solid;
+            border-color: #3498db;
+            padding: 2px;
+        }
+
+        .deck-slot .card {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Filters Section */
+        .filter-group {
+            margin-bottom: 1rem;
+        }
+
+        .filter-group h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 12px;
+            color: #2c3e50;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 11px;
+        }
+
+        .filter-option input[type="checkbox"] {
+            margin: 0;
+        }
     </style>
 </head>
 
@@ -109,14 +307,97 @@
         <h1>Deck Builder</h1>
         <p class="subtitle">Build Decks.</p>
 
+        <!-- Control Sections -->
+        <div class="control-sections">
+            <!-- Search List -->
+            <div class="control-section">
+                <h3>Search List</h3>
+                <input type="text" id="skill-search" placeholder="Enter skill names (e.g., Standard Distance)">
+            </div>
+
+            <!-- Character -->
+            <div class="control-section">
+                <h3>Character</h3>
+                <button class="character-picker-btn" onclick="openCharacterPicker()">Pick Character</button>
+                <div id="selected-character"></div>
+            </div>
+
+            <!-- Deck -->
+            <div class="control-section">
+                <h3>Deck (0/6)</h3>
+                <div class="deck-slots" id="deck-slots">
+                    <div class="deck-slot">Slot 1</div>
+                    <div class="deck-slot">Slot 2</div>
+                    <div class="deck-slot">Slot 3</div>
+                    <div class="deck-slot">Slot 4</div>
+                    <div class="deck-slot">Slot 5</div>
+                    <div class="deck-slot">Slot 6</div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="control-section">
+                <h3>Filters</h3>
+
+                <div class="filter-group">
+                    <h4>Affinity Conditions</h4>
+                    <div class="filter-options">
+                        <label class="filter-option"><input type="checkbox"> No condition</label>
+                        <label class="filter-option"><input type="checkbox"> Front / Pace / Late / End</label>
+                        <label class="filter-option"><input type="checkbox"> Short / Mile / Medium / Long</label>
+                        <label class="filter-option"><input type="checkbox"> Dirt / Turf</label>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h4>Trigger Conditions</h4>
+                    <div class="filter-options">
+                        <label class="filter-option"><input type="checkbox"> Early-race / Mid-race / Late-race / Last
+                            spurt</label>
+                        <label class="filter-option"><input type="checkbox"> Corner / Straight / Final corner / Final
+                            straight</label>
+                        <label class="filter-option"><input type="checkbox"> Uphill or Downhill</label>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h4>Other</h4>
+                    <div class="filter-options">
+                        <label class="filter-option"><input type="checkbox"> Debuff</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards Container -->
         <div id="cards-container" class="cards-container">
             <div class="loading">Loading support cards...</div>
+        </div>
+
+        <!-- Character Picker Modal -->
+        <div id="character-modal" class="modal">
+            <div class="modal-content">
+                <button class="close-modal" onclick="closeCharacterPicker()">×</button>
+                <h3>Select Character</h3>
+                <div id="characters-container" class="characters-container">
+                    <div class="loading">Loading characters...</div>
+                </div>
+            </div>
         </div>
     </main>
 
     <div id="footer-placeholder"></div>
 
     <script>
+        // Global variables
+        let allSupportCards = [];
+        let allCharacters = [];
+        let skillsMap = new Map();
+        let selectedCharacter = null;
+        let deck = [];
+        let usedCharacterIds = new Set();
+
+        // Initialize the page
         fetch('header.html')
             .then(response => response.text())
             .then(data => {
@@ -133,7 +414,6 @@
             const response = await fetch('./data/skills.json');
             const skills = await response.json();
 
-            const skillsMap = new Map();
             skills.forEach(skill => {
                 skillsMap.set(skill.id, skill);
             });
@@ -145,39 +425,192 @@
             if (!skillData) return 'Unknown Skill';
 
             let skillName = skillData.name_en || skillData.enname || 'Unknown Skill';
-
-            // Remove symbols like ○ and the space before them
             skillName = skillName.replace(/\s+○$/, '');
 
             return skillName;
         }
 
-        async function loadCardsWithSkills() {
-            const [skillsMap, supportCardsResponse] = await Promise.all([
-                loadSkillsData(),
-                fetch('./data/support-cards.json')
-            ]);
+        // Search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('skill-search');
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                filterCardsBySkill(searchTerm);
+            });
+        }
 
-            const supportCards = await supportCardsResponse.json();
+        function filterCardsBySkill(searchTerm) {
+            if (!searchTerm) {
+                // Show all cards if no search term
+                renderCards(allSupportCards);
+                return;
+            }
+
+            const filteredCards = allSupportCards.filter(card => {
+                // Check event skills
+                const eventSkills = card.event_skills || [];
+                const hasEventSkill = eventSkills.some(skillId => {
+                    const skillData = skillsMap.get(skillId);
+                    if (!skillData) return false;
+                    const skillName = getSkillName(skillData).toLowerCase();
+                    // Exact word matching for strictness
+                    return skillName.includes(searchTerm) &&
+                        (!skillName.includes('non-') || searchTerm.includes('non-'));
+                });
+
+                // Check hint skills
+                const hintSkills = card.hints?.hint_skills || [];
+                const hasHintSkill = hintSkills.some(skillId => {
+                    const skillData = skillsMap.get(skillId);
+                    if (!skillData) return false;
+                    const skillName = getSkillName(skillData).toLowerCase();
+                    return skillName.includes(searchTerm) &&
+                        (!skillName.includes('non-') || searchTerm.includes('non-'));
+                });
+
+                return hasEventSkill || hasHintSkill;
+            });
+
+            renderCards(filteredCards);
+        }
+
+        // Character picker functionality
+        async function openCharacterPicker() {
+            if (allCharacters.length === 0) {
+                await loadCharacters();
+            }
+            document.getElementById('character-modal').style.display = 'block';
+            renderCharacterPicker();
+        }
+
+        function closeCharacterPicker() {
+            document.getElementById('character-modal').style.display = 'none';
+        }
+
+        async function loadCharacters() {
+            const response = await fetch('./data/character-cards.json');
+            allCharacters = await response.json();
+        }
+
+        function renderCharacterPicker() {
+            const container = document.getElementById('characters-container');
+            container.innerHTML = '';
+
+            allCharacters.forEach(character => {
+                const charElement = document.createElement('div');
+                charElement.className = `character-card ${selectedCharacter?.char_id === character.char_id ? 'selected' : ''}`;
+                charElement.onclick = () => selectCharacter(character);
+
+                const formattedId = character.card_id.toString().padStart(5, '0');
+
+                charElement.innerHTML = `
+                    <img src="https://gametora.com/images/umamusume/characters/icon_chr_${formattedId}.png" 
+                         alt="${character.name_en}" class="character-portrait">
+                    <div class="character-name">${character.name_en}</div>
+                `;
+
+                container.appendChild(charElement);
+            });
+        }
+
+        function selectCharacter(character) {
+            selectedCharacter = character;
+            usedCharacterIds.add(character.char_id);
+            updateSelectedCharacterDisplay();
+            closeCharacterPicker();
+            updateCardDisplay();
+        }
+
+        function updateSelectedCharacterDisplay() {
+            const container = document.getElementById('selected-character');
+            if (selectedCharacter) {
+                const formattedId = selectedCharacter.card_id.toString().padStart(5, '0');
+                container.innerHTML = `
+                    <div class="character-card">
+                        <img src="https://gametora.com/images/umamusume/characters/icon_chr_${formattedId}.png" 
+                             alt="${selectedCharacter.name_en}" class="character-portrait">
+                        <div class="character-name">${selectedCharacter.name_en}</div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = '';
+            }
+        }
+
+        // Deck functionality
+        function setupDeckSlots() {
+            const slots = document.getElementById('deck-slots');
+            slots.innerHTML = '';
+
+            for (let i = 0; i < 6; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'deck-slot';
+                slot.innerHTML = `Slot ${i + 1}`;
+                slots.appendChild(slot);
+            }
+            updateDeckDisplay();
+        }
+
+        function addCardToDeck(card) {
+            if (deck.length >= 6) return;
+            if (usedCharacterIds.has(card.char_id)) return;
+
+            deck.push(card);
+            usedCharacterIds.add(card.char_id);
+            updateDeckDisplay();
+            updateCardDisplay();
+        }
+
+        function updateDeckDisplay() {
+            const slots = document.querySelectorAll('.deck-slot');
+            const deckTitle = document.querySelector('.control-section:nth-child(3) h3');
+            deckTitle.textContent = `Deck (${deck.length}/6)`;
+
+            slots.forEach((slot, index) => {
+                slot.innerHTML = `Slot ${index + 1}`;
+                slot.className = 'deck-slot';
+
+                if (deck[index]) {
+                    const card = deck[index];
+                    slot.className = 'deck-slot filled';
+                    const formattedId = card.support_id.toString().padStart(5, '0');
+
+                    slot.innerHTML = `
+                        <div class="card">
+                            <div class="card-image-container">
+                                <img src="https://gametora.com/images/umamusume/supports/support_card_s_${formattedId}.png" 
+                                     alt="${card.char_name}" class="card-image">
+                            </div>
+                            <div class="card-name">${card.char_name}</div>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function updateCardDisplay() {
+            renderCards(allSupportCards);
+        }
+
+        // Main card rendering
+        function renderCards(cards) {
             const container = document.getElementById('cards-container');
             container.innerHTML = '';
 
-            supportCards.forEach(card => {
+            cards.forEach(card => {
                 const cardElement = document.createElement('div');
-                cardElement.className = 'card';
+                const isDuplicate = usedCharacterIds.has(card.char_id);
+                cardElement.className = `card ${isDuplicate ? 'dimmed' : ''}`;
+
+                if (!isDuplicate) {
+                    cardElement.onclick = () => addCardToDeck(card);
+                }
 
                 const formattedId = card.support_id.toString().padStart(5, '0');
-
                 const typeMap = {
-                    'speed': '00',
-                    'stamina': '01',
-                    'power': '02',
-                    'guts': '03',
-                    'intelligence': '04',
-                    'friend': '05',
-                    'group': '06'
+                    'speed': '00', 'stamina': '01', 'power': '02', 'guts': '03',
+                    'intelligence': '04', 'friend': '05', 'group': '06'
                 };
-
                 const typeIcon = typeMap[card.type];
 
                 const eventSkills = card.event_skills || [];
@@ -187,7 +620,6 @@
                     return skills.map(skillId => {
                         const skillData = skillsMap.get(skillId);
                         const skillName = getSkillName(skillData);
-
                         return `<span class="skill-number" title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
                     }).join('');
                 };
@@ -220,7 +652,29 @@
             });
         }
 
+        // Main initialization
+        async function loadCardsWithSkills() {
+            const [skillsData, supportCardsResponse] = await Promise.all([
+                loadSkillsData(),
+                fetch('./data/support-cards.json')
+            ]);
+
+            allSupportCards = await supportCardsResponse.json();
+
+            setupSearch();
+            setupDeckSlots();
+            renderCards(allSupportCards);
+        }
+
         loadCardsWithSkills();
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            const modal = document.getElementById('character-modal');
+            if (event.target === modal) {
+                closeCharacterPicker();
+            }
+        }
     </script>
 </body>
 
