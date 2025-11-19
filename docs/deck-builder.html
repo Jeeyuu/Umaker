@@ -126,9 +126,48 @@
                 document.getElementById('footer-placeholder').innerHTML = data;
             });
 
-        fetch('./data/support-cards.json')
-            .then(response => response.json())
-            .then(supportCards => {
+        // Function to create a skill lookup map
+        async function loadSkillsData() {
+            try {
+                const response = await fetch('./data/skills.json');
+                const skills = await response.json();
+
+                // Create a map for quick lookup: skill ID -> skill data
+                const skillsMap = new Map();
+                skills.forEach(skill => {
+                    skillsMap.set(skill.id, skill);
+                });
+
+                return skillsMap;
+            } catch (error) {
+                console.error('Error loading skills data:', error);
+                return new Map(); // Return empty map if skills loading fails
+            }
+        }
+
+        // Function to get skill name from skill data
+        function getSkillName(skillData) {
+            if (!skillData) return 'Unknown Skill';
+
+            // Try name_en first, then enname as fallback
+            if (skillData.name_en) {
+                return skillData.name_en;
+            } else if (skillData.enname) {
+                return skillData.enname;
+            } else {
+                return 'Unknown Skill';
+            }
+        }
+
+        // Main function to load and display cards with skill names
+        async function loadCardsWithSkills() {
+            try {
+                const [skillsMap, supportCardsResponse] = await Promise.all([
+                    loadSkillsData(),
+                    fetch('./data/support-cards.json')
+                ]);
+
+                const supportCards = await supportCardsResponse.json();
                 const container = document.getElementById('cards-container');
                 container.innerHTML = '';
 
@@ -154,11 +193,15 @@
                     const eventSkills = card.event_skills || [];
                     const hintSkills = card.hints?.hint_skills || [];
 
-                    // Format skills with tooltip-ready elements
+                    // Format skills with names instead of numerals
                     const formatSkills = (skills) => {
-                        return skills.map(skill =>
-                            `<span class="skill-number" title="Skill ID: ${skill}" data-skill-id="${skill}">${skill}</span>`
-                        ).join('');
+                        return skills.map(skillId => {
+                            const skillData = skillsMap.get(skillId);
+                            const skillName = getSkillName(skillData);
+
+                            // Use skill name as display text, but keep skill ID in data attribute
+                            return `<span class="skill-number" title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
+                        }).join('');
                     };
 
                     cardElement.innerHTML = `
@@ -187,7 +230,15 @@
 
                     container.appendChild(cardElement);
                 });
-            });
+            } catch (error) {
+                console.error('Error loading cards:', error);
+                const container = document.getElementById('cards-container');
+                container.innerHTML = '<div class="loading">Error loading support cards. Please try again later.</div>';
+            }
+        }
+
+        // Initialize the page
+        loadCardsWithSkills();
     </script>
 </body>
 
