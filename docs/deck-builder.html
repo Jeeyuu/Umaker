@@ -257,6 +257,8 @@
             font-size: 10px;
             color: #7f8c8d;
             text-align: center;
+            min-width: 60px;
+            min-height: 80px;
         }
 
         .deck-slot.filled {
@@ -268,6 +270,11 @@
         .deck-slot .card {
             width: 100%;
             height: 100%;
+        }
+
+        .deck-slot .card-image {
+            width: 100%;
+            height: auto;
         }
 
         /* Filters Section */
@@ -292,6 +299,7 @@
             align-items: center;
             gap: 0.5rem;
             font-size: 11px;
+            color: #000000;
         }
 
         .filter-option input[type="checkbox"] {
@@ -396,6 +404,7 @@
         let selectedCharacter = null;
         let deck = [];
         let usedCharacterIds = new Set();
+        let currentSearchTerm = '';
 
         // Initialize the page
         fetch('header.html')
@@ -434,12 +443,14 @@
         function setupSearch() {
             const searchInput = document.getElementById('skill-search');
             searchInput.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase().trim();
-                filterCardsBySkill(searchTerm);
+                currentSearchTerm = e.target.value.toLowerCase().trim();
+                filterCardsBySkill(currentSearchTerm);
             });
         }
 
         function filterCardsBySkill(searchTerm) {
+            currentSearchTerm = searchTerm;
+
             if (!searchTerm) {
                 // Show all cards if no search term
                 renderCards(allSupportCards);
@@ -514,6 +525,11 @@
         }
 
         function selectCharacter(character) {
+            // Remove previous character if exists
+            if (selectedCharacter) {
+                usedCharacterIds.delete(selectedCharacter.char_id);
+            }
+
             selectedCharacter = character;
             usedCharacterIds.add(character.char_id);
             updateSelectedCharacterDisplay();
@@ -521,15 +537,25 @@
             updateCardDisplay();
         }
 
+        function removeSelectedCharacter() {
+            if (selectedCharacter) {
+                usedCharacterIds.delete(selectedCharacter.char_id);
+                selectedCharacter = null;
+                updateSelectedCharacterDisplay();
+                updateCardDisplay();
+            }
+        }
+
         function updateSelectedCharacterDisplay() {
             const container = document.getElementById('selected-character');
             if (selectedCharacter) {
                 const formattedId = selectedCharacter.card_id.toString().padStart(5, '0');
                 container.innerHTML = `
-                    <div class="character-card">
+                    <div class="character-card" onclick="removeSelectedCharacter()" style="cursor: pointer;">
                         <img src="https://gametora.com/images/umamusume/characters/icon_chr_${formattedId}.png" 
                              alt="${selectedCharacter.name_en}" class="character-portrait">
                         <div class="character-name">${selectedCharacter.name_en}</div>
+                        <div style="font-size: 8px; color: #e74c3c;">Click to remove</div>
                     </div>
                 `;
             } else {
@@ -546,6 +572,7 @@
                 const slot = document.createElement('div');
                 slot.className = 'deck-slot';
                 slot.innerHTML = `Slot ${i + 1}`;
+                slot.onclick = () => removeCardFromDeck(i);
                 slots.appendChild(slot);
             }
             updateDeckDisplay();
@@ -561,6 +588,16 @@
             updateCardDisplay();
         }
 
+        function removeCardFromDeck(index) {
+            if (deck[index]) {
+                const card = deck[index];
+                usedCharacterIds.delete(card.char_id);
+                deck.splice(index, 1);
+                updateDeckDisplay();
+                updateCardDisplay();
+            }
+        }
+
         function updateDeckDisplay() {
             const slots = document.querySelectorAll('.deck-slot');
             const deckTitle = document.querySelector('.control-section:nth-child(3) h3');
@@ -569,6 +606,7 @@
             slots.forEach((slot, index) => {
                 slot.innerHTML = `Slot ${index + 1}`;
                 slot.className = 'deck-slot';
+                slot.onclick = () => removeCardFromDeck(index);
 
                 if (deck[index]) {
                     const card = deck[index];
@@ -589,7 +627,12 @@
         }
 
         function updateCardDisplay() {
-            renderCards(allSupportCards);
+            // Apply current search filter when updating display
+            if (currentSearchTerm) {
+                filterCardsBySkill(currentSearchTerm);
+            } else {
+                renderCards(allSupportCards);
+            }
         }
 
         // Main card rendering
@@ -600,10 +643,19 @@
             cards.forEach(card => {
                 const cardElement = document.createElement('div');
                 const isDuplicate = usedCharacterIds.has(card.char_id);
+                const isInDeck = deck.some(deckCard => deckCard.support_id === card.support_id);
                 cardElement.className = `card ${isDuplicate ? 'dimmed' : ''}`;
 
                 if (!isDuplicate) {
                     cardElement.onclick = () => addCardToDeck(card);
+                } else if (isInDeck) {
+                    // If card is in deck, clicking removes it
+                    cardElement.onclick = () => {
+                        const deckIndex = deck.findIndex(deckCard => deckCard.support_id === card.support_id);
+                        if (deckIndex !== -1) {
+                            removeCardFromDeck(deckIndex);
+                        }
+                    };
                 }
 
                 const formattedId = card.support_id.toString().padStart(5, '0');
