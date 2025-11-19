@@ -67,6 +67,9 @@
             border-radius: 2px;
             cursor: help;
             transition: background-color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .skill-number:hover {
@@ -126,118 +129,97 @@
                 document.getElementById('footer-placeholder').innerHTML = data;
             });
 
-        // Function to create a skill lookup map
         async function loadSkillsData() {
-            try {
-                const response = await fetch('./data/skills.json');
-                const skills = await response.json();
+            const response = await fetch('./data/skills.json');
+            const skills = await response.json();
 
-                // Create a map for quick lookup: skill ID -> skill data
-                const skillsMap = new Map();
-                skills.forEach(skill => {
-                    skillsMap.set(skill.id, skill);
-                });
+            const skillsMap = new Map();
+            skills.forEach(skill => {
+                skillsMap.set(skill.id, skill);
+            });
 
-                return skillsMap;
-            } catch (error) {
-                console.error('Error loading skills data:', error);
-                return new Map(); // Return empty map if skills loading fails
-            }
+            return skillsMap;
         }
 
-        // Function to get skill name from skill data
         function getSkillName(skillData) {
             if (!skillData) return 'Unknown Skill';
 
-            // Try name_en first, then enname as fallback
-            if (skillData.name_en) {
-                return skillData.name_en;
-            } else if (skillData.enname) {
-                return skillData.enname;
-            } else {
-                return 'Unknown Skill';
-            }
+            let skillName = skillData.name_en || skillData.enname || 'Unknown Skill';
+
+            // Remove symbols like ○ and the space before them
+            skillName = skillName.replace(/\s+○$/, '');
+
+            return skillName;
         }
 
-        // Main function to load and display cards with skill names
         async function loadCardsWithSkills() {
-            try {
-                const [skillsMap, supportCardsResponse] = await Promise.all([
-                    loadSkillsData(),
-                    fetch('./data/support-cards.json')
-                ]);
+            const [skillsMap, supportCardsResponse] = await Promise.all([
+                loadSkillsData(),
+                fetch('./data/support-cards.json')
+            ]);
 
-                const supportCards = await supportCardsResponse.json();
-                const container = document.getElementById('cards-container');
-                container.innerHTML = '';
+            const supportCards = await supportCardsResponse.json();
+            const container = document.getElementById('cards-container');
+            container.innerHTML = '';
 
-                supportCards.forEach(card => {
-                    const cardElement = document.createElement('div');
-                    cardElement.className = 'card';
+            supportCards.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'card';
 
-                    const formattedId = card.support_id.toString().padStart(5, '0');
+                const formattedId = card.support_id.toString().padStart(5, '0');
 
-                    const typeMap = {
-                        'speed': '00',
-                        'stamina': '01',
-                        'power': '02',
-                        'guts': '03',
-                        'intelligence': '04',
-                        'friend': '05',
-                        'group': '06'
-                    };
+                const typeMap = {
+                    'speed': '00',
+                    'stamina': '01',
+                    'power': '02',
+                    'guts': '03',
+                    'intelligence': '04',
+                    'friend': '05',
+                    'group': '06'
+                };
 
-                    const typeIcon = typeMap[card.type];
+                const typeIcon = typeMap[card.type];
 
-                    // Get skills data
-                    const eventSkills = card.event_skills || [];
-                    const hintSkills = card.hints?.hint_skills || [];
+                const eventSkills = card.event_skills || [];
+                const hintSkills = card.hints?.hint_skills || [];
 
-                    // Format skills with names instead of numerals
-                    const formatSkills = (skills) => {
-                        return skills.map(skillId => {
-                            const skillData = skillsMap.get(skillId);
-                            const skillName = getSkillName(skillData);
+                const formatSkills = (skills) => {
+                    return skills.map(skillId => {
+                        const skillData = skillsMap.get(skillId);
+                        const skillName = getSkillName(skillData);
 
-                            // Use skill name as display text, but keep skill ID in data attribute
-                            return `<span class="skill-number" title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
-                        }).join('');
-                    };
+                        return `<span class="skill-number" title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
+                    }).join('');
+                };
 
-                    cardElement.innerHTML = `
-                        <div class="card-image-container">
-                            <img src="https://gametora.com/images/umamusume/supports/support_card_s_${formattedId}.png" 
-                                 alt="${card.char_name}" class="card-image">
-                            ${typeIcon ? `<img src="https://gametora.com/images/umamusume/icons/utx_ico_obtain_${typeIcon}.png" 
-                                 alt="${card.type}" class="card-type-icon">` : ''}
-                        </div>
-                        <div class="card-name">${card.char_name}</div>
-                        <div class="card-skills">
-                            ${hintSkills.length > 0 ? `
-                                <div class="skill-section">
-                                    <div class="skill-label">Hint Skills</div>
-                                    <div class="skill-list">${formatSkills(hintSkills)}</div>
-                                </div>
-                            ` : ''}
-                            ${eventSkills.length > 0 ? `
-                                <div class="skill-section">
-                                    <div class="skill-label">Event Skills</div>
-                                    <div class="skill-list">${formatSkills(eventSkills)}</div>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
+                cardElement.innerHTML = `
+                    <div class="card-image-container">
+                        <img src="https://gametora.com/images/umamusume/supports/support_card_s_${formattedId}.png" 
+                             alt="${card.char_name}" class="card-image">
+                        ${typeIcon ? `<img src="https://gametora.com/images/umamusume/icons/utx_ico_obtain_${typeIcon}.png" 
+                             alt="${card.type}" class="card-type-icon">` : ''}
+                    </div>
+                    <div class="card-name">${card.char_name}</div>
+                    <div class="card-skills">
+                        ${hintSkills.length > 0 ? `
+                            <div class="skill-section">
+                                <div class="skill-label">Hint Skills</div>
+                                <div class="skill-list">${formatSkills(hintSkills)}</div>
+                            </div>
+                        ` : ''}
+                        ${eventSkills.length > 0 ? `
+                            <div class="skill-section">
+                                <div class="skill-label">Event Skills</div>
+                                <div class="skill-list">${formatSkills(eventSkills)}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
 
-                    container.appendChild(cardElement);
-                });
-            } catch (error) {
-                console.error('Error loading cards:', error);
-                const container = document.getElementById('cards-container');
-                container.innerHTML = '<div class="loading">Error loading support cards. Please try again later.</div>';
-            }
+                container.appendChild(cardElement);
+            });
         }
 
-        // Initialize the page
         loadCardsWithSkills();
     </script>
 </body>
