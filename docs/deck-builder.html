@@ -294,12 +294,20 @@
             gap: 0.25rem;
         }
 
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
         .filter-option {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 11px;
+            gap: 0.25rem;
+            font-size: 10px;
             color: #000000;
+            white-space: nowrap;
         }
 
         .filter-option input[type="checkbox"] {
@@ -351,31 +359,44 @@
                     <h4>Affinity Conditions</h4>
                     <div class="filter-options">
                         <label class="filter-option"><input type="checkbox"> No condition</label>
-                        <label class="filter-option"><input type="checkbox"> Front</label>
-                        <label class="filter-option"><input type="checkbox"> Pace</label>
-                        <label class="filter-option"><input type="checkbox"> Late</label>
-                        <label class="filter-option"><input type="checkbox"> End</label>
-                        <label class="filter-option"><input type="checkbox"> Short</label>
-                        <label class="filter-option"><input type="checkbox"> Mile</label>
-                        <label class="filter-option"><input type="checkbox"> Medium</label>
-                        <label class="filter-option"><input type="checkbox"> Long</label>
-                        <label class="filter-option"><input type="checkbox"> Dirt</label>
-                        <label class="filter-option"><input type="checkbox"> Turf</label>
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Front</label>
+                            <label class="filter-option"><input type="checkbox"> Pace</label>
+                            <label class="filter-option"><input type="checkbox"> Late</label>
+                            <label class="filter-option"><input type="checkbox"> End</label>
+                        </div>
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Short</label>
+                            <label class="filter-option"><input type="checkbox"> Mile</label>
+                            <label class="filter-option"><input type="checkbox"> Medium</label>
+                            <label class="filter-option"><input type="checkbox"> Long</label>
+                        </div>
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Dirt</label>
+                            <label class="filter-option"><input type="checkbox"> Turf</label>
+                        </div>
                     </div>
                 </div>
 
                 <div class="filter-group">
                     <h4>Trigger Conditions</h4>
                     <div class="filter-options">
-                        <label class="filter-option"><input type="checkbox"> Early-race</label>
-                        <label class="filter-option"><input type="checkbox"> Mid-race</label>
-                        <label class="filter-option"><input type="checkbox"> Late-race</label>
-                        <label class="filter-option"><input type="checkbox"> Last Spurt</label>
-                        <label class="filter-option"><input type="checkbox"> Corner</label>
-                        <label class="filter-option"><input type="checkbox"> Straight</label>
-                        <label class="filter-option"><input type="checkbox"> Final Corner</label>
-                        <label class="filter-option"><input type="checkbox"> Final Straight</label>
-                        <label class="filter-option"><input type="checkbox"> Uphill or Downhill</label>
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Early-race</label>
+                            <label class="filter-option"><input type="checkbox"> Mid-race</label>
+                            <label class="filter-option"><input type="checkbox"> Late-race</label>
+                            <label class="filter-option"><input type="checkbox"> Last spurt</label>
+                        </div>
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Corner</label>
+                            <label class="filter-option"><input type="checkbox"> Straight</label>
+                            <label class="filter-option"><input type="checkbox"> Final corner</label>
+                            <label class="filter-option"><input type="checkbox"> Final straight</label>
+                        </div>
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Uphill</label>
+                            <label class="filter-option"><input type="checkbox"> Downhill</label>
+                        </div>
                     </div>
                 </div>
 
