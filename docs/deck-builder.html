@@ -521,13 +521,29 @@
             charElement.onclick = () => selectCharacter(character);
 
             charElement.innerHTML = `
-            <img src="./images/chara_stand/chara_stand_${character.char_id}_${character.costume}.png" 
+            <img src="./images/chara_stand/chara_stand_${character.char_id}_${character.card_id}.png" 
                  alt="${character.name_en}" class="character-portrait" onerror="this.style.display='none'">
             <div class="character-name">${character.name_en}</div>
         `;
 
             container.appendChild(charElement);
         });
+    }
+
+    function updateSelectedCharacterDisplay() {
+        const container = document.getElementById('selected-character');
+        if (selectedCharacter) {
+            container.innerHTML = `
+            <div class="character-card" onclick="removeSelectedCharacter()" style="cursor: pointer;">
+                <img src="./images/chara_stand/chara_stand_${selectedCharacter.char_id}_${selectedCharacter.card_id}.png" 
+                     alt="${selectedCharacter.name_en}" class="character-portrait" onerror="this.style.display='none'">
+                <div class="character-name">${selectedCharacter.name_en}</div>
+                <div style="font-size: 8px; color: #e74c3c;">Click to remove</div>
+            </div>
+        `;
+        } else {
+            container.innerHTML = '';
+        }
     }
 
         function selectCharacter(character) {
@@ -548,22 +564,6 @@
                 selectedCharacter = null;
                 updateSelectedCharacterDisplay();
                 updateCardDisplay();
-            }
-        }
-
-        function updateSelectedCharacterDisplay() {
-            const container = document.getElementById('selected-character');
-            if (selectedCharacter) {
-                container.innerHTML = `
-            <div class="character-card" onclick="removeSelectedCharacter()" style="cursor: pointer;">
-                <img src="./images/chara_stand/chara_stand_${selectedCharacter.char_id}_${selectedCharacter.costume}.png" 
-                     alt="${selectedCharacter.name_en}" class="character-portrait" onerror="this.style.display='none'">
-                <div class="character-name">${selectedCharacter.name_en}</div>
-                <div style="font-size: 8px; color: #e74c3c;">Click to remove</div>
-            </div>
-        `;
-            } else {
-                container.innerHTML = '';
             }
         }
 
