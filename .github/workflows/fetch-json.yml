@@ -263,8 +263,8 @@ jobs:
           EXISTING_IMAGES=$(find "$IMAGE_DIR" -name "chara_stand_*.png" -type f | sed 's/.*chara_stand_//; s/\.png//' | sort -n)
           echo "Found $(echo "$EXISTING_IMAGES" | wc -l) existing character images"
           
-          # Extract char_id and card_id from JSON and create expected filenames
-          ALL_CHARACTER_IMAGES=$(jq -r '.[] | "\(.char_id)_\(.card_id)"' "$CHARACTER_JSON" | sort -n | uniq)
+          # Extract char_id and costume from JSON and create expected filenames
+          ALL_CHARACTER_IMAGES=$(jq -r '.[] | "\(.char_id)_\(.costume)"' "$CHARACTER_JSON" | sort -n | uniq)
           echo "Found $(echo "$ALL_CHARACTER_IMAGES" | wc -l) character images in JSON"
           
           # Find missing images
@@ -287,24 +287,24 @@ jobs:
           
           for CHAR_DATA in $MISSING_IMAGES; do
             CHAR_ID=$(echo "$CHAR_DATA" | cut -d'_' -f1)
-            CARD_ID=$(echo "$CHAR_DATA" | cut -d'_' -f2)
+            COSTUME=$(echo "$CHAR_DATA" | cut -d'_' -f2)
             
-            IMAGE_URL="https://gametora.com/images/umamusume/characters/thumb/chara_stand_${CHAR_ID}_${CARD_ID}.png"
-            IMAGE_PATH="${IMAGE_DIR}/chara_stand_${CHAR_ID}_${CARD_ID}.png"
+            IMAGE_URL="https://gametora.com/images/umamusume/characters/thumb/chara_stand_${CHAR_ID}_${COSTUME}.png"
+            IMAGE_PATH="${IMAGE_DIR}/chara_stand_${CHAR_ID}_${COSTUME}.png"
             
             echo "Downloading: $IMAGE_URL"
             
             if curl -s -f -o "$IMAGE_PATH" "$IMAGE_URL"; then
               if [ -s "$IMAGE_PATH" ] && file "$IMAGE_PATH" | grep -q "PNG image data"; then
-                echo "Successfully downloaded: chara_stand_${CHAR_ID}_${CARD_ID}.png"
+                echo "Successfully downloaded: chara_stand_${CHAR_ID}_${COSTUME}.png"
                 CHAR_IMAGES_DOWNLOADED=$((CHAR_IMAGES_DOWNLOADED + 1))
               else
-                echo "Downloaded file is not a valid PNG: chara_stand_${CHAR_ID}_${CARD_ID}.png"
+                echo "Downloaded file is not a valid PNG: chara_stand_${CHAR_ID}_${COSTUME}.png"
                 rm -f "$IMAGE_PATH"
                 CHAR_IMAGES_FAILED=$((CHAR_IMAGES_FAILED + 1))
               fi
             else
-              echo "Failed to download: chara_stand_${CHAR_ID}_${CARD_ID}.png"
+              echo "Failed to download: chara_stand_${CHAR_ID}_${COSTUME}.png"
               rm -f "$IMAGE_PATH"
               CHAR_IMAGES_FAILED=$((CHAR_IMAGES_FAILED + 1))
             fi
