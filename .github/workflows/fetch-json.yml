@@ -21,6 +21,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq curl
+
       - name: Fetch manifest and get latest codes
         id: get-codes
         run: |
@@ -220,7 +223,7 @@ jobs:
           echo "images_failed=$IMAGES_FAILED" >> $GITHUB_OUTPUT
 
       - name: Commit and push image changes
-        if: steps.download-images.outputs.images_downloaded > 0
+        if: ${{ steps.download-images.outputs.images_downloaded > 0 }}
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Add ${{ steps.download-images.outputs.images_downloaded }} new support card images [$(date +%Y-%m-%d)]"
@@ -246,6 +249,13 @@ jobs:
       - name: Create images directory
         run: mkdir -p docs/images/chara_stand
 
+      - name: Debug character JSON structure
+        run: |
+          echo "First character entry in JSON:"
+          jq '.[0]' docs/data/character-cards.json
+          echo "First 5 character entries with IDs:"
+          jq -r '.[0:5] | .[] | "char_id: \(.char_id), card_id: \(.card_id), costume: \(.costume)"' docs/data/character-cards.json
+
       - name: Download missing character images
         id: download-character-images
         run: |
@@ -263,8 +273,8 @@ jobs:
           EXISTING_IMAGES=$(find "$IMAGE_DIR" -name "chara_stand_*.png" -type f | sed 's/.*chara_stand_//; s/\.png//' | sort -n)
           echo "Found $(echo "$EXISTING_IMAGES" | wc -l) existing character images"
           
-          # Extract char_id and costume from JSON and create expected filenames
-          ALL_CHARACTER_IMAGES=$(jq -r '.[] | "\(.char_id)_\(.costume)"' "$CHARACTER_JSON" | sort -n | uniq)
+          # FIXED: Use card_id instead of costume
+          ALL_CHARACTER_IMAGES=$(jq -r '.[] | "\(.char_id)_\(.card_id)"' "$CHARACTER_JSON" | sort -n | uniq)
           echo "Found $(echo "$ALL_CHARACTER_IMAGES" | wc -l) character images in JSON"
           
           # Find missing images
@@ -287,24 +297,24 @@ jobs:
           
           for CHAR_DATA in $MISSING_IMAGES; do
             CHAR_ID=$(echo "$CHAR_DATA" | cut -d'_' -f1)
-            COSTUME=$(echo "$CHAR_DATA" | cut -d'_' -f2)
+            CARD_ID=$(echo "$CHAR_DATA" | cut -d'_' -f2)
             
-            IMAGE_URL="https://gametora.com/images/umamusume/characters/thumb/chara_stand_${CHAR_ID}_${COSTUME}.png"
-            IMAGE_PATH="${IMAGE_DIR}/chara_stand_${CHAR_ID}_${COSTUME}.png"
+            IMAGE_URL="https://gametora.com/images/umamusume/characters/thumb/chara_stand_${CHAR_ID}_${CARD_ID}.png"
+            IMAGE_PATH="${IMAGE_DIR}/chara_stand_${CHAR_ID}_${CARD_ID}.png"
             
             echo "Downloading: $IMAGE_URL"
             
             if curl -s -f -o "$IMAGE_PATH" "$IMAGE_URL"; then
               if [ -s "$IMAGE_PATH" ] && file "$IMAGE_PATH" | grep -q "PNG image data"; then
-                echo "Successfully downloaded: chara_stand_${CHAR_ID}_${COSTUME}.png"
+                echo "Successfully downloaded: chara_stand_${CHAR_ID}_${CARD_ID}.png"
                 CHAR_IMAGES_DOWNLOADED=$((CHAR_IMAGES_DOWNLOADED + 1))
               else
-                echo "Downloaded file is not a valid PNG: chara_stand_${CHAR_ID}_${COSTUME}.png"
+                echo "Downloaded file is not a valid PNG: chara_stand_${CHAR_ID}_${CARD_ID}.png"
                 rm -f "$IMAGE_PATH"
                 CHAR_IMAGES_FAILED=$((CHAR_IMAGES_FAILED + 1))
               fi
             else
-              echo "Failed to download: chara_stand_${CHAR_ID}_${COSTUME}.png"
+              echo "Failed to download: chara_stand_${CHAR_ID}_${CARD_ID}.png"
               rm -f "$IMAGE_PATH"
               CHAR_IMAGES_FAILED=$((CHAR_IMAGES_FAILED + 1))
             fi
@@ -321,7 +331,7 @@ jobs:
           echo "char_images_failed=$CHAR_IMAGES_FAILED" >> $GITHUB_OUTPUT
 
       - name: Commit and push character image changes
-        if: steps.download-character-images.outputs.char_images_downloaded > 0
+        if: ${{ steps.download-character-images.outputs.char_images_downloaded > 0 }}
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Add ${{ steps.download-character-images.outputs.char_images_downloaded }} new character images [$(date +%Y-%m-%d)]"
