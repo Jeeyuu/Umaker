@@ -1,4 +1,4 @@
-name: Fetch JSON Data and Support Card Images from Gametora
+name: Fetch JSON Data and Images from Gametora
 
 on:
   schedule:
@@ -228,4 +228,105 @@ jobs:
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           branch: main
           file_pattern: "docs/images/support_card_s/**"
+          add_options: "-A"
+
+  download-character-images:
+    needs: update-json
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq curl file
+
+      - name: Create images directory
+        run: mkdir -p docs/images/chara_stand
+
+      - name: Download missing character images
+        id: download-character-images
+        run: |
+          CHARACTER_JSON="docs/data/character-cards.json"
+          IMAGE_DIR="docs/images/chara_stand"
+          
+          if [ ! -f "$CHARACTER_JSON" ]; then
+            echo "character-cards.json not found at $CHARACTER_JSON"
+            exit 1
+          fi
+          
+          echo "Reading character data from $CHARACTER_JSON"
+          
+          # Get existing character images
+          EXISTING_IMAGES=$(find "$IMAGE_DIR" -name "chara_stand_*.png" -type f | sed 's/.*chara_stand_//; s/\.png//' | sort -n)
+          echo "Found $(echo "$EXISTING_IMAGES" | wc -l) existing character images"
+          
+          # Extract char_id and costume from JSON and create expected filenames
+          ALL_CHARACTER_IMAGES=$(jq -r '.[] | "\(.char_id)_\(.costume)"' "$CHARACTER_JSON" | sort -n | uniq)
+          echo "Found $(echo "$ALL_CHARACTER_IMAGES" | wc -l) character images in JSON"
+          
+          # Find missing images
+          MISSING_IMAGES=$(comm -23 <(echo "$ALL_CHARACTER_IMAGES") <(echo "$EXISTING_IMAGES") | grep -v '^null_' | grep -v '^$')
+          
+          MISSING_COUNT=$(echo "$MISSING_IMAGES" | wc -l)
+          echo "Found $MISSING_COUNT missing character images to download"
+          
+          if [ "$MISSING_COUNT" -eq 0 ]; then
+            echo "All character images are already downloaded. No work to do."
+            echo "char_images_downloaded=0" >> $GITHUB_OUTPUT
+            echo "char_images_failed=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          CHAR_IMAGES_DOWNLOADED=0
+          CHAR_IMAGES_FAILED=0
+          
+          echo "Starting download of $MISSING_COUNT missing character images"
+          
+          for CHAR_DATA in $MISSING_IMAGES; do
+            CHAR_ID=$(echo "$CHAR_DATA" | cut -d'_' -f1)
+            COSTUME=$(echo "$CHAR_DATA" | cut -d'_' -f2)
+            
+            IMAGE_URL="https://gametora.com/images/umamusume/characters/thumb/chara_stand_${CHAR_ID}_${COSTUME}.png"
+            IMAGE_PATH="${IMAGE_DIR}/chara_stand_${CHAR_ID}_${COSTUME}.png"
+            
+            echo "Downloading: $IMAGE_URL"
+            
+            if curl -s -f -o "$IMAGE_PATH" "$IMAGE_URL"; then
+              if [ -s "$IMAGE_PATH" ] && file "$IMAGE_PATH" | grep -q "PNG image data"; then
+                echo "Successfully downloaded: chara_stand_${CHAR_ID}_${COSTUME}.png"
+                CHAR_IMAGES_DOWNLOADED=$((CHAR_IMAGES_DOWNLOADED + 1))
+              else
+                echo "Downloaded file is not a valid PNG: chara_stand_${CHAR_ID}_${COSTUME}.png"
+                rm -f "$IMAGE_PATH"
+                CHAR_IMAGES_FAILED=$((CHAR_IMAGES_FAILED + 1))
+              fi
+            else
+              echo "Failed to download: chara_stand_${CHAR_ID}_${COSTUME}.png"
+              rm -f "$IMAGE_PATH"
+              CHAR_IMAGES_FAILED=$((CHAR_IMAGES_FAILED + 1))
+            fi
+            
+            sleep 0.2
+          done
+          
+          echo "Character Image Download Summary:"
+          echo "  Downloaded: $CHAR_IMAGES_DOWNLOADED"
+          echo "  Failed: $CHAR_IMAGES_FAILED"
+          echo "  Total missing found: $MISSING_COUNT"
+          
+          echo "char_images_downloaded=$CHAR_IMAGES_DOWNLOADED" >> $GITHUB_OUTPUT
+          echo "char_images_failed=$CHAR_IMAGES_FAILED" >> $GITHUB_OUTPUT
+
+      - name: Commit and push character image changes
+        if: steps.download-character-images.outputs.char_images_downloaded > 0
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Add ${{ steps.download-character-images.outputs.char_images_downloaded }} new character images [$(date +%Y-%m-%d)]"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          branch: main
+          file_pattern: "docs/images/chara_stand/**"
           add_options: "-A"
