@@ -365,7 +365,7 @@
             <!-- Filters -->
             <div class="control-section">
                 <h3>Filters</h3>
-            
+
                 <div class="filter-group">
                     <div class="filter-options">
                         <div class="filter-row">
@@ -523,8 +523,8 @@
                 const formattedId = character.card_id.toString().padStart(5, '0');
 
                 charElement.innerHTML = `
-                    <img src="https://gametora.com/images/umamusume/characters/icon_chr_${formattedId}.png" 
-                         alt="${character.name_en}" class="character-portrait">
+                    <img src="./images/characters/icon_chr_${formattedId}.png" 
+                         alt="${character.name_en}" class="character-portrait" onerror="this.style.display='none'">
                     <div class="character-name">${character.name_en}</div>
                 `;
 
@@ -559,8 +559,8 @@
                 const formattedId = selectedCharacter.card_id.toString().padStart(5, '0');
                 container.innerHTML = `
                     <div class="character-card" onclick="removeSelectedCharacter()" style="cursor: pointer;">
-                        <img src="https://gametora.com/images/umamusume/characters/icon_chr_${formattedId}.png" 
-                             alt="${selectedCharacter.name_en}" class="character-portrait">
+                        <img src="./images/characters/icon_chr_${formattedId}.png" 
+                             alt="${selectedCharacter.name_en}" class="character-portrait" onerror="this.style.display='none'">
                         <div class="character-name">${selectedCharacter.name_en}</div>
                         <div style="font-size: 8px; color: #e74c3c;">Click to remove</div>
                     </div>
@@ -622,8 +622,8 @@
                     slot.innerHTML = `
                         <div class="card">
                             <div class="card-image-container">
-                                <img src="https://gametora.com/images/umamusume/supports/support_card_s_${formattedId}.png" 
-                                     alt="${card.char_name}" class="card-image">
+                                <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
+                                     alt="${card.char_name}" class="card-image" onerror="this.style.display='none'">
                             </div>
                             <div class="card-name">${card.char_name}</div>
                         </div>
@@ -641,121 +641,110 @@
         }
 
         function renderCards(cards) {
-                const container = document.getElementById('cards-container');
+            const container = document.getElementById('cards-container');
+            const scrollPos = container.scrollTop;
+            const fragment = document.createDocumentFragment();
 
-                // Store current scroll position
-                const scrollPos = container.scrollTop;
+            cards.forEach(card => {
+                const existingCard = container.querySelector(`[data-card-id="${card.support_id}"]`);
 
-                // Create a document fragment for batch DOM operations
-                const fragment = document.createDocumentFragment();
-
-                cards.forEach(card => {
-                    // Check if card element already exists
-                    const existingCard = container.querySelector(`[data-card-id="${card.support_id}"]`);
-
-                    if (existingCard) {
-                        // Update existing card instead of recreating
-                        updateCardElement(existingCard, card);
-                        fragment.appendChild(existingCard);
-                    } else {
-                        // Create new card element
-                        const cardElement = createCardElement(card);
-                        fragment.appendChild(cardElement);
-                    }
-                });
-
-                // Clear and repopulate container in one operation
-                container.innerHTML = '';
-                container.appendChild(fragment);
-
-                // Restore scroll position
-                container.scrollTop = scrollPos;
-            }
-
-            function createCardElement(card) {
-                const cardElement = document.createElement('div');
-                cardElement.setAttribute('data-card-id', card.support_id);
-
-                const isDuplicate = usedCharacterIds.has(card.char_id);
-                const isInDeck = deck.some(deckCard => deckCard.support_id === card.support_id);
-                cardElement.className = `card ${isDuplicate ? 'dimmed' : ''}`;
-
-                if (!isDuplicate) {
-                    cardElement.onclick = () => addCardToDeck(card);
-                } else if (isInDeck) {
-                    cardElement.onclick = () => {
-                        const deckIndex = deck.findIndex(deckCard => deckCard.support_id === card.support_id);
-                        if (deckIndex !== -1) {
-                            removeCardFromDeck(deckIndex);
-                        }
-                    };
+                if (existingCard) {
+                    updateCardElement(existingCard, card);
+                    fragment.appendChild(existingCard);
+                } else {
+                    const cardElement = createCardElement(card);
+                    fragment.appendChild(cardElement);
                 }
+            });
 
-                const formattedId = card.support_id.toString().padStart(5, '0');
-                const typeMap = {
-                    'speed': '00', 'stamina': '01', 'power': '02', 'guts': '03',
-                    'intelligence': '04', 'friend': '05', 'group': '06'
-                };
-                const typeIcon = typeMap[card.type];
-
-                const eventSkills = card.event_skills || [];
-                const hintSkills = card.hints?.hint_skills || [];
-
-                const formatSkills = (skills) => {
-                    return skills.map(skillId => {
-                        const skillData = skillsMap.get(skillId);
-                        const skillName = getSkillName(skillData);
-                        return `<span class="skill-number" title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
-                    }).join('');
-                };
-
-                cardElement.innerHTML = `
-        <div class="card-image-container">
-            <img src="https://gametora.com/images/umamusume/supports/support_card_s_${formattedId}.png" 
-                 alt="${card.char_name}" class="card-image" loading="lazy">
-            ${typeIcon ? `<img src="https://gametora.com/images/umamusume/icons/utx_ico_obtain_${typeIcon}.png" 
-                 alt="${card.type}" class="card-type-icon">` : ''}
-        </div>
-        <div class="card-name">${card.char_name}</div>
-        <div class="card-skills">
-            ${hintSkills.length > 0 ? `
-                <div class="skill-section">
-                    <div class="skill-label">Hint Skills</div>
-                    <div class="skill-list">${formatSkills(hintSkills)}</div>
-                </div>
-            ` : ''}
-            ${eventSkills.length > 0 ? `
-                <div class="skill-section">
-                    <div class="skill-label">Event Skills</div>
-                    <div class="skill-list">${formatSkills(eventSkills)}</div>
-                </div>
-            ` : ''}
-        </div>
-    `;
-
-                return cardElement;
-            }
-
-    function updateCardElement(cardElement, card) {
-        const isDuplicate = usedCharacterIds.has(card.char_id);
-        const isInDeck = deck.some(deckCard => deckCard.support_id === card.support_id);
-
-        // Only update classes and event handlers if needed
-        cardElement.className = `card ${isDuplicate ? 'dimmed' : ''}`;
-
-        if (!isDuplicate) {
-            cardElement.onclick = () => addCardToDeck(card);
-        } else if (isInDeck) {
-            cardElement.onclick = () => {
-                const deckIndex = deck.findIndex(deckCard => deckCard.support_id === card.support_id);
-                if (deckIndex !== -1) {
-                    removeCardFromDeck(deckIndex);
-                }
-            };
-        } else {
-            cardElement.onclick = null;
+            container.innerHTML = '';
+            container.appendChild(fragment);
+            container.scrollTop = scrollPos;
         }
-    }
+
+        function createCardElement(card) {
+            const cardElement = document.createElement('div');
+            cardElement.setAttribute('data-card-id', card.support_id);
+
+            const isDuplicate = usedCharacterIds.has(card.char_id);
+            const isInDeck = deck.some(deckCard => deckCard.support_id === card.support_id);
+            cardElement.className = `card ${isDuplicate ? 'dimmed' : ''}`;
+
+            if (!isDuplicate) {
+                cardElement.onclick = () => addCardToDeck(card);
+            } else if (isInDeck) {
+                cardElement.onclick = () => {
+                    const deckIndex = deck.findIndex(deckCard => deckCard.support_id === card.support_id);
+                    if (deckIndex !== -1) {
+                        removeCardFromDeck(deckIndex);
+                    }
+                };
+            }
+
+            const formattedId = card.support_id.toString().padStart(5, '0');
+            const typeMap = {
+                'speed': '00', 'stamina': '01', 'power': '02', 'guts': '03',
+                'intelligence': '04', 'friend': '05', 'group': '06'
+            };
+            const typeIcon = typeMap[card.type];
+
+            const eventSkills = card.event_skills || [];
+            const hintSkills = card.hints?.hint_skills || [];
+
+            const formatSkills = (skills) => {
+                return skills.map(skillId => {
+                    const skillData = skillsMap.get(skillId);
+                    const skillName = getSkillName(skillData);
+                    return `<span class="skill-number" title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
+                }).join('');
+            };
+
+            cardElement.innerHTML = `
+                <div class="card-image-container">
+                    <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
+                         alt="${card.char_name}" class="card-image" loading="lazy" onerror="this.style.display='none'">
+                    ${typeIcon ? `<img src="./images/utx_ico_obtain/utx_ico_obtain_${typeIcon}.png" 
+                         alt="${card.type}" class="card-type-icon" onerror="this.style.display='none'">` : ''}
+                </div>
+                <div class="card-name">${card.char_name}</div>
+                <div class="card-skills">
+                    ${hintSkills.length > 0 ? `
+                        <div class="skill-section">
+                            <div class="skill-label">Hint Skills</div>
+                            <div class="skill-list">${formatSkills(hintSkills)}</div>
+                        </div>
+                    ` : ''}
+                    ${eventSkills.length > 0 ? `
+                        <div class="skill-section">
+                            <div class="skill-label">Event Skills</div>
+                            <div class="skill-list">${formatSkills(eventSkills)}</div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            return cardElement;
+        }
+
+        function updateCardElement(cardElement, card) {
+            const isDuplicate = usedCharacterIds.has(card.char_id);
+            const isInDeck = deck.some(deckCard => deckCard.support_id === card.support_id);
+
+            cardElement.className = `card ${isDuplicate ? 'dimmed' : ''}`;
+
+            if (!isDuplicate) {
+                cardElement.onclick = () => addCardToDeck(card);
+            } else if (isInDeck) {
+                cardElement.onclick = () => {
+                    const deckIndex = deck.findIndex(deckCard => deckCard.support_id === card.support_id);
+                    if (deckIndex !== -1) {
+                        removeCardFromDeck(deckIndex);
+                    }
+                };
+            } else {
+                cardElement.onclick = null;
+            }
+        }
 
         async function loadCardsWithSkills() {
             const [skillsData, supportCardsResponse] = await Promise.all([
