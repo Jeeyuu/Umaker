@@ -511,26 +511,24 @@
             allCharacters = await response.json();
         }
 
-        function renderCharacterPicker() {
-            const container = document.getElementById('characters-container');
-            container.innerHTML = '';
+    function renderCharacterPicker() {
+        const container = document.getElementById('characters-container');
+        container.innerHTML = '';
 
-            allCharacters.forEach(character => {
-                const charElement = document.createElement('div');
-                charElement.className = `character-card ${selectedCharacter?.char_id === character.char_id ? 'selected' : ''}`;
-                charElement.onclick = () => selectCharacter(character);
+        allCharacters.forEach(character => {
+            const charElement = document.createElement('div');
+            charElement.className = `character-card ${selectedCharacter?.char_id === character.char_id ? 'selected' : ''}`;
+            charElement.onclick = () => selectCharacter(character);
 
-                const formattedId = character.card_id.toString().padStart(5, '0');
+            charElement.innerHTML = `
+            <img src="./images/chara_stand/chara_stand_${character.char_id}_${character.costume}.png" 
+                 alt="${character.name_en}" class="character-portrait" onerror="this.style.display='none'">
+            <div class="character-name">${character.name_en}</div>
+        `;
 
-                charElement.innerHTML = `
-                    <img src="./images/characters/icon_chr_${formattedId}.png" 
-                         alt="${character.name_en}" class="character-portrait" onerror="this.style.display='none'">
-                    <div class="character-name">${character.name_en}</div>
-                `;
-
-                container.appendChild(charElement);
-            });
-        }
+            container.appendChild(charElement);
+        });
+    }
 
         function selectCharacter(character) {
             if (selectedCharacter) {
@@ -556,15 +554,14 @@
         function updateSelectedCharacterDisplay() {
             const container = document.getElementById('selected-character');
             if (selectedCharacter) {
-                const formattedId = selectedCharacter.card_id.toString().padStart(5, '0');
                 container.innerHTML = `
-                    <div class="character-card" onclick="removeSelectedCharacter()" style="cursor: pointer;">
-                        <img src="./images/characters/icon_chr_${formattedId}.png" 
-                             alt="${selectedCharacter.name_en}" class="character-portrait" onerror="this.style.display='none'">
-                        <div class="character-name">${selectedCharacter.name_en}</div>
-                        <div style="font-size: 8px; color: #e74c3c;">Click to remove</div>
-                    </div>
-                `;
+            <div class="character-card" onclick="removeSelectedCharacter()" style="cursor: pointer;">
+                <img src="./images/chara_stand/chara_stand_${selectedCharacter.char_id}_${selectedCharacter.costume}.png" 
+                     alt="${selectedCharacter.name_en}" class="character-portrait" onerror="this.style.display='none'">
+                <div class="character-name">${selectedCharacter.name_en}</div>
+                <div style="font-size: 8px; color: #e74c3c;">Click to remove</div>
+            </div>
+        `;
             } else {
                 container.innerHTML = '';
             }
