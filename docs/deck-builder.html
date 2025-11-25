@@ -644,11 +644,41 @@
         }
 
         function renderCards(cards) {
-            const container = document.getElementById('cards-container');
-            container.innerHTML = '';
+                const container = document.getElementById('cards-container');
 
-            cards.forEach(card => {
+                // Store current scroll position
+                const scrollPos = container.scrollTop;
+
+                // Create a document fragment for batch DOM operations
+                const fragment = document.createDocumentFragment();
+
+                cards.forEach(card => {
+                    // Check if card element already exists
+                    const existingCard = container.querySelector(`[data-card-id="${card.support_id}"]`);
+
+                    if (existingCard) {
+                        // Update existing card instead of recreating
+                        updateCardElement(existingCard, card);
+                        fragment.appendChild(existingCard);
+                    } else {
+                        // Create new card element
+                        const cardElement = createCardElement(card);
+                        fragment.appendChild(cardElement);
+                    }
+                });
+
+                // Clear and repopulate container in one operation
+                container.innerHTML = '';
+                container.appendChild(fragment);
+
+                // Restore scroll position
+                container.scrollTop = scrollPos;
+            }
+
+            function createCardElement(card) {
                 const cardElement = document.createElement('div');
+                cardElement.setAttribute('data-card-id', card.support_id);
+
                 const isDuplicate = usedCharacterIds.has(card.char_id);
                 const isInDeck = deck.some(deckCard => deckCard.support_id === card.support_id);
                 cardElement.className = `card ${isDuplicate ? 'dimmed' : ''}`;
@@ -683,32 +713,52 @@
                 };
 
                 cardElement.innerHTML = `
-                    <div class="card-image-container">
-                        <img src="https://gametora.com/images/umamusume/supports/support_card_s_${formattedId}.png" 
-                             alt="${card.char_name}" class="card-image">
-                        ${typeIcon ? `<img src="https://gametora.com/images/umamusume/icons/utx_ico_obtain_${typeIcon}.png" 
-                             alt="${card.type}" class="card-type-icon">` : ''}
-                    </div>
-                    <div class="card-name">${card.char_name}</div>
-                    <div class="card-skills">
-                        ${hintSkills.length > 0 ? `
-                            <div class="skill-section">
-                                <div class="skill-label">Hint Skills</div>
-                                <div class="skill-list">${formatSkills(hintSkills)}</div>
-                            </div>
-                        ` : ''}
-                        ${eventSkills.length > 0 ? `
-                            <div class="skill-section">
-                                <div class="skill-label">Event Skills</div>
-                                <div class="skill-list">${formatSkills(eventSkills)}</div>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
+        <div class="card-image-container">
+            <img src="https://gametora.com/images/umamusume/supports/support_card_s_${formattedId}.png" 
+                 alt="${card.char_name}" class="card-image" loading="lazy">
+            ${typeIcon ? `<img src="https://gametora.com/images/umamusume/icons/utx_ico_obtain_${typeIcon}.png" 
+                 alt="${card.type}" class="card-type-icon">` : ''}
+        </div>
+        <div class="card-name">${card.char_name}</div>
+        <div class="card-skills">
+            ${hintSkills.length > 0 ? `
+                <div class="skill-section">
+                    <div class="skill-label">Hint Skills</div>
+                    <div class="skill-list">${formatSkills(hintSkills)}</div>
+                </div>
+            ` : ''}
+            ${eventSkills.length > 0 ? `
+                <div class="skill-section">
+                    <div class="skill-label">Event Skills</div>
+                    <div class="skill-list">${formatSkills(eventSkills)}</div>
+                </div>
+            ` : ''}
+        </div>
+    `;
 
-                container.appendChild(cardElement);
-            });
+                return cardElement;
+            }
+
+    function updateCardElement(cardElement, card) {
+        const isDuplicate = usedCharacterIds.has(card.char_id);
+        const isInDeck = deck.some(deckCard => deckCard.support_id === card.support_id);
+
+        // Only update classes and event handlers if needed
+        cardElement.className = `card ${isDuplicate ? 'dimmed' : ''}`;
+
+        if (!isDuplicate) {
+            cardElement.onclick = () => addCardToDeck(card);
+        } else if (isInDeck) {
+            cardElement.onclick = () => {
+                const deckIndex = deck.findIndex(deckCard => deckCard.support_id === card.support_id);
+                if (deckIndex !== -1) {
+                    removeCardFromDeck(deckIndex);
+                }
+            };
+        } else {
+            cardElement.onclick = null;
         }
+    }
 
         async function loadCardsWithSkills() {
             const [skillsData, supportCardsResponse] = await Promise.all([
