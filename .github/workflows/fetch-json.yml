@@ -24,10 +24,8 @@ jobs:
       - name: Fetch manifest and get latest codes
         id: get-codes
         run: |
-          # Fetch the manifest
           curl -s -o manifest.json https://gametora.com/data/manifests/umamusume.json
           
-          # Extract the specific codes we need
           CHARACTER_CARDS_CODE=$(jq -r '.["character-cards"]' manifest.json)
           SUPPORT_CARDS_CODE=$(jq -r '.["support-cards"]' manifest.json)
           SKILLS_CODE=$(jq -r '.["skills"]' manifest.json)
@@ -51,19 +49,6 @@ jobs:
           echo "en_gacha_support_standard_code=$EN_GACHA_SUPPORT_STANDARD_CODE" >> $GITHUB_OUTPUT
           echo "en_layout_data_code=$EN_LAYOUT_DATA_CODE" >> $GITHUB_OUTPUT
           echo "events_champions_meeting_code=$EVENTS_CHAMPIONS_MEETING_CODE" >> $GITHUB_OUTPUT
-          
-          echo "Latest codes:"
-          echo "Character Cards: $CHARACTER_CARDS_CODE"
-          echo "Support Cards: $SUPPORT_CARDS_CODE"
-          echo "Skills: $SKILLS_CODE"
-          echo "Gacha Char Standard: $GACHA_CHAR_STANDARD_CODE"
-          echo "Gacha Special: $GACHA_SPECIAL_CODE"
-          echo "Gacha Support Standard: $GACHA_SUPPORT_STANDARD_CODE"
-          echo "EN Gacha Char Standard: $EN_GACHA_CHAR_STANDARD_CODE"
-          echo "EN Gacha Special: $EN_GACHA_SPECIAL_CODE"
-          echo "EN Gacha Support Standard: $EN_GACHA_SUPPORT_STANDARD_CODE"
-          echo "EN Layout Data: $EN_LAYOUT_DATA_CODE"
-          echo "Events Champions Meeting: $EVENTS_CHAMPIONS_MEETING_CODE"
 
       - name: Create data directory
         run: mkdir -p docs/data
@@ -74,69 +59,56 @@ jobs:
           TIMESTAMP=$(date +%Y%m%d_%H%M%S)
           mkdir -p docs/data/archive
           
-          # Track if any files were added or updated
           FILES_CHANGED=false
           
-          # Function to download and check file
           download_and_check() {
             local name=$1
             local url=$2
             local filename="docs/data/${name}.json"
             local temp_file="${filename}.tmp"
             
-            echo "📥 Processing $name..."
+            echo "Processing $name..."
             
-            # Check if file doesn't exist or is empty
             if [ ! -f "$filename" ] || [ ! -s "$filename" ]; then
-              echo "📭 File $name.json doesn't exist or is empty, downloading..."
+              echo "File $name.json doesn't exist or is empty, downloading..."
               
-              # Download to temporary file
               if curl -s -o "$temp_file" "$url"; then
-                # Check if file is valid JSON
                 if jq empty "$temp_file" 2>/dev/null; then
-                  # Move temp file to final location
                   mv "$temp_file" "$filename"
-                  echo "✅ Downloaded new $name.json"
+                  echo "Downloaded new $name.json"
                   FILES_CHANGED=true
                 else
-                  echo "❌ $name.json is not valid JSON. Skipping."
+                  echo "$name.json is not valid JSON. Skipping."
                   rm "$temp_file"
                 fi
               else
-                echo "❌ Failed to download $name from $url"
+                echo "Failed to download $name from $url"
               fi
             else
-              echo "📁 File $name.json exists, checking for updates..."
+              echo "File $name.json exists, checking for updates..."
               
-              # Download to temporary file for comparison
               if curl -s -o "$temp_file" "$url"; then
-                # Check if file is valid JSON
                 if jq empty "$temp_file" 2>/dev/null; then
-                  # Check if file has changed
                   if cmp -s "$filename" "$temp_file"; then
-                    echo "✅ No changes detected for $name.json, skipping update"
+                    echo "No changes detected for $name.json, skipping update"
                     rm "$temp_file"
                   else
-                    # Archive old file
                     cp "$filename" "docs/data/archive/${name}_${TIMESTAMP}.json"
-                    echo "📁 Archived $name.json to archive/${name}_${TIMESTAMP}.json"
-                    
-                    # Move temp file to final location
+                    echo "Archived $name.json to archive/${name}_${TIMESTAMP}.json"
                     mv "$temp_file" "$filename"
-                    echo "🔄 Updated $name.json"
+                    echo "Updated $name.json"
                     FILES_CHANGED=true
                   fi
                 else
-                  echo "❌ $name.json is not valid JSON. Skipping update."
+                  echo "$name.json is not valid JSON. Skipping update."
                   rm "$temp_file"
                 fi
               else
-                echo "❌ Failed to download $name from $url"
+                echo "Failed to download $name from $url"
               fi
             fi
           }
           
-          # Download all files with existence checks and change detection
           download_and_check "character-cards" "https://gametora.com/data/umamusume/character-cards.${{ steps.get-codes.outputs.character_cards_code }}.json"
           download_and_check "support-cards" "https://gametora.com/data/umamusume/support-cards.${{ steps.get-codes.outputs.support_cards_code }}.json"
           download_and_check "skills" "https://gametora.com/data/umamusume/skills.${{ steps.get-codes.outputs.skills_code }}.json"
@@ -150,14 +122,6 @@ jobs:
           download_and_check "events-champions-meeting" "https://gametora.com/data/umamusume/events/champions-meeting.${{ steps.get-codes.outputs.events_champions_meeting_code }}.json"
           
           echo "files_changed=$FILES_CHANGED" >> $GITHUB_OUTPUT
-
-      - name: List downloaded files
-        run: |
-          echo "📂 Current files in docs/data/:"
-          ls -la docs/data/
-          echo ""
-          echo "📁 Files in archive directory:"
-          ls -la docs/data/archive/ || echo "No archive directory"
 
       - name: Commit and push JSON changes
         if: steps.download-files.outputs.files_changed == 'true'
@@ -173,7 +137,6 @@ jobs:
   download-support-images:
     needs: update-json
     runs-on: ubuntu-latest
-    if: always() # Run even if update-json fails
     
     steps:
       - name: Checkout repository
@@ -182,98 +145,87 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq curl
+          sudo apt-get install -y jq curl file
 
       - name: Create images directory
-        run: mkdir -p docs/images/support-cards
+        run: mkdir -p docs/images/support_card_s
 
-      - name: Extract support IDs and download images
+      - name: Download missing support card images
         id: download-images
         run: |
           SUPPORT_JSON="docs/data/support-cards.json"
-          IMAGE_DIR="docs/images/support-cards"
+          IMAGE_DIR="docs/images/support_card_s"
           
-          # Check if support-cards.json exists
           if [ ! -f "$SUPPORT_JSON" ]; then
-            echo "❌ support-cards.json not found at $SUPPORT_JSON"
+            echo "support-cards.json not found at $SUPPORT_JSON"
             exit 1
           fi
           
-          echo "📖 Reading support IDs from $SUPPORT_JSON..."
+          echo "Reading support IDs from $SUPPORT_JSON"
           
-          # Extract all support_id values and download images
+          EXISTING_IMAGES=$(find "$IMAGE_DIR" -name "support_card_s_*.png" -type f | sed 's/.*support_card_s_//; s/\.png//' | sort -n)
+          echo "Found $(echo "$EXISTING_IMAGES" | wc -l) existing images"
+          
+          ALL_SUPPORT_IDS=$(jq -r '.[] | .support_id' "$SUPPORT_JSON" | sort -n | uniq)
+          echo "Found $(echo "$ALL_SUPPORT_IDS" | wc -l) support IDs in JSON"
+          
+          MISSING_IDS=$(comm -23 <(echo "$ALL_SUPPORT_IDS") <(echo "$EXISTING_IMAGES") | grep -v '^null$' | grep -v '^$')
+          
+          MISSING_COUNT=$(echo "$MISSING_IDS" | wc -l)
+          echo "Found $MISSING_COUNT missing images to download"
+          
+          if [ "$MISSING_COUNT" -eq 0 ]; then
+            echo "All images are already downloaded. No work to do."
+            echo "images_downloaded=0" >> $GITHUB_OUTPUT
+            echo "images_failed=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
           IMAGES_DOWNLOADED=0
-          IMAGES_SKIPPED=0
           IMAGES_FAILED=0
           
-          # Get all support_id values from the JSON
-          SUPPORT_IDS=$(jq -r '.[] | .support_id' "$SUPPORT_JSON")
+          echo "Starting download of $MISSING_COUNT missing images"
           
-          echo "🔍 Found $(echo "$SUPPORT_IDS" | wc -l) support IDs to process"
-          
-          for SUPPORT_ID in $SUPPORT_IDS; do
-            # Skip if support_id is null or empty
-            if [ "$SUPPORT_ID" = "null" ] || [ -z "$SUPPORT_ID" ]; then
-              continue
-            fi
-            
-            # Format the ID to 5 digits with leading zeros
+          for SUPPORT_ID in $MISSING_IDS; do
             FORMATTED_ID=$(printf "%05d" "$SUPPORT_ID")
             IMAGE_URL="https://gametora.com/images/umamusume/supports/support_card_s_${FORMATTED_ID}.png"
             IMAGE_PATH="${IMAGE_DIR}/support_card_s_${FORMATTED_ID}.png"
             
-            # Check if image already exists
-            if [ -f "$IMAGE_PATH" ]; then
-              echo "✅ Image already exists: support_card_s_${FORMATTED_ID}.png"
-              IMAGES_SKIPPED=$((IMAGES_SKIPPED + 1))
-            else
-              echo "📥 Downloading: $IMAGE_URL"
-              
-              # Download the image with error handling
-              if curl -s -f -o "$IMAGE_PATH" "$IMAGE_URL"; then
-                # Verify the downloaded file is not empty and is a valid image
-                if [ -s "$IMAGE_PATH" ] && file "$IMAGE_PATH" | grep -q "PNG image data"; then
-                  echo "✅ Successfully downloaded: support_card_s_${FORMATTED_ID}.png"
-                  IMAGES_DOWNLOADED=$((IMAGES_DOWNLOADED + 1))
-                else
-                  echo "❌ Downloaded file is not a valid PNG: support_card_s_${FORMATTED_ID}.png"
-                  rm -f "$IMAGE_PATH"
-                  IMAGES_FAILED=$((IMAGES_FAILED + 1))
-                fi
+            echo "Downloading: $IMAGE_URL"
+            
+            if curl -s -f -o "$IMAGE_PATH" "$IMAGE_URL"; then
+              if [ -s "$IMAGE_PATH" ] && file "$IMAGE_PATH" | grep -q "PNG image data"; then
+                echo "Successfully downloaded: support_card_s_${FORMATTED_ID}.png"
+                IMAGES_DOWNLOADED=$((IMAGES_DOWNLOADED + 1))
               else
-                echo "❌ Failed to download: support_card_s_${FORMATTED_ID}.png"
-                # Remove empty file if created
+                echo "Downloaded file is not a valid PNG: support_card_s_${FORMATTED_ID}.png"
                 rm -f "$IMAGE_PATH"
                 IMAGES_FAILED=$((IMAGES_FAILED + 1))
               fi
-              
-              # Add a small delay to be respectful to the server
-              sleep 0.1
+            else
+              echo "Failed to download: support_card_s_${FORMATTED_ID}.png"
+              rm -f "$IMAGE_PATH"
+              IMAGES_FAILED=$((IMAGES_FAILED + 1))
             fi
+            
+            sleep 0.2
           done
           
-          echo "📊 Download Summary:"
-          echo "   Downloaded: $IMAGES_DOWNLOADED"
-          echo "   Skipped (already exist): $IMAGES_SKIPPED"
-          echo "   Failed: $IMAGES_FAILED"
+          echo "Download Summary:"
+          echo "  Downloaded: $IMAGES_DOWNLOADED"
+          echo "  Failed: $IMAGES_FAILED"
+          echo "  Total missing found: $MISSING_COUNT"
           
           echo "images_downloaded=$IMAGES_DOWNLOADED" >> $GITHUB_OUTPUT
-          echo "images_skipped=$IMAGES_SKIPPED" >> $GITHUB_OUTPUT
           echo "images_failed=$IMAGES_FAILED" >> $GITHUB_OUTPUT
-
-      - name: List downloaded images
-        run: |
-          echo "📂 Images in docs/images/support-cards/:"
-          ls -la docs/images/support-cards/ | head -20
-          echo "Total files: $(ls -1 docs/images/support-cards/ | wc -l)"
 
       - name: Commit and push image changes
         if: steps.download-images.outputs.images_downloaded > 0
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Add support card images [$(date +%Y-%m-%d)] - Downloaded ${{ steps.download-images.outputs.images_downloaded }} new images"
+          commit_message: "Add ${{ steps.download-images.outputs.images_downloaded }} new support card images [$(date +%Y-%m-%d)]"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           branch: main
-          file_pattern: "docs/images/support-cards/**"
+          file_pattern: "docs/images/support_card_s/**"
           add_options: "-A"
