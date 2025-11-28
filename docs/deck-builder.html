@@ -6,462 +6,447 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deck Builder</title>
     <link rel="stylesheet" href="styles.css">
-<style>
-    .cards-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-        gap: 1rem;
-        width: 100%;
-    }
+    <style>
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 1rem;
+            width: 100%;
+        }
 
-    .card {
-        background: white;
-        border-radius: 12px 12px 8px 8px;
-        padding: 4px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-    }
+        .card {
+            background: white;
+            border-radius: 12px 12px 8px 8px;
+            padding: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
 
-    /* Simple opacity-based dimming that works */
-    .card.disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
+        .card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
-    .card-error-label {
-        position: absolute;
-        top: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        color: white;
-        font-size: 10px;
-        font-weight: bold;
-        text-align: center;
-        padding: 4px 10px;
-        border-radius: 12px;
-        z-index: 100;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        white-space: nowrap;
-        pointer-events: none;
-    }
+        .card-error-label {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            white-space: nowrap;
+            pointer-events: none;
+        }
 
-    .error-trainee {
-        background: #e74c3c;
-    }
+        .error-trainee {
+            background: #e74c3c;
+        }
 
-    .error-duplicate {
-        background: #f39c12;
-    }
+        .error-duplicate {
+            background: #f39c12;
+        }
 
-    .error-selected {
-        background: #3498db;
-    }
+        .error-selected {
+            background: #3498db;
+        }
 
-    .card-image {
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-        display: block;
-    }
+        .card-image {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            display: block;
+        }
 
-    .card-name {
-        font-size: 12px;
-        text-align: center;
-        font-weight: bold;
-        color: #2c3e50;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        padding: 4px;
-    }
+        .card-name {
+            font-size: 12px;
+            text-align: center;
+            font-weight: bold;
+            color: #2c3e50;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 4px;
+        }
 
-    .card-skills {
-        font-size: 10px;
-        padding: 4px;
-        color: #2c3e50;
-    }
+        .card-skills {
+            font-size: 10px;
+            padding: 4px;
+            color: #2c3e50;
+        }
 
-    .skill-section {
-        margin-bottom: 4px;
-    }
+        .skill-section {
+            margin-bottom: 4px;
+        }
 
-    .skill-label {
-        font-weight: bold;
-        color: #3498db;
-        margin-bottom: 2px;
-    }
+        .skill-label {
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 2px;
+        }
 
-    .skill-list {
-        font-size: 9px;
-        line-height: 1.2;
-        max-height: 60px;
-        overflow-y: auto;
-    }
+        .skill-list {
+            font-size: 9px;
+            line-height: 1.2;
+            max-height: 60px;
+            overflow-y: auto;
+        }
 
-    .skill-number {
-        display: block;
-        padding: 1px 2px;
-        border-radius: 2px;
-        cursor: help;
-        transition: background-color 0.2s;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+        .skill-number {
+            display: block;
+            padding: 1px 2px;
+            border-radius: 2px;
+            cursor: help;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-    .skill-number.highlighted {
-        background-color: #fff3cd;
-        border-left: 2px solid #ffc107;
-    }
+        .skill-number.highlighted {
+            background-color: #fff3cd;
+            border-left: 2px solid #ffc107;
+        }
 
-    .skill-number:hover {
-        background-color: #f0f0f0;
-    }
+        .skill-number:hover {
+            background-color: #f0f0f0;
+        }
 
-    .loading {
-        text-align: center;
-        padding: 2rem;
-        color: #7f8c8d;
-        grid-column: 1 / -1;
-    }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+            grid-column: 1 / -1;
+        }
 
-    .card-image-container {
-        position: relative;
-        display: inline-block;
-        width: 100%;
-    }
+        .card-image-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
 
-    .card-type-icon {
-        position: absolute;
-        top: 0px;
-        right: 0px;
-        width: 24px;
-        height: 24px;
-        background: rgba(255, 255, 255, 1);
-        border-radius: 4px;
-        padding: 2px;
-    }
+        .card-type-icon {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 1);
+            border-radius: 4px;
+            padding: 2px;
+        }
 
-    /* Control Sections */
-    .control-sections {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr 1fr;
-        gap: 1rem;
-        margin-bottom: 2rem;
-        padding: 1rem;
-        background: #f8f9fa;
-        border-radius: 8px;
-    }
+        .control-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
 
-    .control-section {
-        background: white;
-        padding: 1rem;
-        border-radius: 8px;
-        border: 1px solid #e0e0e0;
-    }
+        .control-section {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
 
-    .control-section h3 {
-        margin: 0 0 1rem 0;
-        font-size: 14px;
-        color: #2c3e50;
-    }
+        .control-section h3 {
+            margin: 0 0 1rem 0;
+            font-size: 14px;
+            color: #2c3e50;
+        }
 
-    /* Search Section */
-    .search-boxes {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
+        .search-boxes {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
-    .search-box {
-        display: flex;
-        gap: 5px;
-    }
+        .search-box {
+            display: flex;
+            gap: 5px;
+        }
 
-    .search-input {
-        flex: 1;
-        padding: 6px 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 12px;
-    }
+        .search-input {
+            flex: 1;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
 
-    .remove-search-btn {
-        background: #e74c3c;
-        color: white;
-        border: none;
-        width: 24px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+        .remove-search-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .remove-search-btn:hover {
-        background: #c0392b;
-    }
+        .remove-search-btn:hover {
+            background: #c0392b;
+        }
 
-    .add-search-btn {
-        background: #2ecc71;
-        color: white;
-        border: none;
-        padding: 6px 10px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 11px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        margin-top: 5px;
-    }
+        .add-search-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 5px;
+        }
 
-    .add-search-btn:hover {
-        background: #27ae60;
-    }
+        .add-search-btn:hover {
+            background: #27ae60;
+        }
 
-    /* Character Picker */
-    .character-picker-btn {
-        width: 100%;
-        padding: 8px;
-        background: #3498db;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 12px;
-    }
+        .character-picker-btn {
+            width: 100%;
+            padding: 8px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
 
-    .character-picker-btn:hover {
-        background: #2980b9;
-    }
+        .character-picker-btn:hover {
+            background: #2980b9;
+        }
 
-    .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-    }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
 
-    .modal-content {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        padding: 2rem;
-        border-radius: 8px;
-        max-width: 90%;
-        max-height: 80%;
-        overflow-y: auto;
-    }
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
 
-    .close-modal {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: none;
-        border: none;
-        font-size: 20px;
-        cursor: pointer;
-    }
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
 
-    .characters-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-        gap: 0.5rem;
-        margin-top: 1rem;
-    }
+        .characters-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
 
-    .character-card {
-        background: white;
-        border-radius: 8px;
-        padding: 4px;
-        cursor: pointer;
-        text-align: center;
-    }
+        .character-card {
+            background: white;
+            border-radius: 8px;
+            padding: 4px;
+            cursor: pointer;
+            text-align: center;
+        }
 
-    .character-card.selected {
-        border: 2px solid #3498db;
-    }
+        .character-card.selected {
+            border: 2px solid #3498db;
+        }
 
-    .character-portrait {
-        width: fit-content;
-        height: auto;
-        border-radius: 4px;
-    }
+        .character-portrait {
+            width: fit-content;
+            height: auto;
+            border-radius: 4px;
+        }
 
-    .character-name {
-        font-size: 10px;
-        margin-top: 4px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+        .character-name {
+            font-size: 10px;
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-    /* Deck Section */
-    .deck-slots {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
-    }
+        .deck-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
 
-    .deck-slot {
-        aspect-ratio: 3/4;
-        background: #ecf0f1;
-        border: 2px dashed #bdc3c7;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 10px;
-        color: #7f8c8d;
-        text-align: center;
-        min-width: 90px;
-        min-height: 120px;
-        max-width: 90px;
-        max-height: 120px;
-        position: relative;
-    }
+        .deck-slot {
+            aspect-ratio: 3/4;
+            background: #ecf0f1;
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #7f8c8d;
+            text-align: center;
+            min-width: 90px;
+            min-height: 120px;
+            max-width: 90px;
+            max-height: 120px;
+            position: relative;
+        }
 
-    .deck-slot.filled {
-        border-style: solid;
-        border-color: #3498db;
-    }
+        .deck-slot.filled {
+            border-style: solid;
+            border-color: #3498db;
+            position: relative;
+        }
 
-    .deck-slot .card {
-        width: 100%;
-        height: 100%;
-        padding: 4px;
-    }
+        .deck-slot .card {
+            width: 100%;
+            height: 100%;
+            padding: 4px;
+        }
 
-    .deck-slot .card-image-container {
-        width: 100%;
-        height: auto;
-    }
+        .deck-slot .card-image-container {
+            width: 100%;
+            height: auto;
+        }
 
-    .deck-slot .card-image {
-        width: 100%;
-        height: auto;
-        border-radius: 6px;
-    }
+        .deck-slot .card-image {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+        }
 
-    .deck-slot .card-name {
-        font-size: 9px;
-        padding: 2px;
-        margin: 0;
-    }
+        .deck-slot .card-name {
+            font-size: 9px;
+            padding: 2px;
+            margin: 0;
+        }
 
-    /* Filters Section */
-    .filter-group {
-        margin-bottom: 1rem;
-    }
+        .filter-group {
+            margin-bottom: 1rem;
+        }
 
-    .filter-group h4 {
-        margin: 0 0 0.5rem 0;
-        font-size: 12px;
-        color: #2c3e50;
-    }
+        .filter-group h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 12px;
+            color: #2c3e50;
+        }
 
-    .filter-options {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    }
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
 
-    .filter-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-bottom: 0.25rem;
-    }
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
 
-    .filter-option {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        font-size: 10px;
-        color: #000000;
-        white-space: nowrap;
-    }
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 10px;
+            color: #000000;
+            white-space: nowrap;
+        }
 
-    .filter-option input[type="checkbox"] {
-        margin: 0;
-    }
+        .filter-option input[type="checkbox"] {
+            margin: 0;
+        }
 
-    /* Drag and Drop Styles */
-    .card[draggable="true"] {
-        cursor: grab;
-    }
+        .card[draggable="true"] {
+            cursor: grab;
+        }
 
-    .card[draggable="true"]:active {
-        cursor: grabbing;
-    }
+        .card[draggable="true"]:active {
+            cursor: grabbing;
+        }
 
-    .deck-slot.drag-over {
-        background-color: #d5edff;
-        border-color: #3498db;
-    }
+        .deck-slot.drag-over {
+            background-color: #d5edff;
+            border-color: #3498db;
+        }
 
-    /* Welcome Message */
-    .welcome-message {
-        text-align: center;
-        padding: 3rem;
-        color: #7f8c8d;
-        grid-column: 1 / -1;
-        font-style: italic;
-    }
+        .welcome-message {
+            text-align: center;
+            padding: 3rem;
+            color: #7f8c8d;
+            grid-column: 1 / -1;
+            font-style: italic;
+        }
 
-    /* CRITICAL FIX: Position the remove button OUTSIDE the card container */
-    .deck-slot.filled {
-        position: relative;
-    }
+        .deck-card-remove {
+            opacity: 1;
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
 
-    .deck-card-remove {
-        opacity: 1 !important;
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        background: #e74c3c;
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        font-size: 12px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    }
+        .deck-card-remove:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
 
-    .deck-card-remove:hover {
-        background: #c0392b;
-        transform: scale(1.1);
-    }
-
-    /* Deck Card Dragging */
-    .deck-card-dragging {
-        opacity: 0.5;
-    }
-</style>
+        .deck-card-dragging {
+            opacity: 0.5;
+        }
+    </style>
 </head>
 
 <body>
     <div id="header-placeholder"></div>
 
     <main>
-        <!-- Control Sections -->
         <div class="control-sections">
-            <!-- Search List -->
             <div class="control-section">
                 <h3>Search List</h3>
                 <div class="search-boxes" id="search-boxes">
@@ -475,14 +460,12 @@
                 </button>
             </div>
 
-            <!-- Character -->
             <div class="control-section">
                 <h3>Character</h3>
                 <button class="character-picker-btn" onclick="openCharacterPicker()">Pick Character</button>
                 <div id="selected-character"></div>
             </div>
 
-            <!-- Deck -->
             <div class="control-section">
                 <h3>Deck (0/6)</h3>
                 <div class="deck-slots" id="deck-slots">
@@ -495,10 +478,8 @@
                 </div>
             </div>
 
-            <!-- Filters -->
             <div class="control-section">
                 <h3>Filters</h3>
-
                 <div class="filter-group">
                     <div class="filter-options">
                         <div class="filter-row">
@@ -526,12 +507,10 @@
             </div>
         </div>
 
-        <!-- Cards Container -->
         <div id="cards-container" class="cards-container">
             <div class="welcome-message">Enter search terms to find support cards</div>
         </div>
 
-        <!-- Character Picker Modal -->
         <div id="character-modal" class="modal">
             <div class="modal-content">
                 <button class="close-modal" onclick="closeCharacterPicker()">×</button>
@@ -555,52 +534,37 @@
         let draggedCard = null;
         let draggedCardIndex = null;
 
-        fetch('header.html')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('header-placeholder').innerHTML = data;
-            });
+        fetch('header.html').then(response => response.text()).then(data => {
+            document.getElementById('header-placeholder').innerHTML = data;
+        });
 
-        fetch('footer.html')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('footer-placeholder').innerHTML = data;
-            });
+        fetch('footer.html').then(response => response.text()).then(data => {
+            document.getElementById('footer-placeholder').innerHTML = data;
+        });
 
         async function loadSkillsData() {
             const response = await fetch('./data/skills.json');
             const skills = await response.json();
-
             skills.forEach(skill => {
                 skillsMap.set(skill.id, skill);
             });
-
             return skillsMap;
         }
 
         function getSkillName(skillData) {
             if (!skillData) return 'Unknown Skill';
-
             let skillName = skillData.name_en || skillData.enname || 'Unknown Skill';
-            skillName = skillName.replace(/\s+○$/, '');
-
-            return skillName;
+            return skillName.replace(/\s+○$/, '');
         }
 
         function setupSearch() {
             const addSearchBtn = document.getElementById('add-search-btn');
             addSearchBtn.addEventListener('click', addSearchBox);
-
-            // Add event listener to the initial search box
             const initialInput = document.querySelector('.search-input');
             initialInput.addEventListener('input', handleSearch);
-
-            // Make the first X clickable
             const initialRemoveBtn = document.querySelector('.remove-search-btn');
             initialRemoveBtn.addEventListener('click', function () {
-                const searchBox = this.parentElement;
-                searchBox.remove();
-                updateRemoveButtons();
+                this.parentElement.remove();
                 updateSearchTerms();
                 filterAndRenderCards();
             });
@@ -614,28 +578,15 @@
                 <input type="text" class="search-input" placeholder="Enter skill or character name...">
                 <button class="remove-search-btn">×</button>
             `;
-
             searchBoxesContainer.appendChild(searchBox);
-
-            // Update remove buttons state
-            updateRemoveButtons();
-
-            // Add event listener to the new input
             const input = searchBox.querySelector('.search-input');
             input.addEventListener('input', handleSearch);
-
-            // Add event listener to the remove button
             const removeBtn = searchBox.querySelector('.remove-search-btn');
             removeBtn.addEventListener('click', function () {
                 searchBox.remove();
-                updateRemoveButtons();
                 updateSearchTerms();
                 filterAndRenderCards();
             });
-        }
-
-        function updateRemoveButtons() {
-            // All remove buttons are now clickable, no need to disable first one
         }
 
         function handleSearch() {
@@ -652,30 +603,22 @@
 
         function filterAndRenderCards() {
             if (currentSearchTerms.length === 0) {
-                // No active search terms, show welcome message
                 showWelcomeMessage();
                 return;
             }
 
-            // Filter cards that match any of the search terms
             const filteredCards = allSupportCards.filter(card => {
-                // Check if card name matches any search term
-                if (currentSearchTerms.some(term =>
-                    card.char_name.toLowerCase().includes(term))) {
+                if (currentSearchTerms.some(term => card.char_name.toLowerCase().includes(term))) {
                     return true;
                 }
 
-                // Check if any skill matches any search term
                 const eventSkills = card.event_skills || [];
                 const hasEventSkill = eventSkills.some(skillId => {
                     const skillData = skillsMap.get(skillId);
                     if (!skillData) return false;
                     const skillName = getSkillName(skillData).toLowerCase();
                     return currentSearchTerms.some(term =>
-                        // More specific matching - exact word match
-                        skillName.split(/\s+/).some(word => word === term) ||
-                        // Or exact phrase match for multi-word terms
-                        skillName === term
+                        skillName.split(/\s+/).some(word => word === term) || skillName === term
                     );
                 });
 
@@ -685,10 +628,7 @@
                     if (!skillData) return false;
                     const skillName = getSkillName(skillData).toLowerCase();
                     return currentSearchTerms.some(term =>
-                        // More specific matching - exact word match
-                        skillName.split(/\s+/).some(word => word === term) ||
-                        // Or exact phrase match for multi-word terms
-                        skillName === term
+                        skillName.split(/\s+/).some(word => word === term) || skillName === term
                     );
                 });
 
@@ -723,18 +663,15 @@
         function renderCharacterPicker() {
             const container = document.getElementById('characters-container');
             container.innerHTML = '';
-
             allCharacters.forEach(character => {
                 const charElement = document.createElement('div');
                 charElement.className = `character-card ${selectedCharacter?.char_id === character.char_id ? 'selected' : ''}`;
                 charElement.onclick = () => selectCharacter(character);
-
                 charElement.innerHTML = `
-    <img src="./images/chara_stand/chara_stand_${character.char_id}_${character.card_id}.png" 
-         alt="${character.name_en}" class="character-portrait" onerror="this.style.display='none'">
-    <div class="character-name">${character.name_en}</div>
-`;
-
+                    <img src="./images/chara_stand/chara_stand_${character.char_id}_${character.card_id}.png" 
+                         alt="${character.name_en}" class="character-portrait" onerror="this.style.display='none'">
+                    <div class="character-name">${character.name_en}</div>
+                `;
                 container.appendChild(charElement);
             });
         }
@@ -758,13 +695,13 @@
             const container = document.getElementById('selected-character');
             if (selectedCharacter) {
                 container.innerHTML = `
-    <div class="character-card" onclick="removeSelectedCharacter()" style="cursor: pointer;">
-        <img src="./images/chara_stand/chara_stand_${selectedCharacter.char_id}_${selectedCharacter.card_id}.png" 
-             alt="${selectedCharacter.name_en}" class="character-portrait" onerror="this.style.display='none'">
-        <div class="character-name">${selectedCharacter.name_en}</div>
-        <div style="font-size: 8px; color: #e74c3c;">Click to remove</div>
-    </div>
-`;
+                    <div class="character-card" onclick="removeSelectedCharacter()" style="cursor: pointer;">
+                        <img src="./images/chara_stand/chara_stand_${selectedCharacter.char_id}_${selectedCharacter.card_id}.png" 
+                             alt="${selectedCharacter.name_en}" class="character-portrait" onerror="this.style.display='none'">
+                        <div class="character-name">${selectedCharacter.name_en}</div>
+                        <div style="font-size: 8px; color: #e74c3c;">Click to remove</div>
+                    </div>
+                `;
             } else {
                 container.innerHTML = '';
             }
@@ -773,48 +710,35 @@
         function setupDeckSlots() {
             const slots = document.getElementById('deck-slots');
             slots.innerHTML = '';
-
             for (let i = 0; i < 6; i++) {
                 const slot = document.createElement('div');
                 slot.className = 'deck-slot';
                 slot.innerHTML = `Slot ${i + 1}`;
                 slot.dataset.slotIndex = i;
-
-                // Drag and drop event listeners
                 slot.addEventListener('dragover', handleDragOver);
                 slot.addEventListener('dragenter', handleDragEnter);
                 slot.addEventListener('dragleave', handleDragLeave);
                 slot.addEventListener('drop', handleDrop);
-
                 slots.appendChild(slot);
             }
             updateDeckDisplay();
         }
 
         function addCardToDeck(card, targetSlotIndex) {
-            // Check if card is already in deck
             if (isCardInDeck(card)) return;
-
-            // Check if character is already in deck
             if (isCharacterInDeck(card.char_id)) return;
-
-            // Check if selected character matches card character
             if (selectedCharacter && selectedCharacter.char_id === card.char_id) return;
 
-            // Find the first empty slot if no specific target
             if (targetSlotIndex === undefined) {
                 targetSlotIndex = deck.findIndex(slot => slot === null);
-                if (targetSlotIndex === -1) return; // Deck is full
+                if (targetSlotIndex === -1) return;
             }
 
-            // If we're moving a card within the deck
             if (draggedCardIndex !== null) {
-                // Remove from current position
                 deck[draggedCardIndex] = null;
                 draggedCardIndex = null;
             }
 
-            // Add to target position
             deck[targetSlotIndex] = card;
             updateDeckDisplay();
             updateCardDisplay();
@@ -830,14 +754,11 @@
 
         function swapCardsInDeck(index1, index2) {
             if (deck[index1] && deck[index2]) {
-                // Swap the cards
                 [deck[index1], deck[index2]] = [deck[index2], deck[index1]];
             } else if (deck[index1] && !deck[index2]) {
-                // Move card to empty slot
                 deck[index2] = deck[index1];
                 deck[index1] = null;
             } else if (!deck[index1] && deck[index2]) {
-                // Move card to empty slot
                 deck[index1] = deck[index2];
                 deck[index2] = null;
             }
@@ -853,140 +774,124 @@
         }
 
         function getCardErrors(card, isDeckCard = false) {
-                const errors = [];
-
-                // For search cards only: Check if card is already in deck
-                if (!isDeckCard && isCardInDeck(card)) {
-                    errors.push({ type: 'selected', message: '! Selected' });
-                    return errors;
-                }
-
-                // Check if selected character matches card character (Trainee)
-                if (selectedCharacter && selectedCharacter.char_id === card.char_id) {
-                    errors.push({ type: 'trainee', message: '! Trainee' });
-                    return errors; // Trainee overrides everything else
-                }
-
-                // For search cards only: Check if character is already in deck
-                if (!isDeckCard && isCharacterInDeck(card.char_id)) {
-                    errors.push({ type: 'duplicate', message: '! Duplicate Support' });
-                }
-
+            const errors = [];
+            if (!isDeckCard && isCardInDeck(card)) {
+                errors.push({ type: 'selected', message: '! Selected' });
                 return errors;
             }
+            if (selectedCharacter && selectedCharacter.char_id === card.char_id) {
+                errors.push({ type: 'trainee', message: '! Trainee' });
+                return errors;
+            }
+            if (!isDeckCard && isCharacterInDeck(card.char_id)) {
+                errors.push({ type: 'duplicate', message: '! Duplicate Support' });
+            }
+            return errors;
+        }
 
         function updateDeckDisplay() {
-                const slots = document.querySelectorAll('.deck-slot');
-                const deckCount = deck.filter(card => card !== null).length;
-                const deckTitle = document.querySelector('.control-section:nth-child(3) h3');
-                deckTitle.textContent = `Deck (${deckCount}/6)`;
+            const slots = document.querySelectorAll('.deck-slot');
+            const deckCount = deck.filter(card => card !== null).length;
+            const deckTitle = document.querySelector('.control-section:nth-child(3) h3');
+            deckTitle.textContent = `Deck (${deckCount}/6)`;
 
-                slots.forEach((slot, index) => {
-                    slot.innerHTML = `Slot ${index + 1}`;
-                    slot.className = 'deck-slot';
-                    slot.dataset.slotIndex = index;
+            slots.forEach((slot, index) => {
+                slot.innerHTML = `Slot ${index + 1}`;
+                slot.className = 'deck-slot';
+                slot.dataset.slotIndex = index;
 
-                    if (deck[index]) {
-                        const card = deck[index];
-                        slot.className = 'deck-slot filled';
-                        const formattedId = card.support_id.toString().padStart(5, '0');
+                if (deck[index]) {
+                    const card = deck[index];
+                    slot.className = 'deck-slot filled';
+                    const formattedId = card.support_id.toString().padStart(5, '0');
 
-                        // For deck cards, isDeckCard = true (so no "Selected" error)
-                        const errors = getCardErrors(card, true);
-                        const hasErrors = errors.length > 0;
-                        const isTraineeError = hasErrors && errors.some(error => error.type === 'trainee');
+                    const errors = getCardErrors(card, true);
+                    const hasErrors = errors.length > 0;
+                    const isTraineeError = hasErrors && errors.some(error => error.type === 'trainee');
 
-                        // Get all skills for deck cards with highlighting
-                        const eventSkills = card.event_skills || [];
-                        const hintSkills = card.hints?.hint_skills || [];
+                    const eventSkills = card.event_skills || [];
+                    const hintSkills = card.hints?.hint_skills || [];
 
-                        const formatSkillsForDeck = (skills) => {
-                            return skills.map(skillId => {
-                                const skillData = skillsMap.get(skillId);
-                                if (!skillData) return '';
+                    const formatSkillsForDeck = (skills) => {
+                        return skills.map(skillId => {
+                            const skillData = skillsMap.get(skillId);
+                            if (!skillData) return '';
+                            const skillName = getSkillName(skillData);
+                            const isHighlighted = currentSearchTerms.length > 0 &&
+                                currentSearchTerms.some(term =>
+                                    skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
+                                    skillName.toLowerCase() === term
+                                );
+                            return `<span class="skill-number ${isHighlighted ? 'highlighted' : ''}" 
+                                        title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
+                        }).join('');
+                    };
 
-                                const skillName = getSkillName(skillData);
-                                const isHighlighted = currentSearchTerms.length > 0 &&
-                                    currentSearchTerms.some(term =>
-                                        skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
-                                        skillName.toLowerCase() === term
-                                    );
+                    const hintSkillsHTML = hintSkills.length > 0 ? `
+                        <div class="skill-section">
+                            <div class="skill-label">Hint Skills</div>
+                            <div class="skill-list">${formatSkillsForDeck(hintSkills)}</div>
+                        </div>
+                    ` : '';
 
-                                return `<span class="skill-number ${isHighlighted ? 'highlighted' : ''}" 
-                                title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
-                            }).join('');
-                        };
+                    const eventSkillsHTML = eventSkills.length > 0 ? `
+                        <div class="skill-section">
+                            <div class="skill-label">Event Skills</div>
+                            <div class="skill-list">${formatSkillsForDeck(eventSkills)}</div>
+                        </div>
+                    ` : '';
 
-                        const hintSkillsHTML = hintSkills.length > 0 ? `
-                <div class="skill-section">
-                    <div class="skill-label">Hint Skills</div>
-                    <div class="skill-list">${formatSkillsForDeck(hintSkills)}</div>
-                </div>
-            ` : '';
+                    let deckCardHTML = `
+                        <div class="card deck-card ${isTraineeError ? 'disabled' : ''}" 
+                             draggable="${!isTraineeError}" 
+                             data-card-index="${index}" 
+                             style="position: relative;">
+                            <div class="card-image-container">
+                                <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
+                                     alt="${card.char_name}" class="card-image" onerror="this.style.display='none'">
+                            </div>
+                            <div class="card-name">${card.char_name}</div>
+                            <div class="card-skills">
+                                ${hintSkillsHTML}
+                                ${eventSkillsHTML}
+                            </div>
+                        </div>
+                    `;
 
-                        const eventSkillsHTML = eventSkills.length > 0 ? `
-                <div class="skill-section">
-                    <div class="skill-label">Event Skills</div>
-                    <div class="skill-list">${formatSkillsForDeck(eventSkills)}</div>
-                </div>
-            ` : '';
+                    slot.innerHTML = deckCardHTML;
 
-                        // In updateDeckDisplay function, replace the deckCardHTML with:
-                        let deckCardHTML = `
-    <div class="card deck-card ${isTraineeError ? 'disabled' : ''}" 
-         draggable="${!isTraineeError}" 
-         data-card-index="${index}" 
-         style="position: relative;">
-        <div class="card-image-container">
-            <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
-                 alt="${card.char_name}" class="card-image" onerror="this.style.display='none'">
-        </div>
-        <div class="card-name">${card.char_name}</div>
-        <div class="card-skills">
-            ${hintSkillsHTML}
-            ${eventSkillsHTML}
-        </div>
-    </div>
-`;
+                    const removeButton = document.createElement('button');
+                    removeButton.className = 'deck-card-remove';
+                    removeButton.innerHTML = '×';
+                    removeButton.onclick = (e) => {
+                        e.stopPropagation();
+                        removeCardFromDeck(index);
+                    };
+                    slot.appendChild(removeButton);
 
-                        slot.innerHTML = deckCardHTML;
-
-                        // Add the remove button to the SLOT, not the card
-                        const removeButton = document.createElement('button');
-                        removeButton.className = 'deck-card-remove';
-                        removeButton.innerHTML = '×';
-                        removeButton.onclick = (e) => {
-                            e.stopPropagation();
-                            removeCardFromDeck(index);
-                        };
-                        slot.appendChild(removeButton);
-
-                        // Add error labels to deck card if any (only Trainee errors for deck cards)
-                        if (hasErrors) {
-                            const deckCard = slot.querySelector('.deck-card');
-                            errors.forEach(error => {
-                                const errorLabel = document.createElement('div');
-                                errorLabel.className = `card-error-label error-${error.type}`;
-                                errorLabel.textContent = error.message;
-                                deckCard.appendChild(errorLabel);
-                            });
-                        }
-
-                        // Add drag events to deck cards only if not a Trainee error
+                    if (hasErrors) {
                         const deckCard = slot.querySelector('.deck-card');
-                        if (deckCard && !isTraineeError) {
-                            deckCard.addEventListener('dragstart', handleDeckCardDragStart);
-                            deckCard.addEventListener('dragend', handleDeckCardDragEnd);
-                        }
+                        errors.forEach(error => {
+                            const errorLabel = document.createElement('div');
+                            errorLabel.className = `card-error-label error-${error.type}`;
+                            errorLabel.textContent = error.message;
+                            deckCard.appendChild(errorLabel);
+                        });
                     }
 
-                    // Re-add drag and drop event listeners to slots
-                    slot.addEventListener('dragover', handleDragOver);
-                    slot.addEventListener('dragenter', handleDragEnter);
-                    slot.addEventListener('dragleave', handleDragLeave);
-                    slot.addEventListener('drop', handleDrop);
-                });
-            }
+                    const deckCard = slot.querySelector('.deck-card');
+                    if (deckCard && !isTraineeError) {
+                        deckCard.addEventListener('dragstart', handleDeckCardDragStart);
+                        deckCard.addEventListener('dragend', handleDeckCardDragEnd);
+                    }
+                }
+
+                slot.addEventListener('dragover', handleDragOver);
+                slot.addEventListener('dragenter', handleDragEnter);
+                slot.addEventListener('dragleave', handleDragLeave);
+                slot.addEventListener('drop', handleDrop);
+            });
+        }
 
         function updateCardDisplay() {
             filterAndRenderCards();
@@ -1011,136 +916,118 @@
         }
 
         function createCardElement(card, searchTerms = []) {
-                const cardElement = document.createElement('div');
-                cardElement.setAttribute('data-card-id', card.support_id);
-                cardElement.setAttribute('draggable', 'true');
+            const cardElement = document.createElement('div');
+            cardElement.setAttribute('data-card-id', card.support_id);
+            cardElement.setAttribute('draggable', 'true');
 
-                // For search cards, isDeckCard = false
-                const errors = getCardErrors(card, false);
-                const hasErrors = errors.length > 0;
+            const errors = getCardErrors(card, false);
+            const hasErrors = errors.length > 0;
 
+            cardElement.className = `card ${hasErrors ? 'disabled' : ''}`;
 
-                cardElement.className = `card ${hasErrors ? 'disabled' : ''}`;
+            const formattedId = card.support_id.toString().padStart(5, '0');
+            const typeMap = {
+                'speed': '00', 'stamina': '01', 'power': '02', 'guts': '03',
+                'intelligence': '04', 'friend': '05', 'group': '06'
+            };
+            const typeIcon = typeMap[card.type];
 
-                const formattedId = card.support_id.toString().padStart(5, '0');
-                const typeMap = {
-                    'speed': '00', 'stamina': '01', 'power': '02', 'guts': '03',
-                    'intelligence': '04', 'friend': '05', 'group': '06'
-                };
-                const typeIcon = typeMap[card.type];
+            const eventSkills = card.event_skills || [];
+            const hintSkills = card.hints?.hint_skills || [];
 
-                const eventSkills = card.event_skills || [];
-                const hintSkills = card.hints?.hint_skills || [];
+            const getHighlightedSkills = (skills, searchTerms) => {
+                return skills.map(skillId => {
+                    const skillData = skillsMap.get(skillId);
+                    if (!skillData) return null;
+                    const skillName = getSkillName(skillData);
+                    const isHighlighted = searchTerms.length > 0 &&
+                        searchTerms.some(term =>
+                            skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
+                            skillName.toLowerCase() === term
+                        );
+                    return isHighlighted ? { id: skillId, name: skillName, highlighted: isHighlighted } : null;
+                }).filter(skill => skill !== null);
+            };
 
-                // Get only highlighted skills
-                const getHighlightedSkills = (skills, searchTerms) => {
-                    return skills.map(skillId => {
-                        const skillData = skillsMap.get(skillId);
-                        if (!skillData) return null;
+            const highlightedHintSkills = getHighlightedSkills(hintSkills, searchTerms);
+            const highlightedEventSkills = getHighlightedSkills(eventSkills, searchTerms);
 
-                        const skillName = getSkillName(skillData);
-                        const isHighlighted = searchTerms.length > 0 &&
-                            searchTerms.some(term =>
-                                // More specific matching - exact word match
-                                skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
-                                // Or exact phrase match for multi-word terms
-                                skillName.toLowerCase() === term
-                            );
+            let skillsHTML = '';
 
-                        return isHighlighted ? {
-                            id: skillId,
-                            name: skillName,
-                            highlighted: isHighlighted
-                        } : null;
-                    }).filter(skill => skill !== null);
-                };
-
-                const highlightedHintSkills = getHighlightedSkills(hintSkills, searchTerms);
-                const highlightedEventSkills = getHighlightedSkills(eventSkills, searchTerms);
-
-                let skillsHTML = '';
-
-                if (searchTerms.length > 0) {
-                    // Show only highlighted skills
-                    if (highlightedHintSkills.length > 0) {
-                        skillsHTML += `
-                <div class="skill-section">
-                    <div class="skill-label">Hint Skills</div>
-                    <div class="skill-list">
-                        ${highlightedHintSkills.map(skill =>
-                            `<span class="skill-number highlighted" 
-                                title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
-                        ).join('')}
-                    </div>
-                </div>
-            `;
-                    }
-
-                    if (highlightedEventSkills.length > 0) {
-                        skillsHTML += `
-                <div class="skill-section">
-                    <div class="skill-label">Event Skills</div>
-                    <div class="skill-list">
-                        ${highlightedEventSkills.map(skill =>
-                            `<span class="skill-number highlighted" 
-                                title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
-                        ).join('')}
-                    </div>
-                </div>
-            `;
-                    }
+            if (searchTerms.length > 0) {
+                if (highlightedHintSkills.length > 0) {
+                    skillsHTML += `
+                        <div class="skill-section">
+                            <div class="skill-label">Hint Skills</div>
+                            <div class="skill-list">
+                                ${highlightedHintSkills.map(skill =>
+                        `<span class="skill-number highlighted" 
+                                        title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
+                    ).join('')}
+                            </div>
+                        </div>
+                    `;
                 }
 
-                // Build the inner HTML FIRST
-                cardElement.innerHTML = `
-        <div class="card-image-container">
-            <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
-                 alt="${card.char_name}" class="card-image" loading="lazy" onerror="this.style.display='none'">
-            ${typeIcon ? `<img src="./images/utx_ico_obtain/utx_ico_obtain_${typeIcon}.png" 
-                 alt="${card.type}" class="card-type-icon" onerror="this.style.display='none'">` : ''}
-        </div>
-        <div class="card-name">${card.char_name}</div>
-        ${skillsHTML ? `<div class="card-skills">${skillsHTML}</div>` : ''}
-    `;
-
-                // THEN add error labels if any (AFTER setting innerHTML)
-                if (hasErrors) {
-                    errors.forEach(error => {
-                        const errorLabel = document.createElement('div');
-                        errorLabel.className = `card-error-label error-${error.type}`;
-                        errorLabel.textContent = error.message;
-                        cardElement.appendChild(errorLabel); // Append to cardElement, not innerHTML
-                    });
+                if (highlightedEventSkills.length > 0) {
+                    skillsHTML += `
+                        <div class="skill-section">
+                            <div class="skill-label">Event Skills</div>
+                            <div class="skill-list">
+                                ${highlightedEventSkills.map(skill =>
+                        `<span class="skill-number highlighted" 
+                                        title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
+                    ).join('')}
+                            </div>
+                        </div>
+                    `;
                 }
-
-                // Drag and drop event listeners
-                cardElement.addEventListener('dragstart', handleCardDragStart);
-                cardElement.addEventListener('dragend', handleCardDragEnd);
-
-                if (!hasErrors) {
-                    cardElement.onclick = () => addCardToDeck(card);
-                } else {
-                    cardElement.onclick = null;
-                }
-
-                return cardElement;
             }
 
-        // Drag and Drop Functions for cards from search
+            cardElement.innerHTML = `
+                <div class="card-image-container">
+                    <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
+                         alt="${card.char_name}" class="card-image" loading="lazy" onerror="this.style.display='none'">
+                    ${typeIcon ? `<img src="./images/utx_ico_obtain/utx_ico_obtain_${typeIcon}.png" 
+                         alt="${card.type}" class="card-type-icon" onerror="this.style.display='none'">` : ''}
+                </div>
+                <div class="card-name">${card.char_name}</div>
+                ${skillsHTML ? `<div class="card-skills">${skillsHTML}</div>` : ''}
+            `;
+
+            if (hasErrors) {
+                errors.forEach(error => {
+                    const errorLabel = document.createElement('div');
+                    errorLabel.className = `card-error-label error-${error.type}`;
+                    errorLabel.textContent = error.message;
+                    cardElement.appendChild(errorLabel);
+                });
+            }
+
+            cardElement.addEventListener('dragstart', handleCardDragStart);
+            cardElement.addEventListener('dragend', handleCardDragEnd);
+
+            if (!hasErrors) {
+                cardElement.onclick = () => addCardToDeck(card);
+            } else {
+                cardElement.onclick = null;
+            }
+
+            return cardElement;
+        }
+
         function handleCardDragStart(e) {
             const cardId = parseInt(this.getAttribute('data-card-id'));
             const card = allSupportCards.find(c => c.support_id === cardId);
-
-            // Only allow dragging if no errors
             const errors = getCardErrors(card);
             if (errors.length === 0) {
                 draggedCard = this;
                 this.style.opacity = '0.4';
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('text/plain', this.getAttribute('data-card-id'));
-                draggedCardIndex = null; // Not from deck
+                draggedCardIndex = null;
             } else {
-                e.preventDefault(); // Prevent dragging of cards with errors
+                e.preventDefault();
             }
         }
 
@@ -1151,26 +1038,21 @@
             });
         }
 
-        // Drag and Drop Functions for cards in deck
-            function handleDeckCardDragStart(e) {
-                const cardIndex = parseInt(this.getAttribute('data-card-index'));
-                const card = deck[cardIndex];
-
-                // Check if this card has Trainee error
-                const errors = getCardErrors(card, true);
-                const isTraineeError = errors.some(error => error.type === 'trainee');
-
-                if (isTraineeError) {
-                    e.preventDefault(); // Prevent dragging of Trainee-error cards
-                    return;
-                }
-
-                draggedCard = this;
-                this.classList.add('deck-card-dragging');
-                e.dataTransfer.effectAllowed = 'move';
-                draggedCardIndex = cardIndex;
-                e.dataTransfer.setData('text/plain', 'deck-card:' + draggedCardIndex);
+        function handleDeckCardDragStart(e) {
+            const cardIndex = parseInt(this.getAttribute('data-card-index'));
+            const card = deck[cardIndex];
+            const errors = getCardErrors(card, true);
+            const isTraineeError = errors.some(error => error.type === 'trainee');
+            if (isTraineeError) {
+                e.preventDefault();
+                return;
             }
+            draggedCard = this;
+            this.classList.add('deck-card-dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            draggedCardIndex = cardIndex;
+            e.dataTransfer.setData('text/plain', 'deck-card:' + draggedCardIndex);
+        }
 
         function handleDeckCardDragEnd(e) {
             this.classList.remove('deck-card-dragging');
@@ -1190,7 +1072,6 @@
         }
 
         function handleDragLeave(e) {
-            // Only remove class if not dragging over a child element
             if (!this.contains(e.relatedTarget)) {
                 this.classList.remove('drag-over');
             }
@@ -1199,21 +1080,15 @@
         function handleDrop(e) {
             e.preventDefault();
             e.stopPropagation();
-
             const targetSlotIndex = parseInt(this.getAttribute('data-slot-index'));
-
             if (draggedCard) {
                 const data = e.dataTransfer.getData('text/plain');
-
                 if (data.startsWith('deck-card:')) {
-                    // Dragging from deck to deck
                     const sourceIndex = parseInt(data.split(':')[1]);
                     swapCardsInDeck(sourceIndex, targetSlotIndex);
                 } else {
-                    // Dragging from search to deck
                     const cardId = parseInt(data);
                     const card = allSupportCards.find(c => c.support_id === cardId);
-
                     if (card) {
                         const errors = getCardErrors(card);
                         if (errors.length === 0) {
@@ -1222,7 +1097,6 @@
                     }
                 }
             }
-
             this.classList.remove('drag-over');
             return false;
         }
@@ -1232,12 +1106,10 @@
                 loadSkillsData(),
                 fetch('./data/support-cards.json')
             ]);
-
             allSupportCards = await supportCardsResponse.json();
-
             setupSearch();
             setupDeckSlots();
-            showWelcomeMessage(); // Show welcome message initially instead of all cards
+            showWelcomeMessage();
         }
 
         loadCardsWithSkills();
