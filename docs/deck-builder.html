@@ -4,381 +4,540 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Support Card Search</title>
+    <title>Deck Builder</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 1rem;
+            width: 100%;
         }
 
-        body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-
-        .description {
-            color: #7f8c8d;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .search-section {
+        .card {
             background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            margin-bottom: 30px;
+            border-radius: 12px 12px 8px 8px;
+            padding: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .search-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+        .card.dimmed {
+            opacity: 0.5;
+            position: relative;
         }
 
-        .search-title {
-            font-size: 1.2rem;
+        .card.dimmed::before {
+            content: "DUPLICATE";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: orange;
+            color: white;
+            font-size: 8px;
+            font-weight: bold;
+            text-align: center;
+            padding: 2px;
+            border-radius: 8px 8px 0 0;
+            z-index: 2;
+        }
+
+        .card-image {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-name {
+            font-size: 12px;
+            text-align: center;
+            font-weight: bold;
+            color: #2c3e50;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 4px;
+        }
+
+        .card-skills {
+            font-size: 10px;
+            padding: 4px;
             color: #2c3e50;
         }
 
-        .add-search-btn {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        .skill-section {
+            margin-bottom: 4px;
         }
 
-        .add-search-btn:hover {
-            background: #2980b9;
+        .skill-label {
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 2px;
         }
 
+        .skill-list {
+            font-size: 9px;
+            line-height: 1.2;
+            max-height: 60px;
+            overflow-y: auto;
+        }
+
+        .skill-number {
+            display: block;
+            padding: 1px 2px;
+            border-radius: 2px;
+            cursor: help;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .skill-number.highlighted {
+            background-color: #fff3cd;
+            border-left: 2px solid #ffc107;
+        }
+
+        .skill-number:hover {
+            background-color: #f0f0f0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+            grid-column: 1 / -1;
+        }
+
+        .card-image-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .card-type-icon {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 1);
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        /* Control Sections */
+        .control-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .control-section {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .control-section h3 {
+            margin: 0 0 1rem 0;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        /* Search Section */
         .search-boxes {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .search-box {
             display: flex;
-            gap: 10px;
+            gap: 5px;
         }
 
         .search-input {
             flex: 1;
-            padding: 10px 15px;
+            padding: 6px 8px;
             border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
+            border-radius: 4px;
+            font-size: 12px;
         }
 
         .remove-search-btn {
             background: #e74c3c;
             color: white;
             border: none;
-            width: 40px;
-            border-radius: 5px;
+            width: 24px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 1.2rem;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .remove-search-btn:hover {
+        .remove-search-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .remove-search-btn:not(:disabled):hover {
             background: #c0392b;
         }
 
-        .cards-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-header {
-            background: #2c3e50;
+        .add-search-btn {
+            background: #2ecc71;
             color: white;
-            padding: 15px;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 4px;
+            margin-top: 5px;
         }
 
-        .card-name {
-            font-weight: bold;
-            font-size: 1.1rem;
+        .add-search-btn:hover {
+            background: #27ae60;
         }
 
-        .card-type {
-            background: #3498db;
-            padding: 3px 8px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-        }
-
-        .card-image {
+        /* Character Picker */
+        .character-picker-btn {
             width: 100%;
-            height: 200px;
-            object-fit: cover;
+            padding: 8px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
         }
 
-        .card-skills {
-            padding: 15px;
+        .character-picker-btn:hover {
+            background: #2980b9;
         }
 
-        .skill-section {
-            margin-bottom: 15px;
-        }
-
-        .skill-section:last-child {
-            margin-bottom: 0;
-        }
-
-        .skill-header {
-            font-weight: bold;
-            color: #3498db;
-            margin-bottom: 8px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .skill-list {
-            list-style-type: none;
-        }
-
-        .skill-item {
-            padding: 8px 10px;
-            margin-bottom: 5px;
-            border-radius: 5px;
-            background: #f8f9fa;
-            transition: background 0.2s;
-        }
-
-        .skill-item:hover {
-            background: #e9ecef;
-        }
-
-        .highlighted {
-            background: #fff3cd;
-            border-left: 3px solid #ffc107;
-        }
-
-        .no-results {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 40px;
-            color: #7f8c8d;
-            font-size: 1.1rem;
-        }
-
-        .hidden {
+        .modal {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
         }
 
-        .instructions {
-            background: #e8f4fd;
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
             border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
-            border-left: 4px solid #3498db;
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
         }
 
-        .instructions h3 {
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .characters-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .character-card {
+            background: white;
+            border-radius: 8px;
+            padding: 4px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .character-card.selected {
+            border: 2px solid #3498db;
+        }
+
+        .character-portrait {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+
+        .character-name {
+            font-size: 10px;
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Deck Section */
+        .deck-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .deck-slot {
+            aspect-ratio: 3/4;
+            background: #ecf0f1;
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #7f8c8d;
+            text-align: center;
+            min-width: 90px;
+            min-height: 120px;
+            max-width: 90px;
+            max-height: 120px;
+        }
+
+        .deck-slot.filled {
+            border-style: solid;
+            border-color: #3498db;
+        }
+
+        .deck-slot .card {
+            width: 100%;
+            height: 100%;
+            padding: 4px;
+        }
+
+        .deck-slot .card-image-container {
+            width: 100%;
+            height: auto;
+        }
+
+        .deck-slot .card-image {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+        }
+
+        .deck-slot .card-name {
+            font-size: 9px;
+            padding: 2px;
+            margin: 0;
+        }
+
+        /* Filters Section */
+        .filter-group {
+            margin-bottom: 1rem;
+        }
+
+        .filter-group h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 12px;
             color: #2c3e50;
-            margin-bottom: 10px;
         }
 
-        .instructions ul {
-            padding-left: 20px;
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
         }
 
-        .instructions li {
-            margin-bottom: 8px;
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
-        @media (max-width: 768px) {
-            .cards-container {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            }
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 10px;
+            color: #000000;
+            white-space: nowrap;
+        }
 
-            .search-box {
-                flex-direction: column;
-            }
-
-            .remove-search-btn {
-                width: 100%;
-                padding: 10px;
-            }
+        .filter-option input[type="checkbox"] {
+            margin: 0;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <header>
-            <h1>Support Card Search</h1>
-            <p class="description">Search for cards by skill names or character names. Skills are hidden until searched.
-            </p>
-        </header>
+    <div id="header-placeholder"></div>
 
-        <section class="search-section">
-            <div class="search-header">
-                <h2 class="search-title">Search Terms</h2>
+    <main>
+        <!-- Control Sections -->
+        <div class="control-sections">
+            <!-- Search List -->
+            <div class="control-section">
+                <h3>Search List</h3>
+                <div class="search-boxes" id="search-boxes">
+                    <div class="search-box">
+                        <input type="text" class="search-input" placeholder="Enter skill or character name...">
+                        <button class="remove-search-btn" disabled>×</button>
+                    </div>
+                </div>
                 <button class="add-search-btn" id="add-search-btn">
                     <span>+</span> Add Search Box
                 </button>
             </div>
-            <div class="search-boxes" id="search-boxes">
-                <div class="search-box">
-                    <input type="text" class="search-input" placeholder="Enter skill name or character name...">
-                    <button class="remove-search-btn" disabled>×</button>
+
+            <!-- Character -->
+            <div class="control-section">
+                <h3>Character</h3>
+                <button class="character-picker-btn" onclick="openCharacterPicker()">Pick Character</button>
+                <div id="selected-character"></div>
+            </div>
+
+            <!-- Deck -->
+            <div class="control-section">
+                <h3>Deck (0/6)</h3>
+                <div class="deck-slots" id="deck-slots">
+                    <div class="deck-slot">Slot 1</div>
+                    <div class="deck-slot">Slot 2</div>
+                    <div class="deck-slot">Slot 3</div>
+                    <div class="deck-slot">Slot 4</div>
+                    <div class="deck-slot">Slot 5</div>
+                    <div class="deck-slot">Slot 6</div>
                 </div>
             </div>
-        </section>
 
-        <div class="instructions">
-            <h3>How to Use</h3>
-            <ul>
-                <li>Enter skill names (e.g., "Straightaway Spurt") or character names (e.g., "Tokai Teio")</li>
-                <li>Add multiple search boxes to find cards with any of the entered skills</li>
-                <li>Matching skills will be highlighted and shown with their respective headers</li>
-                <li>Cards without matching skills will have their skills hidden</li>
-            </ul>
+            <!-- Filters -->
+            <div class="control-section">
+                <h3>Filters</h3>
+
+                <div class="filter-group">
+                    <div class="filter-options">
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> No condition</label>
+                            <label class="filter-option"><input type="checkbox"> Debuff</label>
+                        </div>
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Front</label>
+                            <label class="filter-option"><input type="checkbox"> Pace</label>
+                            <label class="filter-option"><input type="checkbox"> Late</label>
+                            <label class="filter-option"><input type="checkbox"> End</label>
+                        </div>
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Short</label>
+                            <label class="filter-option"><input type="checkbox"> Mile</label>
+                            <label class="filter-option"><input type="checkbox"> Medium</label>
+                            <label class="filter-option"><input type="checkbox"> Long</label>
+                        </div>
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Dirt</label>
+                            <label class="filter-option"><input type="checkbox"> Turf</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="cards-container" id="cards-container">
-            <!-- Cards will be dynamically inserted here -->
+        <!-- Cards Container -->
+        <div id="cards-container" class="cards-container">
+            <div class="loading">Loading support cards...</div>
         </div>
-    </div>
+
+        <!-- Character Picker Modal -->
+        <div id="character-modal" class="modal">
+            <div class="modal-content">
+                <button class="close-modal" onclick="closeCharacterPicker()">×</button>
+                <h3>Select Character</h3>
+                <div id="characters-container" class="characters-container">
+                    <div class="loading">Loading characters...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
 
     <script>
-        // Sample data - in a real application, this would come from an API or JSON file
-        const supportCards = [
-            {
-                id: 1,
-                name: "Tokai Teio",
-                type: "Speed",
-                image: "https://via.placeholder.com/300x200/3498db/ffffff?text=Tokai+Teio",
-                skills: {
-                    "Event Skills": ["Straightaway Spurt", "Last Corner", "Final Sprint"],
-                    "Hint Skills": ["On Your Left", "Speed Up", "Endurance Boost"]
-                }
-            },
-            {
-                id: 2,
-                name: "Symboli Rudolf",
-                type: "Stamina",
-                image: "https://via.placeholder.com/300x200/2ecc71/ffffff?text=Symboli+Rudolf",
-                skills: {
-                    "Event Skills": ["Pace Control", "Stamina Recovery", "Final Effort"],
-                    "Hint Skills": ["On Your Left", "Stamina Boost", "Positioning"]
-                }
-            },
-            {
-                id: 3,
-                name: "Oguri Cap",
-                type: "Power",
-                image: "https://via.placeholder.com/300x200/e74c3c/ffffff?text=Oguri+Cap",
-                skills: {
-                    "Event Skills": ["Power Surge", "Hill Climb", "Final Sprint"],
-                    "Hint Skills": ["Power Up", "Guts", "On Your Left"]
-                }
-            },
-            {
-                id: 4,
-                name: "Gold Ship",
-                type: "Friend",
-                image: "https://via.placeholder.com/300x200/f39c12/ffffff?text=Gold+Ship",
-                skills: {
-                    "Event Skills": ["Unique Move", "Surprise Attack", "Final Effort"],
-                    "Hint Skills": ["Intelligence Up", "Positioning", "Speed Up"]
-                }
-            },
-            {
-                id: 5,
-                name: "Special Week",
-                type: "Guts",
-                image: "https://via.placeholder.com/300x200/9b59b6/ffffff?text=Special+Week",
-                skills: {
-                    "Event Skills": ["Gutsy Move", "Final Sprint", "Last Corner"],
-                    "Hint Skills": ["Guts Up", "Stamina Recovery", "On Your Left"]
-                }
-            },
-            {
-                id: 6,
-                name: "Silence Suzuka",
-                type: "Intelligence",
-                image: "https://via.placeholder.com/300x200/1abc9c/ffffff?text=Silence+Suzuka",
-                skills: {
-                    "Event Skills": ["Strategy", "Positioning", "Final Effort"],
-                    "Hint Skills": ["Intelligence Up", "Speed Up", "On Your Left"]
-                }
-            }
-        ];
+        let allSupportCards = [];
+        let allCharacters = [];
+        let skillsMap = new Map();
+        let selectedCharacter = null;
+        let deck = [];
+        let usedCharacterIds = new Set();
+        let currentSearchTerms = [];
 
-        // DOM elements
-        const searchBoxesContainer = document.getElementById('search-boxes');
-        const addSearchBtn = document.getElementById('add-search-btn');
-        const cardsContainer = document.getElementById('cards-container');
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-placeholder').innerHTML = data;
+            });
 
-        // Initialize with one search box
-        let searchTerms = [''];
+        fetch('footer.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('footer-placeholder').innerHTML = data;
+            });
 
-        // Add event listeners
-        addSearchBtn.addEventListener('click', addSearchBox);
+        async function loadSkillsData() {
+            const response = await fetch('./data/skills.json');
+            const skills = await response.json();
 
-        // Render initial cards (all skills hidden)
-        renderCards();
+            skills.forEach(skill => {
+                skillsMap.set(skill.id, skill);
+            });
 
-        // Function to add a new search box
+            return skillsMap;
+        }
+
+        function getSkillName(skillData) {
+            if (!skillData) return 'Unknown Skill';
+
+            let skillName = skillData.name_en || skillData.enname || 'Unknown Skill';
+            skillName = skillName.replace(/\s+○$/, '');
+
+            return skillName;
+        }
+
+        function setupSearch() {
+            const addSearchBtn = document.getElementById('add-search-btn');
+            addSearchBtn.addEventListener('click', addSearchBox);
+
+            // Add event listener to the initial search box
+            const initialInput = document.querySelector('.search-input');
+            initialInput.addEventListener('input', handleSearch);
+        }
+
         function addSearchBox() {
+            const searchBoxesContainer = document.getElementById('search-boxes');
             const searchBox = document.createElement('div');
             searchBox.className = 'search-box';
             searchBox.innerHTML = `
-                <input type="text" class="search-input" placeholder="Enter skill name or character name...">
+                <input type="text" class="search-input" placeholder="Enter skill or character name...">
                 <button class="remove-search-btn">×</button>
             `;
 
             searchBoxesContainer.appendChild(searchBox);
 
-            // Enable remove button for all but the first search box
+            // Update remove buttons state
             updateRemoveButtons();
 
             // Add event listener to the new input
@@ -395,7 +554,6 @@
             });
         }
 
-        // Function to update the state of remove buttons
         function updateRemoveButtons() {
             const searchBoxes = document.querySelectorAll('.search-box');
             searchBoxes.forEach((box, index) => {
@@ -404,127 +562,365 @@
             });
         }
 
-        // Function to handle search input
-        function handleSearch(e) {
+        function handleSearch() {
             updateSearchTerms();
             filterAndRenderCards();
         }
 
-        // Function to update search terms from inputs
         function updateSearchTerms() {
             const inputs = document.querySelectorAll('.search-input');
-            searchTerms = Array.from(inputs).map(input => input.value.trim().toLowerCase());
+            currentSearchTerms = Array.from(inputs)
+                .map(input => input.value.trim().toLowerCase())
+                .filter(term => term.length > 0);
         }
 
-        // Function to filter cards based on search terms and render them
         function filterAndRenderCards() {
-            const activeSearchTerms = searchTerms.filter(term => term.length > 0);
-
-            if (activeSearchTerms.length === 0) {
+            if (currentSearchTerms.length === 0) {
                 // No active search terms, show all cards with skills hidden
-                renderCards();
+                renderCards(allSupportCards);
                 return;
             }
 
             // Filter cards that match any of the search terms
-            const filteredCards = supportCards.filter(card => {
+            const filteredCards = allSupportCards.filter(card => {
                 // Check if card name matches any search term
-                if (activeSearchTerms.some(term =>
-                    card.name.toLowerCase().includes(term))) {
+                if (currentSearchTerms.some(term =>
+                    card.char_name.toLowerCase().includes(term))) {
                     return true;
                 }
 
                 // Check if any skill matches any search term
-                for (const category in card.skills) {
-                    if (card.skills[category].some(skill =>
-                        activeSearchTerms.some(term =>
-                            skill.toLowerCase().includes(term)))) {
-                        return true;
-                    }
-                }
+                const eventSkills = card.event_skills || [];
+                const hasEventSkill = eventSkills.some(skillId => {
+                    const skillData = skillsMap.get(skillId);
+                    if (!skillData) return false;
+                    const skillName = getSkillName(skillData).toLowerCase();
+                    return currentSearchTerms.some(term => skillName.includes(term));
+                });
 
-                return false;
+                const hintSkills = card.hints?.hint_skills || [];
+                const hasHintSkill = hintSkills.some(skillId => {
+                    const skillData = skillsMap.get(skillId);
+                    if (!skillData) return false;
+                    const skillName = getSkillName(skillData).toLowerCase();
+                    return currentSearchTerms.some(term => skillName.includes(term));
+                });
+
+                return hasEventSkill || hasHintSkill;
             });
 
-            renderCards(filteredCards, activeSearchTerms);
+            renderCards(filteredCards, currentSearchTerms);
         }
 
-        // Function to render cards
-        function renderCards(cardsToRender = supportCards, searchTerms = []) {
-            cardsContainer.innerHTML = '';
+        async function openCharacterPicker() {
+            if (allCharacters.length === 0) {
+                await loadCharacters();
+            }
+            document.getElementById('character-modal').style.display = 'block';
+            renderCharacterPicker();
+        }
 
-            if (cardsToRender.length === 0) {
-                cardsContainer.innerHTML = '<div class="no-results">No cards match your search criteria.</div>';
-                return;
+        function closeCharacterPicker() {
+            document.getElementById('character-modal').style.display = 'none';
+        }
+
+        async function loadCharacters() {
+            const response = await fetch('./data/character-cards.json');
+            allCharacters = await response.json();
+        }
+
+        function renderCharacterPicker() {
+            const container = document.getElementById('characters-container');
+            container.innerHTML = '';
+
+            allCharacters.forEach(character => {
+                const charElement = document.createElement('div');
+                charElement.className = `character-card ${selectedCharacter?.char_id === character.char_id ? 'selected' : ''}`;
+                charElement.onclick = () => selectCharacter(character);
+
+                charElement.innerHTML = `
+    <img src="./images/chara_stand/chara_stand_${character.char_id}_${character.card_id}.png" 
+         alt="${character.name_en}" class="character-portrait" onerror="this.style.display='none'">
+    <div class="character-name">${character.name_en}</div>
+`;
+
+                container.appendChild(charElement);
+            });
+        }
+
+        function selectCharacter(character) {
+            if (selectedCharacter) {
+                usedCharacterIds.delete(selectedCharacter.char_id);
             }
 
-            cardsToRender.forEach(card => {
-                const cardElement = document.createElement('div');
-                cardElement.className = 'card';
+            selectedCharacter = character;
+            usedCharacterIds.add(character.char_id);
+            updateSelectedCharacterDisplay();
+            closeCharacterPicker();
+            updateCardDisplay();
+        }
 
-                // Determine which skill categories have matches
-                const matchingCategories = {};
-                let hasMatches = false;
+        function removeSelectedCharacter() {
+            if (selectedCharacter) {
+                usedCharacterIds.delete(selectedCharacter.char_id);
+                selectedCharacter = null;
+                updateSelectedCharacterDisplay();
+                updateCardDisplay();
+            }
+        }
 
-                if (searchTerms.length > 0) {
-                    for (const category in card.skills) {
-                        matchingCategories[category] = card.skills[category].filter(skill =>
-                            searchTerms.some(term => skill.toLowerCase().includes(term))
-                        );
-                        if (matchingCategories[category].length > 0) {
-                            hasMatches = true;
-                        }
-                    }
+        function updateSelectedCharacterDisplay() {
+            const container = document.getElementById('selected-character');
+            if (selectedCharacter) {
+                container.innerHTML = `
+    <div class="character-card" onclick="removeSelectedCharacter()" style="cursor: pointer;">
+        <img src="./images/chara_stand/chara_stand_${selectedCharacter.char_id}_${selectedCharacter.card_id}.png" 
+             alt="${selectedCharacter.name_en}" class="character-portrait" onerror="this.style.display='none'">
+        <div class="character-name">${selectedCharacter.name_en}</div>
+        <div style="font-size: 8px; color: #e74c3c;">Click to remove</div>
+    </div>
+`;
+            } else {
+                container.innerHTML = '';
+            }
+        }
+
+        function setupDeckSlots() {
+            const slots = document.getElementById('deck-slots');
+            slots.innerHTML = '';
+
+            for (let i = 0; i < 6; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'deck-slot';
+                slot.innerHTML = `Slot ${i + 1}`;
+                slot.onclick = () => removeCardFromDeck(i);
+                slots.appendChild(slot);
+            }
+            updateDeckDisplay();
+        }
+
+        function addCardToDeck(card) {
+            if (deck.length >= 6) return;
+            if (usedCharacterIds.has(card.char_id)) return;
+
+            deck.push(card);
+            usedCharacterIds.add(card.char_id);
+            updateDeckDisplay();
+            updateCardDisplay();
+        }
+
+        function removeCardFromDeck(index) {
+            if (deck[index]) {
+                const card = deck[index];
+                usedCharacterIds.delete(card.char_id);
+                deck.splice(index, 1);
+                updateDeckDisplay();
+                updateCardDisplay();
+            }
+        }
+
+        function updateDeckDisplay() {
+            const slots = document.querySelectorAll('.deck-slot');
+            const deckTitle = document.querySelector('.control-section:nth-child(3) h3');
+            deckTitle.textContent = `Deck (${deck.length}/6)`;
+
+            slots.forEach((slot, index) => {
+                slot.innerHTML = `Slot ${index + 1}`;
+                slot.className = 'deck-slot';
+                slot.onclick = () => removeCardFromDeck(index);
+
+                if (deck[index]) {
+                    const card = deck[index];
+                    slot.className = 'deck-slot filled';
+                    const formattedId = card.support_id.toString().padStart(5, '0');
+
+                    slot.innerHTML = `
+                        <div class="card">
+                            <div class="card-image-container">
+                                <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
+                                     alt="${card.char_name}" class="card-image" onerror="this.style.display='none'">
+                            </div>
+                            <div class="card-name">${card.char_name}</div>
+                        </div>
+                    `;
                 }
-
-                // Build skills HTML - only show categories with matches or if no search terms
-                let skillsHTML = '';
-
-                if (searchTerms.length === 0) {
-                    // No search terms, hide all skills
-                    skillsHTML = '<div class="skill-section"><p>Skills hidden - enter a search term to reveal skills</p></div>';
-                } else {
-                    // Show only categories with matching skills
-                    for (const category in card.skills) {
-                        if (matchingCategories[category].length > 0) {
-                            skillsHTML += `
-                                <div class="skill-section">
-                                    <div class="skill-header">${category}</div>
-                                    <ul class="skill-list">
-                                        ${card.skills[category].map(skill => {
-                                const isHighlighted = searchTerms.some(term =>
-                                    skill.toLowerCase().includes(term));
-                                return `<li class="skill-item ${isHighlighted ? 'highlighted' : ''}">${skill}</li>`;
-                            }).join('')}
-                                    </ul>
-                                </div>
-                            `;
-                        }
-                    }
-
-                    // If no skills match but card name does, show a message
-                    if (!hasMatches && searchTerms.some(term => card.name.toLowerCase().includes(term))) {
-                        skillsHTML = '<div class="skill-section"><p>No matching skills found for this card</p></div>';
-                    }
-                }
-
-                cardElement.innerHTML = `
-                    <div class="card-header">
-                        <div class="card-name">${card.name}</div>
-                        <div class="card-type">${card.type}</div>
-                    </div>
-                    <img src="${card.image}" alt="${card.name}" class="card-image">
-                    <div class="card-skills">
-                        ${skillsHTML}
-                    </div>
-                `;
-
-                cardsContainer.appendChild(cardElement);
             });
         }
 
-        // Add event listeners to initial search input
-        document.querySelector('.search-input').addEventListener('input', handleSearch);
+        function updateCardDisplay() {
+            filterAndRenderCards();
+        }
+
+        function renderCards(cards, searchTerms = []) {
+            const container = document.getElementById('cards-container');
+            const scrollPos = container.scrollTop;
+            const fragment = document.createDocumentFragment();
+
+            cards.forEach(card => {
+                const existingCard = container.querySelector(`[data-card-id="${card.support_id}"]`);
+
+                if (existingCard) {
+                    updateCardElement(existingCard, card);
+                    fragment.appendChild(existingCard);
+                } else {
+                    const cardElement = createCardElement(card, searchTerms);
+                    fragment.appendChild(cardElement);
+                }
+            });
+
+            container.innerHTML = '';
+            container.appendChild(fragment);
+            container.scrollTop = scrollPos;
+        }
+
+        function createCardElement(card, searchTerms = []) {
+            const cardElement = document.createElement('div');
+            cardElement.setAttribute('data-card-id', card.support_id);
+
+            const isDuplicate = usedCharacterIds.has(card.char_id);
+            const isInDeck = deck.some(deckCard => deckCard.support_id === card.support_id);
+            cardElement.className = `card ${isDuplicate ? 'dimmed' : ''}`;
+
+            if (!isDuplicate) {
+                cardElement.onclick = () => addCardToDeck(card);
+            } else if (isInDeck) {
+                cardElement.onclick = () => {
+                    const deckIndex = deck.findIndex(deckCard => deckCard.support_id === card.support_id);
+                    if (deckIndex !== -1) {
+                        removeCardFromDeck(deckIndex);
+                    }
+                };
+            }
+
+            const formattedId = card.support_id.toString().padStart(5, '0');
+            const typeMap = {
+                'speed': '00', 'stamina': '01', 'power': '02', 'guts': '03',
+                'intelligence': '04', 'friend': '05', 'group': '06'
+            };
+            const typeIcon = typeMap[card.type];
+
+            const eventSkills = card.event_skills || [];
+            const hintSkills = card.hints?.hint_skills || [];
+
+            // Determine which skill categories have matches
+            const hasEventSkillMatches = searchTerms.length > 0 && eventSkills.some(skillId => {
+                const skillData = skillsMap.get(skillId);
+                if (!skillData) return false;
+                const skillName = getSkillName(skillData).toLowerCase();
+                return searchTerms.some(term => skillName.includes(term));
+            });
+
+            const hasHintSkillMatches = searchTerms.length > 0 && hintSkills.some(skillId => {
+                const skillData = skillsMap.get(skillId);
+                if (!skillData) return false;
+                const skillName = getSkillName(skillData).toLowerCase();
+                return searchTerms.some(term => skillName.includes(term));
+            });
+
+            // Check if card name matches
+            const hasNameMatch = searchTerms.length > 0 &&
+                searchTerms.some(term => card.char_name.toLowerCase().includes(term));
+
+            const formatSkills = (skills, searchTerms) => {
+                return skills.map(skillId => {
+                    const skillData = skillsMap.get(skillId);
+                    const skillName = getSkillName(skillData);
+                    const isHighlighted = searchTerms.length > 0 &&
+                        searchTerms.some(term => skillName.toLowerCase().includes(term));
+
+                    return `<span class="skill-number ${isHighlighted ? 'highlighted' : ''}" 
+                                title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
+                }).join('');
+            };
+
+            let skillsHTML = '';
+
+            if (searchTerms.length === 0) {
+                // No search terms, hide all skills
+                skillsHTML = '<div class="skill-section"><div class="skill-list">Skills hidden - enter a search term to reveal skills</div></div>';
+            } else {
+                // Show only categories with matching skills or if card name matches
+                if (hasHintSkillMatches || (hasNameMatch && hintSkills.length > 0)) {
+                    skillsHTML += `
+                        <div class="skill-section">
+                            <div class="skill-label">Hint Skills</div>
+                            <div class="skill-list">${formatSkills(hintSkills, searchTerms)}</div>
+                        </div>
+                    `;
+                }
+
+                if (hasEventSkillMatches || (hasNameMatch && eventSkills.length > 0)) {
+                    skillsHTML += `
+                        <div class="skill-section">
+                            <div class="skill-label">Event Skills</div>
+                            <div class="skill-list">${formatSkills(eventSkills, searchTerms)}</div>
+                        </div>
+                    `;
+                }
+
+                // If no skills match but card name does, show a message
+                if (hasNameMatch && !hasEventSkillMatches && !hasHintSkillMatches) {
+                    skillsHTML = '<div class="skill-section"><div class="skill-list">No matching skills found for this card</div></div>';
+                }
+            }
+
+            cardElement.innerHTML = `
+                <div class="card-image-container">
+                    <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
+                         alt="${card.char_name}" class="card-image" loading="lazy" onerror="this.style.display='none'">
+                    ${typeIcon ? `<img src="./images/utx_ico_obtain/utx_ico_obtain_${typeIcon}.png" 
+                         alt="${card.type}" class="card-type-icon" onerror="this.style.display='none'">` : ''}
+                </div>
+                <div class="card-name">${card.char_name}</div>
+                <div class="card-skills">
+                    ${skillsHTML}
+                </div>
+            `;
+
+            return cardElement;
+        }
+
+        function updateCardElement(cardElement, card) {
+            const isDuplicate = usedCharacterIds.has(card.char_id);
+            const isInDeck = deck.some(deckCard => deckCard.support_id === card.support_id);
+
+            cardElement.className = `card ${isDuplicate ? 'dimmed' : ''}`;
+
+            if (!isDuplicate) {
+                cardElement.onclick = () => addCardToDeck(card);
+            } else if (isInDeck) {
+                cardElement.onclick = () => {
+                    const deckIndex = deck.findIndex(deckCard => deckCard.support_id === card.support_id);
+                    if (deckIndex !== -1) {
+                        removeCardFromDeck(deckIndex);
+                    }
+                };
+            } else {
+                cardElement.onclick = null;
+            }
+        }
+
+        async function loadCardsWithSkills() {
+            const [skillsData, supportCardsResponse] = await Promise.all([
+                loadSkillsData(),
+                fetch('./data/support-cards.json')
+            ]);
+
+            allSupportCards = await supportCardsResponse.json();
+
+            setupSearch();
+            setupDeckSlots();
+            renderCards(allSupportCards);
+        }
+
+        loadCardsWithSkills();
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('character-modal');
+            if (event.target === modal) {
+                closeCharacterPicker();
+            }
+        }
     </script>
 </body>
 
