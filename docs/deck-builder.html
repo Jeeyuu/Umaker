@@ -13,7 +13,6 @@
             gap: 1rem;
             width: 100%;
             max-width: calc(100% - 2rem);
-            /* Match container width */
             margin: 0 auto;
         }
 
@@ -232,19 +231,71 @@
             background: #27ae60;
         }
 
-        .character-picker-btn {
-            width: 100%;
-            padding: 8px;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 4px;
+        .character-slot {
+            background: #ecf0f1;
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #7f8c8d;
+            text-align: center;
+            width: 120px;
+            height: 120px;
             cursor: pointer;
-            font-size: 12px;
+            transition: all 0.3s ease;
         }
 
-        .character-picker-btn:hover {
-            background: #2980b9;
+        .character-slot:hover {
+            background: #d5dbdb;
+            border-color: #3498db;
+        }
+
+        .character-slot.filled {
+            border-style: solid;
+            border-color: #3498db;
+            background: white;
+            padding: 0;
+        }
+
+        .character-portrait {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .character-name {
+            font-size: 10px;
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .character-remove {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .character-remove:hover {
+            background: #c0392b;
+            transform: scale(1.1);
         }
 
         .modal {
@@ -269,6 +320,7 @@
             max-width: 90%;
             max-height: 80%;
             overflow-y: auto;
+            width: 80%;
         }
 
         .close-modal {
@@ -281,6 +333,18 @@
             cursor: pointer;
         }
 
+        .character-search-container {
+            margin-bottom: 1rem;
+        }
+
+        .character-search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
         .characters-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -288,27 +352,35 @@
             margin-top: 1rem;
         }
 
-        .character-card {
+        .character-picker-card {
             background: white;
             border-radius: 8px;
             padding: 4px;
             cursor: pointer;
             text-align: center;
             width: 120px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
         }
 
-        .character-card.selected {
+        .character-picker-card:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+        }
+
+        .character-picker-card.selected {
             border: 2px solid #3498db;
+            background: #ebf5fb;
         }
 
-        .character-portrait {
+        .character-picker-portrait {
             width: 120px;
-            height: auto;
+            height: 120px;
             object-fit: cover;
             border-radius: 4px;
         }
 
-        .character-name {
+        .character-picker-name {
             font-size: 10px;
             margin-top: 4px;
             white-space: nowrap;
@@ -319,13 +391,10 @@
         .deck-slots {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            /* Fixed 3 columns */
             grid-template-rows: repeat(2, 1fr);
-            /* Fixed 2 rows */
             gap: 0.5rem;
             width: 100%;
             max-width: 400px;
-            /* Limit max width for 3 columns */
             margin: 0 auto;
         }
 
@@ -460,7 +529,6 @@
             opacity: 0.5;
         }
 
-        /* Ensure main content has consistent width */
         main {
             max-width: calc(100% - 2rem);
             margin: 0 auto;
@@ -489,8 +557,11 @@
 
             <div class="control-section">
                 <h3>Character</h3>
-                <button class="character-picker-btn" onclick="openCharacterPicker()">Pick Character</button>
-                <div id="selected-character"></div>
+                <div id="character-slot-container">
+                    <div class="character-slot" onclick="openCharacterPicker()">
+                        Pick Character
+                    </div>
+                </div>
             </div>
 
             <div class="control-section">
@@ -542,6 +613,10 @@
             <div class="modal-content">
                 <button class="close-modal" onclick="closeCharacterPicker()">×</button>
                 <h3>Select Character</h3>
+                <div class="character-search-container">
+                    <input type="text" class="character-search-input" id="character-search-input"
+                        placeholder="Search character by name...">
+                </div>
                 <div id="characters-container" class="characters-container">
                     <div class="loading">Loading characters...</div>
                 </div>
@@ -560,6 +635,7 @@
         let currentSearchTerms = [];
         let draggedCard = null;
         let draggedCardIndex = null;
+        let characterSearchTerm = '';
 
         fetch('header.html').then(response => response.text()).then(data => {
             document.getElementById('header-placeholder').innerHTML = data;
@@ -680,6 +756,8 @@
 
         function closeCharacterPicker() {
             document.getElementById('character-modal').style.display = 'none';
+            characterSearchTerm = '';
+            document.getElementById('character-search-input').value = '';
         }
 
         async function loadCharacters() {
@@ -689,15 +767,33 @@
 
         function renderCharacterPicker() {
             const container = document.getElementById('characters-container');
+            const searchInput = document.getElementById('character-search-input');
+
+            // Setup search input
+            searchInput.addEventListener('input', function () {
+                characterSearchTerm = this.value.trim().toLowerCase();
+                renderCharacterPicker();
+            });
+
             container.innerHTML = '';
-            allCharacters.forEach(character => {
+
+            const filteredCharacters = allCharacters.filter(character =>
+                character.name_en.toLowerCase().includes(characterSearchTerm)
+            );
+
+            if (filteredCharacters.length === 0) {
+                container.innerHTML = '<div class="loading">No characters found</div>';
+                return;
+            }
+
+            filteredCharacters.forEach(character => {
                 const charElement = document.createElement('div');
-                charElement.className = `character-card ${selectedCharacter?.char_id === character.char_id ? 'selected' : ''}`;
+                charElement.className = `character-picker-card ${selectedCharacter?.char_id === character.char_id ? 'selected' : ''}`;
                 charElement.onclick = () => selectCharacter(character);
                 charElement.innerHTML = `
                         <img src="./images/chara_stand/chara_stand_${character.char_id}_${character.card_id}.png" 
-                             alt="${character.name_en}" class="character-portrait" onerror="this.style.display='none'">
-                        <div class="character-name">${character.name_en}</div>
+                             alt="${character.name_en}" class="character-picker-portrait" onerror="this.style.display='none'">
+                        <div class="character-picker-name">${character.name_en}</div>
                     `;
                 container.appendChild(charElement);
             });
@@ -705,7 +801,7 @@
 
         function selectCharacter(character) {
             selectedCharacter = character;
-            updateSelectedCharacterDisplay();
+            updateCharacterSlotDisplay();
             closeCharacterPicker();
             updateCardDisplay();
             updateDeckDisplay();
@@ -713,24 +809,27 @@
 
         function removeSelectedCharacter() {
             selectedCharacter = null;
-            updateSelectedCharacterDisplay();
+            updateCharacterSlotDisplay();
             updateCardDisplay();
             updateDeckDisplay();
         }
 
-        function updateSelectedCharacterDisplay() {
-            const container = document.getElementById('selected-character');
+        function updateCharacterSlotDisplay() {
+            const container = document.getElementById('character-slot-container');
             if (selectedCharacter) {
                 container.innerHTML = `
-                        <div class="character-card" onclick="removeSelectedCharacter()" style="cursor: pointer;">
-                            <img src="./images/chara_stand/chara_stand_${selectedCharacter.char_id}_${selectedCharacter.card_id}.png" 
-                                 alt="${selectedCharacter.name_en}" class="character-portrait" onerror="this.style.display='none'">
-                            <div class="character-name">${selectedCharacter.name_en}</div>
-                            <div style="font-size: 8px; color: #e74c3c;">Click to remove</div>
-                        </div>
-                    `;
+                    <div class="character-slot filled" style="position: relative;">
+                        <img src="./images/chara_stand/chara_stand_${selectedCharacter.char_id}_${selectedCharacter.card_id}.png" 
+                             alt="${selectedCharacter.name_en}" class="character-portrait" onerror="this.style.display='none'">
+                        <button class="character-remove" onclick="removeSelectedCharacter()">×</button>
+                    </div>
+                `;
             } else {
-                container.innerHTML = '';
+                container.innerHTML = `
+                    <div class="character-slot" onclick="openCharacterPicker()">
+                        Pick Character
+                    </div>
+                `;
             }
         }
 
@@ -1136,6 +1235,7 @@
             allSupportCards = await supportCardsResponse.json();
             setupSearch();
             setupDeckSlots();
+            updateCharacterSlotDisplay();
             showWelcomeMessage();
         }
 
