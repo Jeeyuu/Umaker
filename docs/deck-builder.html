@@ -199,15 +199,22 @@
             min-width: fit-content;
         }
 
-        /* Filters Section - Split into two boxes */
+        /* Filters Section - Two separate boxes */
         .control-section:nth-child(4) {
             min-width: 0;
             display: flex;
             flex-direction: column;
             gap: 1rem;
+            padding: 0;
+            background: transparent;
+            border: none;
         }
 
         .filter-box {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
             flex: 1;
             min-height: 0;
         }
@@ -453,10 +460,11 @@
         .deck-slots {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(2, 1fr);
+            grid-template-rows: repeat(2, auto);
             gap: 0.5rem;
             width: fit-content;
             margin: 0 auto;
+            align-items: start;
         }
 
         .deck-slot {
@@ -464,8 +472,8 @@
             border: 2px dashed #bdc3c7;
             border-radius: 8px;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            align-items: flex-start;
+            justify-content: flex-start;
             font-size: 10px;
             color: #7f8c8d;
             text-align: center;
@@ -473,6 +481,7 @@
             min-height: 160px;
             position: relative;
             box-sizing: border-box;
+            padding: 4px;
         }
 
         .deck-slot.filled {
@@ -483,6 +492,7 @@
             padding: 4px;
             width: 120px;
             box-sizing: border-box;
+            align-items: flex-start;
         }
 
         .deck-slot .card {
@@ -490,6 +500,7 @@
             height: auto;
             padding: 0;
             box-sizing: border-box;
+            margin: 0;
         }
 
         .deck-slot .card-image-container {
@@ -639,7 +650,6 @@
             </div>
 
             <div class="control-section">
-                <h3>Filters</h3>
                 <div class="filter-box">
                     <h4>Conditions & Positions</h4>
                     <div class="filter-group">
@@ -699,6 +709,7 @@
     <div id="footer-placeholder"></div>
 
     <script>
+        // ... (JavaScript code remains exactly the same as previous version)
         let allSupportCards = [];
         let allCharacters = [];
         let skillsMap = new Map();
