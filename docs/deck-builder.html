@@ -312,6 +312,7 @@
             min-height: 120px;
             max-width: 90px;
             max-height: 120px;
+            position: relative;
         }
 
         .deck-slot.filled {
@@ -424,6 +425,11 @@
         .deck-card-remove:hover {
             background: #c0392b;
         }
+
+        /* Deck Card Dragging */
+        .deck-card-dragging {
+            opacity: 0.5;
+        }
     </style>
 </head>
 
@@ -522,10 +528,11 @@
         let allCharacters = [];
         let skillsMap = new Map();
         let selectedCharacter = null;
-        let deck = [];
+        let deck = Array(6).fill(null); // Use fixed array with null for empty slots
         let usedCharacterIds = new Set();
         let currentSearchTerms = [];
         let draggedCard = null;
+        let draggedCardIndex = null;
 
         fetch('header.html')
             .then(response => response.text())
@@ -769,23 +776,24 @@
             updateDeckDisplay();
         }
 
-        function addCardToDeck(card, slotIndex) {
-            if (deck.length >= 6) return;
+        function addCardToDeck(card, targetSlotIndex) {
             if (usedCharacterIds.has(card.char_id)) return;
 
-            // If slotIndex is specified, insert at that position
-            if (slotIndex !== undefined && slotIndex >= 0 && slotIndex <= deck.length) {
-                // Remove from current position if it exists
-                const existingIndex = deck.findIndex(c => c.support_id === card.support_id);
-                if (existingIndex !== -1) {
-                    deck.splice(existingIndex, 1);
-                }
-                // Insert at new position
-                deck.splice(slotIndex, 0, card);
-            } else {
-                deck.push(card);
+            // Find the first empty slot if no specific target
+            if (targetSlotIndex === undefined) {
+                targetSlotIndex = deck.findIndex(slot => slot === null);
+                if (targetSlotIndex === -1) return; // Deck is full
             }
 
+            // If we're moving a card within the deck
+            if (draggedCardIndex !== null) {
+                // Remove from current position
+                deck[draggedCardIndex] = null;
+                draggedCardIndex = null;
+            }
+
+            // Add to target position
+            deck[targetSlotIndex] = card;
             usedCharacterIds.add(card.char_id);
             updateDeckDisplay();
             updateCardDisplay();
@@ -795,16 +803,33 @@
             if (deck[index]) {
                 const card = deck[index];
                 usedCharacterIds.delete(card.char_id);
-                deck.splice(index, 1);
+                deck[index] = null;
                 updateDeckDisplay();
                 updateCardDisplay();
             }
         }
 
+        function swapCardsInDeck(index1, index2) {
+            if (deck[index1] && deck[index2]) {
+                // Swap the cards
+                [deck[index1], deck[index2]] = [deck[index2], deck[index1]];
+            } else if (deck[index1] && !deck[index2]) {
+                // Move card to empty slot
+                deck[index2] = deck[index1];
+                deck[index1] = null;
+            } else if (!deck[index1] && deck[index2]) {
+                // Move card to empty slot
+                deck[index1] = deck[index2];
+                deck[index2] = null;
+            }
+            updateDeckDisplay();
+        }
+
         function updateDeckDisplay() {
             const slots = document.querySelectorAll('.deck-slot');
+            const deckCount = deck.filter(card => card !== null).length;
             const deckTitle = document.querySelector('.control-section:nth-child(3) h3');
-            deckTitle.textContent = `Deck (${deck.length}/6)`;
+            deckTitle.textContent = `Deck (${deckCount}/6)`;
 
             slots.forEach((slot, index) => {
                 slot.innerHTML = `Slot ${index + 1}`;
@@ -852,7 +877,7 @@
                     ` : '';
 
                     slot.innerHTML = `
-                        <div class="card" style="position: relative;">
+                        <div class="card deck-card" draggable="true" data-card-index="${index}" style="position: relative;">
                             <button class="deck-card-remove" onclick="removeCardFromDeck(${index})">×</button>
                             <div class="card-image-container">
                                 <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
@@ -865,9 +890,16 @@
                             </div>
                         </div>
                     `;
+
+                    // Add drag events to deck cards
+                    const deckCard = slot.querySelector('.deck-card');
+                    if (deckCard) {
+                        deckCard.addEventListener('dragstart', handleDeckCardDragStart);
+                        deckCard.addEventListener('dragend', handleDeckCardDragEnd);
+                    }
                 }
 
-                // Re-add drag and drop event listeners
+                // Re-add drag and drop event listeners to slots
                 slot.addEventListener('dragover', handleDragOver);
                 slot.addEventListener('dragenter', handleDragEnter);
                 slot.addEventListener('dragleave', handleDragLeave);
@@ -903,18 +935,18 @@
             cardElement.setAttribute('draggable', 'true');
 
             const isDuplicate = usedCharacterIds.has(card.char_id);
-            const isInDeck = deck.some(deckCard => deckCard.support_id === card.support_id);
+            const isInDeck = deck.some(deckCard => deckCard && deckCard.support_id === card.support_id);
             cardElement.className = `card ${isDuplicate ? 'dimmed' : ''}`;
 
             // Drag and drop event listeners
-            cardElement.addEventListener('dragstart', handleDragStart);
-            cardElement.addEventListener('dragend', handleDragEnd);
+            cardElement.addEventListener('dragstart', handleCardDragStart);
+            cardElement.addEventListener('dragend', handleCardDragEnd);
 
             if (!isDuplicate) {
                 cardElement.onclick = () => addCardToDeck(card);
             } else if (isInDeck) {
                 cardElement.onclick = () => {
-                    const deckIndex = deck.findIndex(deckCard => deckCard.support_id === card.support_id);
+                    const deckIndex = deck.findIndex(deckCard => deckCard && deckCard.support_id === card.support_id);
                     if (deckIndex !== -1) {
                         removeCardFromDeck(deckIndex);
                     }
@@ -1004,16 +1036,33 @@
             return cardElement;
         }
 
-        // Drag and Drop Functions
-        function handleDragStart(e) {
+        // Drag and Drop Functions for cards from search
+        function handleCardDragStart(e) {
             draggedCard = this;
             this.style.opacity = '0.4';
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', this.getAttribute('data-card-id'));
+            draggedCardIndex = null; // Not from deck
         }
 
-        function handleDragEnd(e) {
+        function handleCardDragEnd(e) {
             this.style.opacity = '1';
+            document.querySelectorAll('.deck-slot').forEach(slot => {
+                slot.classList.remove('drag-over');
+            });
+        }
+
+        // Drag and Drop Functions for cards in deck
+        function handleDeckCardDragStart(e) {
+            draggedCard = this;
+            this.classList.add('deck-card-dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            draggedCardIndex = parseInt(this.getAttribute('data-card-index'));
+            e.dataTransfer.setData('text/plain', 'deck-card:' + draggedCardIndex);
+        }
+
+        function handleDeckCardDragEnd(e) {
+            this.classList.remove('deck-card-dragging');
             document.querySelectorAll('.deck-slot').forEach(slot => {
                 slot.classList.remove('drag-over');
             });
@@ -1040,13 +1089,23 @@
             e.preventDefault();
             e.stopPropagation();
 
-            if (draggedCard) {
-                const cardId = parseInt(e.dataTransfer.getData('text/plain'));
-                const card = allSupportCards.find(c => c.support_id === cardId);
-                const slotIndex = parseInt(this.getAttribute('data-slot-index'));
+            const targetSlotIndex = parseInt(this.getAttribute('data-slot-index'));
 
-                if (card && !usedCharacterIds.has(card.char_id)) {
-                    addCardToDeck(card, slotIndex);
+            if (draggedCard) {
+                const data = e.dataTransfer.getData('text/plain');
+
+                if (data.startsWith('deck-card:')) {
+                    // Dragging from deck to deck
+                    const sourceIndex = parseInt(data.split(':')[1]);
+                    swapCardsInDeck(sourceIndex, targetSlotIndex);
+                } else {
+                    // Dragging from search to deck
+                    const cardId = parseInt(data);
+                    const card = allSupportCards.find(c => c.support_id === cardId);
+
+                    if (card && !usedCharacterIds.has(card.char_id)) {
+                        addCardToDeck(card, targetSlotIndex);
+                    }
                 }
             }
 
