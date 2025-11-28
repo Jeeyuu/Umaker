@@ -165,6 +165,8 @@
             padding: 1rem;
             border-radius: 8px;
             border: 1px solid #e0e0e0;
+            min-width: 120px;
+            /* Added min-width for empty character picker */
         }
 
         .control-section h3 {
@@ -190,6 +192,8 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 12px;
+            max-width: 90px;
+            /* Added max-width for search bar */
         }
 
         .remove-search-btn {
@@ -301,8 +305,8 @@
         .character-portrait {
             width: 120px;
             /* Set fixed width to match cards */
-            height: 160px;
-            /* Set height to maintain 3:4 ratio (120px * 4/3 = 160px) */
+            height: auto;
+            /* Changed to auto to maintain aspect ratio */
             object-fit: cover;
             /* Ensure image fills the space properly */
             border-radius: 4px;
