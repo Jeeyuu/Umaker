@@ -595,7 +595,12 @@
                     const skillData = skillsMap.get(skillId);
                     if (!skillData) return false;
                     const skillName = getSkillName(skillData).toLowerCase();
-                    return currentSearchTerms.some(term => skillName.includes(term));
+                    return currentSearchTerms.some(term =>
+                        // More specific matching - exact word match
+                        skillName.split(/\s+/).some(word => word === term) ||
+                        // Or exact phrase match for multi-word terms
+                        skillName === term
+                    );
                 });
 
                 const hintSkills = card.hints?.hint_skills || [];
@@ -603,7 +608,12 @@
                     const skillData = skillsMap.get(skillId);
                     if (!skillData) return false;
                     const skillName = getSkillName(skillData).toLowerCase();
-                    return currentSearchTerms.some(term => skillName.includes(term));
+                    return currentSearchTerms.some(term =>
+                        // More specific matching - exact word match
+                        skillName.split(/\s+/).some(word => word === term) ||
+                        // Or exact phrase match for multi-word terms
+                        skillName === term
+                    );
                 });
 
                 return hasEventSkill || hasHintSkill;
@@ -807,14 +817,24 @@
                 const skillData = skillsMap.get(skillId);
                 if (!skillData) return false;
                 const skillName = getSkillName(skillData).toLowerCase();
-                return searchTerms.some(term => skillName.includes(term));
+                return searchTerms.some(term =>
+                    // More specific matching - exact word match
+                    skillName.split(/\s+/).some(word => word === term) ||
+                    // Or exact phrase match for multi-word terms
+                    skillName === term
+                );
             });
 
             const hasHintSkillMatches = searchTerms.length > 0 && hintSkills.some(skillId => {
                 const skillData = skillsMap.get(skillId);
                 if (!skillData) return false;
                 const skillName = getSkillName(skillData).toLowerCase();
-                return searchTerms.some(term => skillName.includes(term));
+                return searchTerms.some(term =>
+                    // More specific matching - exact word match
+                    skillName.split(/\s+/).some(word => word === term) ||
+                    // Or exact phrase match for multi-word terms
+                    skillName === term
+                );
             });
 
             // Check if card name matches
@@ -826,7 +846,12 @@
                     const skillData = skillsMap.get(skillId);
                     const skillName = getSkillName(skillData);
                     const isHighlighted = searchTerms.length > 0 &&
-                        searchTerms.some(term => skillName.toLowerCase().includes(term));
+                        searchTerms.some(term =>
+                            // More specific matching - exact word match
+                            skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
+                            // Or exact phrase match for multi-word terms
+                            skillName.toLowerCase() === term
+                        );
 
                     return `<span class="skill-number ${isHighlighted ? 'highlighted' : ''}" 
                                 title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
@@ -835,10 +860,7 @@
 
             let skillsHTML = '';
 
-            if (searchTerms.length === 0) {
-                // No search terms, hide all skills
-                skillsHTML = '<div class="skill-section"><div class="skill-list">Skills hidden - enter a search term to reveal skills</div></div>';
-            } else {
+            if (searchTerms.length > 0) {
                 // Show only categories with matching skills or if card name matches
                 if (hasHintSkillMatches || (hasNameMatch && hintSkills.length > 0)) {
                     skillsHTML += `
@@ -863,6 +885,7 @@
                     skillsHTML = '<div class="skill-section"><div class="skill-list">No matching skills found for this card</div></div>';
                 }
             }
+            // If no search terms, don't show any skills section at all
 
             cardElement.innerHTML = `
                 <div class="card-image-container">
@@ -872,9 +895,7 @@
                          alt="${card.type}" class="card-type-icon" onerror="this.style.display='none'">` : ''}
                 </div>
                 <div class="card-name">${card.char_name}</div>
-                <div class="card-skills">
-                    ${skillsHTML}
-                </div>
+                ${skillsHTML ? `<div class="card-skills">${skillsHTML}</div>` : ''}
             `;
 
             return cardElement;
