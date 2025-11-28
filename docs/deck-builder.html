@@ -12,8 +12,10 @@
             grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
             gap: 1rem;
             width: 100%;
-            max-height: calc(5 * (110px + 2rem));
-            /* Cap to 5 rows maximum */
+            max-width: 100%;
+            /* Same width as top sections */
+            max-height: calc(5 * (140px + 1rem));
+            /* Cap to 5 rows with min-height */
             overflow-y: auto;
         }
 
@@ -28,26 +30,28 @@
             display: flex;
             flex-direction: column;
             height: fit-content;
-            /* Adjust to content */
+            min-height: 140px;
+            /* 3:4 ratio of 110px = 82.5px, using 140px for better appearance */
         }
 
         .card.disabled .card-image {
             opacity: 0.5;
-            /* Only dim the image, not the whole card */
         }
 
         .card-error-label {
             position: absolute;
-            top: -10px;
+            top: -15px;
+            /* Moved higher to prevent clipping */
             left: 50%;
             transform: translateX(-50%);
             color: white;
             font-size: 10px;
             font-weight: bold;
             text-align: center;
-            padding: 4px 10px;
+            padding: 4px 8px;
             border-radius: 12px;
-            z-index: 100;
+            z-index: 1000;
+            /* Higher z-index to ensure visibility */
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             white-space: nowrap;
             pointer-events: none;
@@ -83,7 +87,6 @@
 
         .card-name {
             font-size: 12px;
-            /* Same size for both deck and list */
             text-align: center;
             font-weight: bold;
             color: #2c3e50;
@@ -116,9 +119,7 @@
             font-size: 9px;
             line-height: 1.2;
             max-height: none;
-            /* Remove scroll bar */
             overflow-y: visible;
-            /* Show all content */
         }
 
         .skill-number {
@@ -167,6 +168,8 @@
             padding: 1rem;
             background: #f8f9fa;
             border-radius: 8px;
+            width: 100%;
+            max-width: 100%;
         }
 
         .control-section {
@@ -288,7 +291,6 @@
         .characters-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(110px, 110px));
-            /* Same size as cards */
             gap: 0.5rem;
             margin-top: 1rem;
             justify-content: center;
@@ -301,7 +303,6 @@
             cursor: pointer;
             text-align: center;
             width: 110px;
-            /* Same size as cards */
             height: fit-content;
         }
 
@@ -317,7 +318,6 @@
 
         .character-name {
             font-size: 12px;
-            /* Same size as card names */
             margin-top: 4px;
             white-space: nowrap;
             overflow: hidden;
@@ -341,9 +341,10 @@
             color: #7f8c8d;
             text-align: center;
             min-width: 110px;
+            min-height: 140px;
+            /* 3:4 ratio minimum */
             position: relative;
             height: fit-content;
-            /* Adjust to content */
         }
 
         .deck-slot.filled {
@@ -351,13 +352,16 @@
             border-color: #3498db;
             position: relative;
             height: fit-content;
-            /* Adjust to content */
+            min-height: 140px;
+            /* Maintain minimum height */
         }
 
         .deck-slot .card {
             width: 100%;
             height: auto;
             padding: 4px;
+            min-height: 140px;
+            /* Maintain minimum height */
         }
 
         .deck-slot .card-image-container {
@@ -373,7 +377,6 @@
 
         .deck-slot .card-name {
             font-size: 12px;
-            /* Same size as in the list */
             padding: 2px;
             margin: 0;
         }
@@ -958,18 +961,10 @@
             const eventSkills = card.event_skills || [];
             const hintSkills = card.hints?.hint_skills || [];
 
-            // Show all skills when no search terms, or highlighted skills when searching
-            const getSkillsToShow = (skills, searchTerms) => {
-                if (searchTerms.length === 0) {
-                    // Show all skills
-                    return skills.map(skillId => {
-                        const skillData = skillsMap.get(skillId);
-                        if (!skillData) return null;
-                        const skillName = getSkillName(skillData);
-                        return { id: skillId, name: skillName, highlighted: false };
-                    }).filter(skill => skill !== null);
-                } else {
-                    // Show only highlighted skills
+            // Only show skills when there are search terms
+            let skillsHTML = '';
+            if (searchTerms.length > 0) {
+                const getSkillsToShow = (skills, searchTerms) => {
                     return skills.map(skillId => {
                         const skillData = skillsMap.get(skillId);
                         if (!skillData) return null;
@@ -980,40 +975,38 @@
                         );
                         return isHighlighted ? { id: skillId, name: skillName, highlighted: true } : null;
                     }).filter(skill => skill !== null);
+                };
+
+                const hintSkillsToShow = getSkillsToShow(hintSkills, searchTerms);
+                const eventSkillsToShow = getSkillsToShow(eventSkills, searchTerms);
+
+                if (hintSkillsToShow.length > 0) {
+                    skillsHTML += `
+                        <div class="skill-section">
+                            <div class="skill-label">Hint Skills</div>
+                            <div class="skill-list">
+                                ${hintSkillsToShow.map(skill =>
+                        `<span class="skill-number ${skill.highlighted ? 'highlighted' : ''}" 
+                                            title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
+                    ).join('')}
+                            </div>
+                        </div>
+                    `;
                 }
-            };
 
-            const hintSkillsToShow = getSkillsToShow(hintSkills, searchTerms);
-            const eventSkillsToShow = getSkillsToShow(eventSkills, searchTerms);
-
-            let skillsHTML = '';
-
-            if (hintSkillsToShow.length > 0) {
-                skillsHTML += `
-                    <div class="skill-section">
-                        <div class="skill-label">Hint Skills</div>
-                        <div class="skill-list">
-                            ${hintSkillsToShow.map(skill =>
-                    `<span class="skill-number ${skill.highlighted ? 'highlighted' : ''}" 
-                                        title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
-                ).join('')}
+                if (eventSkillsToShow.length > 0) {
+                    skillsHTML += `
+                        <div class="skill-section">
+                            <div class="skill-label">Event Skills</div>
+                            <div class="skill-list">
+                                ${eventSkillsToShow.map(skill =>
+                        `<span class="skill-number ${skill.highlighted ? 'highlighted' : ''}" 
+                                            title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
+                    ).join('')}
+                            </div>
                         </div>
-                    </div>
-                `;
-            }
-
-            if (eventSkillsToShow.length > 0) {
-                skillsHTML += `
-                    <div class="skill-section">
-                        <div class="skill-label">Event Skills</div>
-                        <div class="skill-list">
-                            ${eventSkillsToShow.map(skill =>
-                    `<span class="skill-number ${skill.highlighted ? 'highlighted' : ''}" 
-                                        title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
-                ).join('')}
-                        </div>
-                    </div>
-                `;
+                    `;
+                }
             }
 
             cardElement.innerHTML = `
