@@ -185,12 +185,7 @@
             justify-content: center;
         }
 
-        .remove-search-btn:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-        }
-
-        .remove-search-btn:not(:disabled):hover {
+        .remove-search-btn:hover {
             background: #c0392b;
         }
 
@@ -383,6 +378,29 @@
         .filter-option input[type="checkbox"] {
             margin: 0;
         }
+
+        /* Drag and Drop Styles */
+        .card[draggable="true"] {
+            cursor: grab;
+        }
+
+        .card[draggable="true"]:active {
+            cursor: grabbing;
+        }
+
+        .deck-slot.drag-over {
+            background-color: #d5edff;
+            border-color: #3498db;
+        }
+
+        /* Welcome Message */
+        .welcome-message {
+            text-align: center;
+            padding: 3rem;
+            color: #7f8c8d;
+            grid-column: 1 / -1;
+            font-style: italic;
+        }
     </style>
 </head>
 
@@ -398,7 +416,7 @@
                 <div class="search-boxes" id="search-boxes">
                     <div class="search-box">
                         <input type="text" class="search-input" placeholder="Enter skill or character name...">
-                        <button class="remove-search-btn" disabled>×</button>
+                        <button class="remove-search-btn">×</button>
                     </div>
                 </div>
                 <button class="add-search-btn" id="add-search-btn">
@@ -459,7 +477,7 @@
 
         <!-- Cards Container -->
         <div id="cards-container" class="cards-container">
-            <div class="loading">Loading support cards...</div>
+            <div class="welcome-message">Enter search terms to find support cards</div>
         </div>
 
         <!-- Character Picker Modal -->
@@ -484,6 +502,7 @@
         let deck = [];
         let usedCharacterIds = new Set();
         let currentSearchTerms = [];
+        let draggedCard = null;
 
         fetch('header.html')
             .then(response => response.text())
@@ -524,6 +543,16 @@
             // Add event listener to the initial search box
             const initialInput = document.querySelector('.search-input');
             initialInput.addEventListener('input', handleSearch);
+
+            // Make the first X clickable
+            const initialRemoveBtn = document.querySelector('.remove-search-btn');
+            initialRemoveBtn.addEventListener('click', function () {
+                const searchBox = this.parentElement;
+                searchBox.remove();
+                updateRemoveButtons();
+                updateSearchTerms();
+                filterAndRenderCards();
+            });
         }
 
         function addSearchBox() {
@@ -555,11 +584,7 @@
         }
 
         function updateRemoveButtons() {
-            const searchBoxes = document.querySelectorAll('.search-box');
-            searchBoxes.forEach((box, index) => {
-                const removeBtn = box.querySelector('.remove-search-btn');
-                removeBtn.disabled = index === 0;
-            });
+            // All remove buttons are now clickable, no need to disable first one
         }
 
         function handleSearch() {
@@ -576,8 +601,8 @@
 
         function filterAndRenderCards() {
             if (currentSearchTerms.length === 0) {
-                // No active search terms, show all cards with skills hidden
-                renderCards(allSupportCards);
+                // No active search terms, show welcome message
+                showWelcomeMessage();
                 return;
             }
 
@@ -620,6 +645,11 @@
             });
 
             renderCards(filteredCards, currentSearchTerms);
+        }
+
+        function showWelcomeMessage() {
+            const container = document.getElementById('cards-container');
+            container.innerHTML = '<div class="welcome-message">Enter search terms to find support cards</div>';
         }
 
         async function openCharacterPicker() {
@@ -703,17 +733,30 @@
                 const slot = document.createElement('div');
                 slot.className = 'deck-slot';
                 slot.innerHTML = `Slot ${i + 1}`;
-                slot.onclick = () => removeCardFromDeck(i);
+                slot.dataset.slotIndex = i;
+
+                // Drag and drop event listeners
+                slot.addEventListener('dragover', handleDragOver);
+                slot.addEventListener('dragenter', handleDragEnter);
+                slot.addEventListener('dragleave', handleDragLeave);
+                slot.addEventListener('drop', handleDrop);
+
                 slots.appendChild(slot);
             }
             updateDeckDisplay();
         }
 
-        function addCardToDeck(card) {
+        function addCardToDeck(card, slotIndex) {
             if (deck.length >= 6) return;
             if (usedCharacterIds.has(card.char_id)) return;
 
-            deck.push(card);
+            // If slotIndex is specified, insert at that position
+            if (slotIndex !== undefined && slotIndex >= 0 && slotIndex <= deck.length) {
+                deck.splice(slotIndex, 0, card);
+            } else {
+                deck.push(card);
+            }
+
             usedCharacterIds.add(card.char_id);
             updateDeckDisplay();
             updateCardDisplay();
@@ -737,7 +780,7 @@
             slots.forEach((slot, index) => {
                 slot.innerHTML = `Slot ${index + 1}`;
                 slot.className = 'deck-slot';
-                slot.onclick = () => removeCardFromDeck(index);
+                slot.dataset.slotIndex = index;
 
                 if (deck[index]) {
                     const card = deck[index];
@@ -754,6 +797,12 @@
                         </div>
                     `;
                 }
+
+                // Re-add drag and drop event listeners
+                slot.addEventListener('dragover', handleDragOver);
+                slot.addEventListener('dragenter', handleDragEnter);
+                slot.addEventListener('dragleave', handleDragLeave);
+                slot.addEventListener('drop', handleDrop);
             });
         }
 
@@ -763,33 +812,34 @@
 
         function renderCards(cards, searchTerms = []) {
             const container = document.getElementById('cards-container');
-            const scrollPos = container.scrollTop;
             const fragment = document.createDocumentFragment();
 
-            cards.forEach(card => {
-                const existingCard = container.querySelector(`[data-card-id="${card.support_id}"]`);
+            if (cards.length === 0) {
+                container.innerHTML = '<div class="no-results">No cards match your search criteria.</div>';
+                return;
+            }
 
-                if (existingCard) {
-                    updateCardElement(existingCard, card);
-                    fragment.appendChild(existingCard);
-                } else {
-                    const cardElement = createCardElement(card, searchTerms);
-                    fragment.appendChild(cardElement);
-                }
+            cards.forEach(card => {
+                const cardElement = createCardElement(card, searchTerms);
+                fragment.appendChild(cardElement);
             });
 
             container.innerHTML = '';
             container.appendChild(fragment);
-            container.scrollTop = scrollPos;
         }
 
         function createCardElement(card, searchTerms = []) {
             const cardElement = document.createElement('div');
             cardElement.setAttribute('data-card-id', card.support_id);
+            cardElement.setAttribute('draggable', 'true');
 
             const isDuplicate = usedCharacterIds.has(card.char_id);
             const isInDeck = deck.some(deckCard => deckCard.support_id === card.support_id);
             cardElement.className = `card ${isDuplicate ? 'dimmed' : ''}`;
+
+            // Drag and drop event listeners
+            cardElement.addEventListener('dragstart', handleDragStart);
+            cardElement.addEventListener('dragend', handleDragEnd);
 
             if (!isDuplicate) {
                 cardElement.onclick = () => addCardToDeck(card);
@@ -812,38 +862,12 @@
             const eventSkills = card.event_skills || [];
             const hintSkills = card.hints?.hint_skills || [];
 
-            // Determine which skill categories have matches
-            const hasEventSkillMatches = searchTerms.length > 0 && eventSkills.some(skillId => {
-                const skillData = skillsMap.get(skillId);
-                if (!skillData) return false;
-                const skillName = getSkillName(skillData).toLowerCase();
-                return searchTerms.some(term =>
-                    // More specific matching - exact word match
-                    skillName.split(/\s+/).some(word => word === term) ||
-                    // Or exact phrase match for multi-word terms
-                    skillName === term
-                );
-            });
-
-            const hasHintSkillMatches = searchTerms.length > 0 && hintSkills.some(skillId => {
-                const skillData = skillsMap.get(skillId);
-                if (!skillData) return false;
-                const skillName = getSkillName(skillData).toLowerCase();
-                return searchTerms.some(term =>
-                    // More specific matching - exact word match
-                    skillName.split(/\s+/).some(word => word === term) ||
-                    // Or exact phrase match for multi-word terms
-                    skillName === term
-                );
-            });
-
-            // Check if card name matches
-            const hasNameMatch = searchTerms.length > 0 &&
-                searchTerms.some(term => card.char_name.toLowerCase().includes(term));
-
-            const formatSkills = (skills, searchTerms) => {
+            // Get only highlighted skills
+            const getHighlightedSkills = (skills, searchTerms) => {
                 return skills.map(skillId => {
                     const skillData = skillsMap.get(skillId);
+                    if (!skillData) return null;
+
                     const skillName = getSkillName(skillData);
                     const isHighlighted = searchTerms.length > 0 &&
                         searchTerms.some(term =>
@@ -853,39 +877,49 @@
                             skillName.toLowerCase() === term
                         );
 
-                    return `<span class="skill-number ${isHighlighted ? 'highlighted' : ''}" 
-                                title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
-                }).join('');
+                    return isHighlighted ? {
+                        id: skillId,
+                        name: skillName,
+                        highlighted: isHighlighted
+                    } : null;
+                }).filter(skill => skill !== null);
             };
+
+            const highlightedHintSkills = getHighlightedSkills(hintSkills, searchTerms);
+            const highlightedEventSkills = getHighlightedSkills(eventSkills, searchTerms);
 
             let skillsHTML = '';
 
             if (searchTerms.length > 0) {
-                // Show only categories with matching skills or if card name matches
-                if (hasHintSkillMatches || (hasNameMatch && hintSkills.length > 0)) {
+                // Show only highlighted skills
+                if (highlightedHintSkills.length > 0) {
                     skillsHTML += `
                         <div class="skill-section">
                             <div class="skill-label">Hint Skills</div>
-                            <div class="skill-list">${formatSkills(hintSkills, searchTerms)}</div>
+                            <div class="skill-list">
+                                ${highlightedHintSkills.map(skill =>
+                        `<span class="skill-number highlighted" 
+                                        title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
+                    ).join('')}
+                            </div>
                         </div>
                     `;
                 }
 
-                if (hasEventSkillMatches || (hasNameMatch && eventSkills.length > 0)) {
+                if (highlightedEventSkills.length > 0) {
                     skillsHTML += `
                         <div class="skill-section">
                             <div class="skill-label">Event Skills</div>
-                            <div class="skill-list">${formatSkills(eventSkills, searchTerms)}</div>
+                            <div class="skill-list">
+                                ${highlightedEventSkills.map(skill =>
+                        `<span class="skill-number highlighted" 
+                                        title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
+                    ).join('')}
+                            </div>
                         </div>
                     `;
                 }
-
-                // If no skills match but card name does, show a message
-                if (hasNameMatch && !hasEventSkillMatches && !hasHintSkillMatches) {
-                    skillsHTML = '<div class="skill-section"><div class="skill-list">No matching skills found for this card</div></div>';
-                }
             }
-            // If no search terms, don't show any skills section at all
 
             cardElement.innerHTML = `
                 <div class="card-image-container">
@@ -901,24 +935,49 @@
             return cardElement;
         }
 
-        function updateCardElement(cardElement, card) {
-            const isDuplicate = usedCharacterIds.has(card.char_id);
-            const isInDeck = deck.some(deckCard => deckCard.support_id === card.support_id);
+        // Drag and Drop Functions
+        function handleDragStart(e) {
+            draggedCard = this;
+            this.style.opacity = '0.4';
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
 
-            cardElement.className = `card ${isDuplicate ? 'dimmed' : ''}`;
+        function handleDragEnd(e) {
+            this.style.opacity = '1';
+            document.querySelectorAll('.deck-slot').forEach(slot => {
+                slot.classList.remove('drag-over');
+            });
+        }
 
-            if (!isDuplicate) {
-                cardElement.onclick = () => addCardToDeck(card);
-            } else if (isInDeck) {
-                cardElement.onclick = () => {
-                    const deckIndex = deck.findIndex(deckCard => deckCard.support_id === card.support_id);
-                    if (deckIndex !== -1) {
-                        removeCardFromDeck(deckIndex);
-                    }
-                };
-            } else {
-                cardElement.onclick = null;
+        function handleDragOver(e) {
+            e.preventDefault();
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            this.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.stopPropagation();
+
+            if (draggedCard) {
+                const cardId = parseInt(draggedCard.getAttribute('data-card-id'));
+                const card = allSupportCards.find(c => c.support_id === cardId);
+                const slotIndex = parseInt(this.getAttribute('data-slot-index'));
+
+                if (card && !usedCharacterIds.has(card.char_id)) {
+                    addCardToDeck(card, slotIndex);
+                }
             }
+
+            this.classList.remove('drag-over');
+            return false;
         }
 
         async function loadCardsWithSkills() {
@@ -931,7 +990,7 @@
 
             setupSearch();
             setupDeckSlots();
-            renderCards(allSupportCards);
+            showWelcomeMessage(); // Show welcome message initially instead of all cards
         }
 
         loadCardsWithSkills();
