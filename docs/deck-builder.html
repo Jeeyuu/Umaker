@@ -401,6 +401,29 @@
             grid-column: 1 / -1;
             font-style: italic;
         }
+
+        /* Deck Card Remove Button */
+        .deck-card-remove {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .deck-card-remove:hover {
+            background: #c0392b;
+        }
     </style>
 </head>
 
@@ -752,6 +775,12 @@
 
             // If slotIndex is specified, insert at that position
             if (slotIndex !== undefined && slotIndex >= 0 && slotIndex <= deck.length) {
+                // Remove from current position if it exists
+                const existingIndex = deck.findIndex(c => c.support_id === card.support_id);
+                if (existingIndex !== -1) {
+                    deck.splice(existingIndex, 1);
+                }
+                // Insert at new position
                 deck.splice(slotIndex, 0, card);
             } else {
                 deck.push(card);
@@ -787,13 +816,53 @@
                     slot.className = 'deck-slot filled';
                     const formattedId = card.support_id.toString().padStart(5, '0');
 
+                    // Get all skills for deck cards with highlighting
+                    const eventSkills = card.event_skills || [];
+                    const hintSkills = card.hints?.hint_skills || [];
+
+                    const formatSkillsForDeck = (skills) => {
+                        return skills.map(skillId => {
+                            const skillData = skillsMap.get(skillId);
+                            if (!skillData) return '';
+
+                            const skillName = getSkillName(skillData);
+                            const isHighlighted = currentSearchTerms.length > 0 &&
+                                currentSearchTerms.some(term =>
+                                    skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
+                                    skillName.toLowerCase() === term
+                                );
+
+                            return `<span class="skill-number ${isHighlighted ? 'highlighted' : ''}" 
+                                        title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
+                        }).join('');
+                    };
+
+                    const hintSkillsHTML = hintSkills.length > 0 ? `
+                        <div class="skill-section">
+                            <div class="skill-label">Hint Skills</div>
+                            <div class="skill-list">${formatSkillsForDeck(hintSkills)}</div>
+                        </div>
+                    ` : '';
+
+                    const eventSkillsHTML = eventSkills.length > 0 ? `
+                        <div class="skill-section">
+                            <div class="skill-label">Event Skills</div>
+                            <div class="skill-list">${formatSkillsForDeck(eventSkills)}</div>
+                        </div>
+                    ` : '';
+
                     slot.innerHTML = `
-                        <div class="card">
+                        <div class="card" style="position: relative;">
+                            <button class="deck-card-remove" onclick="removeCardFromDeck(${index})">×</button>
                             <div class="card-image-container">
                                 <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
                                      alt="${card.char_name}" class="card-image" onerror="this.style.display='none'">
                             </div>
                             <div class="card-name">${card.char_name}</div>
+                            <div class="card-skills">
+                                ${hintSkillsHTML}
+                                ${eventSkillsHTML}
+                            </div>
                         </div>
                     `;
                 }
@@ -940,7 +1009,7 @@
             draggedCard = this;
             this.style.opacity = '0.4';
             e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/html', this.innerHTML);
+            e.dataTransfer.setData('text/plain', this.getAttribute('data-card-id'));
         }
 
         function handleDragEnd(e) {
@@ -952,6 +1021,7 @@
 
         function handleDragOver(e) {
             e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
             return false;
         }
 
@@ -960,14 +1030,18 @@
         }
 
         function handleDragLeave(e) {
-            this.classList.remove('drag-over');
+            // Only remove class if not dragging over a child element
+            if (!this.contains(e.relatedTarget)) {
+                this.classList.remove('drag-over');
+            }
         }
 
         function handleDrop(e) {
+            e.preventDefault();
             e.stopPropagation();
 
             if (draggedCard) {
-                const cardId = parseInt(draggedCard.getAttribute('data-card-id'));
+                const cardId = parseInt(e.dataTransfer.getData('text/plain'));
                 const card = allSupportCards.find(c => c.support_id === cardId);
                 const slotIndex = parseInt(this.getAttribute('data-slot-index'));
 
