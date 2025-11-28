@@ -12,7 +12,7 @@
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 1rem;
             width: 100%;
-            max-width: calc(100% - 2rem);
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -151,15 +151,16 @@
 
         .control-sections {
             display: grid;
-            grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) 2fr minmax(120px, 1fr);
+            grid-template-columns: 1fr auto auto 2fr;
             gap: 1rem;
             margin-bottom: 2rem;
             padding: 1rem;
             background: #f8f9fa;
             border-radius: 8px;
-            max-width: calc(100% - 2rem);
+            max-width: 1200px;
             margin-left: auto;
             margin-right: auto;
+            width: 100%;
         }
 
         .control-section {
@@ -167,7 +168,6 @@
             padding: 1rem;
             border-radius: 8px;
             border: 1px solid #e0e0e0;
-            min-width: 120px;
         }
 
         .control-section h3 {
@@ -176,15 +176,46 @@
             color: #2c3e50;
         }
 
+        /* Search Section - Takes available space */
+        .control-section:nth-child(1) {
+            min-width: 0;
+            /* Allow shrinking */
+        }
+
+        /* Character Section - Fixed width */
+        .control-section:nth-child(2) {
+            width: 120px;
+            min-width: 120px;
+            max-width: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Deck Section - Fixed width based on deck slots */
+        .control-section:nth-child(3) {
+            width: 400px;
+            min-width: 400px;
+            max-width: 400px;
+        }
+
+        /* Filters Section - Takes remaining space */
+        .control-section:nth-child(4) {
+            min-width: 0;
+            /* Allow shrinking */
+        }
+
         .search-boxes {
             display: flex;
             flex-direction: column;
             gap: 8px;
+            width: 100%;
         }
 
         .search-box {
             display: flex;
             gap: 5px;
+            width: 100%;
         }
 
         .search-input {
@@ -193,7 +224,8 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 12px;
-            max-width: 90px;
+            min-width: 0;
+            /* Allow shrinking */
         }
 
         .remove-search-btn {
@@ -207,6 +239,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
 
         .remove-search-btn:hover {
@@ -225,6 +258,7 @@
             align-items: center;
             gap: 4px;
             margin-top: 5px;
+            width: 100%;
         }
 
         .add-search-btn:hover {
@@ -457,6 +491,7 @@
             display: flex;
             flex-direction: column;
             gap: 0.25rem;
+            width: 100%;
         }
 
         .filter-row {
@@ -530,7 +565,7 @@
         }
 
         main {
-            max-width: calc(100% - 2rem);
+            max-width: 1200px;
             margin: 0 auto;
             padding: 0 1rem;
         }
