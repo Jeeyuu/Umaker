@@ -430,6 +430,11 @@
         .deck-card-dragging {
             opacity: 0.5;
         }
+
+        /* Ensure remove button is not affected by dimming */
+        .deck-card-remove {
+            opacity: 1 !important;
+        }
     </style>
 </head>
 
@@ -779,7 +784,7 @@
         }
 
         function addCardToDeck(card, targetSlotIndex) {
-            if (usedCharacterIds.has(card.char_id)) return;
+            if (isCardDuplicate(card)) return;
 
             // Find the first empty slot if no specific target
             if (targetSlotIndex === undefined) {
@@ -828,7 +833,21 @@
         }
 
         function isCardDuplicate(card) {
-            return usedCharacterIds.has(card.char_id);
+            // A card is duplicate if:
+            // 1. There's a selected character AND the card has the same character ID
+            // 2. OR the card's character ID is already used by another card in the deck
+            if (selectedCharacter && card.char_id === selectedCharacter.char_id) {
+                return true;
+            }
+
+            // Check if any other card in deck has the same character ID
+            for (let i = 0; i < deck.length; i++) {
+                if (deck[i] && deck[i].char_id === card.char_id) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         function updateDeckDisplay() {
@@ -845,7 +864,7 @@
                 if (deck[index]) {
                     const card = deck[index];
                     const isDuplicate = isCardDuplicate(card);
-                    slot.className = `deck-slot filled ${isDuplicate ? 'dimmed' : ''}`;
+                    slot.className = 'deck-slot filled';
                     const formattedId = card.support_id.toString().padStart(5, '0');
 
                     // Get all skills for deck cards with highlighting
@@ -885,7 +904,6 @@
 
                     slot.innerHTML = `
                         <div class="card deck-card ${isDuplicate ? 'dimmed' : ''}" draggable="true" data-card-index="${index}" style="position: relative;">
-                            ${isDuplicate ? '<div class="duplicate-overlay">DUPLICATE</div>' : ''}
                             <button class="deck-card-remove" onclick="removeCardFromDeck(${index})">×</button>
                             <div class="card-image-container">
                                 <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
