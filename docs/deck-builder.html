@@ -20,20 +20,19 @@
             padding: 4px;
             cursor: pointer;
             transition: all 0.3s ease;
-        }
-
-        .card.dimmed {
-            opacity: 0.5;
             position: relative;
         }
 
-        .card.dimmed::before {
-            content: "DUPLICATE";
+        .card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .card-error-label {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            background: orange;
             color: white;
             font-size: 8px;
             font-weight: bold;
@@ -41,6 +40,18 @@
             padding: 2px;
             border-radius: 8px 8px 0 0;
             z-index: 2;
+        }
+
+        .error-trainee {
+            background: #e74c3c;
+        }
+
+        .error-duplicate {
+            background: #f39c12;
+        }
+
+        .error-selected {
+            background: #3498db;
         }
 
         .card-image {
@@ -533,8 +544,7 @@
         let allCharacters = [];
         let skillsMap = new Map();
         let selectedCharacter = null;
-        let deck = Array(6).fill(null); // Use fixed array with null for empty slots
-        let usedCharacterIds = new Set();
+        let deck = Array(6).fill(null);
         let currentSearchTerms = [];
         let draggedCard = null;
         let draggedCardIndex = null;
@@ -724,26 +734,18 @@
         }
 
         function selectCharacter(character) {
-            if (selectedCharacter) {
-                usedCharacterIds.delete(selectedCharacter.char_id);
-            }
-
             selectedCharacter = character;
-            usedCharacterIds.add(character.char_id);
             updateSelectedCharacterDisplay();
             closeCharacterPicker();
             updateCardDisplay();
-            updateDeckDisplay(); // Update deck to show duplicates
+            updateDeckDisplay();
         }
 
         function removeSelectedCharacter() {
-            if (selectedCharacter) {
-                usedCharacterIds.delete(selectedCharacter.char_id);
-                selectedCharacter = null;
-                updateSelectedCharacterDisplay();
-                updateCardDisplay();
-                updateDeckDisplay(); // Update deck to remove duplicates
-            }
+            selectedCharacter = null;
+            updateSelectedCharacterDisplay();
+            updateCardDisplay();
+            updateDeckDisplay();
         }
 
         function updateSelectedCharacterDisplay() {
@@ -784,7 +786,14 @@
         }
 
         function addCardToDeck(card, targetSlotIndex) {
-            if (isCardDuplicate(card)) return;
+            // Check if card is already in deck
+            if (isCardInDeck(card)) return;
+
+            // Check if character is already in deck
+            if (isCharacterInDeck(card.char_id)) return;
+
+            // Check if selected character matches card character
+            if (selectedCharacter && selectedCharacter.char_id === card.char_id) return;
 
             // Find the first empty slot if no specific target
             if (targetSlotIndex === undefined) {
@@ -829,25 +838,33 @@
             updateDeckDisplay();
         }
 
-        function isCardDuplicate(card) {
-            // A card is duplicate ONLY if:
-            // 1. There's a selected character AND the card has the same character ID
-            // OR
-            // 2. There's another card in the deck with the same character ID
+        function isCardInDeck(card) {
+            return deck.some(deckCard => deckCard && deckCard.support_id === card.support_id);
+        }
 
-            // Check selected character first (priority)
-            if (selectedCharacter && card.char_id === selectedCharacter.char_id) {
-                return true;
+        function isCharacterInDeck(charId) {
+            return deck.some(deckCard => deckCard && deckCard.char_id === charId);
+        }
+
+        function getCardErrors(card) {
+            const errors = [];
+
+            // Check if card is already in deck
+            if (isCardInDeck(card)) {
+                errors.push({ type: 'selected', message: '! Selected' });
             }
 
-            // Check deck for same character (excluding the card itself if it's already in deck)
-            for (let i = 0; i < deck.length; i++) {
-                if (deck[i] && deck[i] !== card && deck[i].char_id === card.char_id) {
-                    return true;
-                }
+            // Check if character is already in deck (duplicate support)
+            else if (isCharacterInDeck(card.char_id)) {
+                errors.push({ type: 'duplicate', message: '! Duplicate Support' });
             }
 
-            return false;
+            // Check if selected character matches card character (trainee)
+            else if (selectedCharacter && selectedCharacter.char_id === card.char_id) {
+                errors.push({ type: 'trainee', message: '! Trainee' });
+            }
+
+            return errors;
         }
 
         function updateDeckDisplay() {
@@ -863,7 +880,6 @@
 
                 if (deck[index]) {
                     const card = deck[index];
-                    const isDuplicate = isCardDuplicate(card);
                     slot.className = 'deck-slot filled';
                     const formattedId = card.support_id.toString().padStart(5, '0');
 
@@ -903,7 +919,7 @@
                     ` : '';
 
                     slot.innerHTML = `
-                        <div class="card deck-card ${isDuplicate ? 'dimmed' : ''}" draggable="true" data-card-index="${index}" style="position: relative;">
+                        <div class="card deck-card" draggable="true" data-card-index="${index}" style="position: relative;">
                             <button class="deck-card-remove" onclick="removeCardFromDeck(${index})">×</button>
                             <div class="card-image-container">
                                 <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
@@ -960,14 +976,26 @@
             cardElement.setAttribute('data-card-id', card.support_id);
             cardElement.setAttribute('draggable', 'true');
 
-            const isDuplicate = isCardDuplicate(card);
-            cardElement.className = `card ${isDuplicate ? 'dimmed' : ''}`;
+            const errors = getCardErrors(card);
+            const hasErrors = errors.length > 0;
+
+            cardElement.className = `card ${hasErrors ? 'disabled' : ''}`;
+
+            // Add error labels if any
+            if (hasErrors) {
+                errors.forEach(error => {
+                    const errorLabel = document.createElement('div');
+                    errorLabel.className = `card-error-label error-${error.type}`;
+                    errorLabel.textContent = error.message;
+                    cardElement.appendChild(errorLabel);
+                });
+            }
 
             // Drag and drop event listeners
             cardElement.addEventListener('dragstart', handleCardDragStart);
             cardElement.addEventListener('dragend', handleCardDragEnd);
 
-            if (!isDuplicate) {
+            if (!hasErrors) {
                 cardElement.onclick = () => addCardToDeck(card);
             } else {
                 cardElement.onclick = null;
@@ -1061,15 +1089,16 @@
             const cardId = parseInt(this.getAttribute('data-card-id'));
             const card = allSupportCards.find(c => c.support_id === cardId);
 
-            // Only allow dragging if not a duplicate
-            if (!isCardDuplicate(card)) {
+            // Only allow dragging if no errors
+            const errors = getCardErrors(card);
+            if (errors.length === 0) {
                 draggedCard = this;
                 this.style.opacity = '0.4';
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('text/plain', this.getAttribute('data-card-id'));
                 draggedCardIndex = null; // Not from deck
             } else {
-                e.preventDefault(); // Prevent dragging of duplicate cards
+                e.preventDefault(); // Prevent dragging of cards with errors
             }
         }
 
@@ -1085,16 +1114,11 @@
             const cardIndex = parseInt(this.getAttribute('data-card-index'));
             const card = deck[cardIndex];
 
-            // Only allow dragging if not a duplicate
-            if (!isCardDuplicate(card)) {
-                draggedCard = this;
-                this.classList.add('deck-card-dragging');
-                e.dataTransfer.effectAllowed = 'move';
-                draggedCardIndex = cardIndex;
-                e.dataTransfer.setData('text/plain', 'deck-card:' + draggedCardIndex);
-            } else {
-                e.preventDefault(); // Prevent dragging of duplicate cards
-            }
+            draggedCard = this;
+            this.classList.add('deck-card-dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            draggedCardIndex = cardIndex;
+            e.dataTransfer.setData('text/plain', 'deck-card:' + draggedCardIndex);
         }
 
         function handleDeckCardDragEnd(e) {
@@ -1139,8 +1163,11 @@
                     const cardId = parseInt(data);
                     const card = allSupportCards.find(c => c.support_id === cardId);
 
-                    if (card && !isCardDuplicate(card)) {
-                        addCardToDeck(card, targetSlotIndex);
+                    if (card) {
+                        const errors = getCardErrors(card);
+                        if (errors.length === 0) {
+                            addCardToDeck(card, targetSlotIndex);
+                        }
                     }
                 }
             }
