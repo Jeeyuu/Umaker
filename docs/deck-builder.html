@@ -850,107 +850,127 @@
         }
 
         function getCardErrors(card) {
-            const errors = [];
+                const errors = [];
 
-            // Check if card is already in deck
-            if (isCardInDeck(card)) {
-                errors.push({ type: 'selected', message: '! Selected' });
-            }
-
-            // Check if character is already in deck (duplicate support)
-            else if (isCharacterInDeck(card.char_id)) {
-                errors.push({ type: 'duplicate', message: '! Duplicate Support' });
-            }
-
-            // Check if selected character matches card character (trainee)
-            else if (selectedCharacter && selectedCharacter.char_id === card.char_id) {
-                errors.push({ type: 'trainee', message: '! Trainee' });
-            }
-
-            return errors;
-        }
-
-        function updateDeckDisplay() {
-            const slots = document.querySelectorAll('.deck-slot');
-            const deckCount = deck.filter(card => card !== null).length;
-            const deckTitle = document.querySelector('.control-section:nth-child(3) h3');
-            deckTitle.textContent = `Deck (${deckCount}/6)`;
-
-            slots.forEach((slot, index) => {
-                slot.innerHTML = `Slot ${index + 1}`;
-                slot.className = 'deck-slot';
-                slot.dataset.slotIndex = index;
-
-                if (deck[index]) {
-                    const card = deck[index];
-                    slot.className = 'deck-slot filled';
-                    const formattedId = card.support_id.toString().padStart(5, '0');
-
-                    // Get all skills for deck cards with highlighting
-                    const eventSkills = card.event_skills || [];
-                    const hintSkills = card.hints?.hint_skills || [];
-
-                    const formatSkillsForDeck = (skills) => {
-                        return skills.map(skillId => {
-                            const skillData = skillsMap.get(skillId);
-                            if (!skillData) return '';
-
-                            const skillName = getSkillName(skillData);
-                            const isHighlighted = currentSearchTerms.length > 0 &&
-                                currentSearchTerms.some(term =>
-                                    skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
-                                    skillName.toLowerCase() === term
-                                );
-
-                            return `<span class="skill-number ${isHighlighted ? 'highlighted' : ''}" 
-                                        title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
-                        }).join('');
-                    };
-
-                    const hintSkillsHTML = hintSkills.length > 0 ? `
-                        <div class="skill-section">
-                            <div class="skill-label">Hint Skills</div>
-                            <div class="skill-list">${formatSkillsForDeck(hintSkills)}</div>
-                        </div>
-                    ` : '';
-
-                    const eventSkillsHTML = eventSkills.length > 0 ? `
-                        <div class="skill-section">
-                            <div class="skill-label">Event Skills</div>
-                            <div class="skill-list">${formatSkillsForDeck(eventSkills)}</div>
-                        </div>
-                    ` : '';
-
-                    slot.innerHTML = `
-                        <div class="card deck-card" draggable="true" data-card-index="${index}" style="position: relative;">
-                            <button class="deck-card-remove" onclick="removeCardFromDeck(${index})">×</button>
-                            <div class="card-image-container">
-                                <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
-                                     alt="${card.char_name}" class="card-image" onerror="this.style.display='none'">
-                            </div>
-                            <div class="card-name">${card.char_name}</div>
-                            <div class="card-skills">
-                                ${hintSkillsHTML}
-                                ${eventSkillsHTML}
-                            </div>
-                        </div>
-                    `;
-
-                    // Add drag events to deck cards
-                    const deckCard = slot.querySelector('.deck-card');
-                    if (deckCard) {
-                        deckCard.addEventListener('dragstart', handleDeckCardDragStart);
-                        deckCard.addEventListener('dragend', handleDeckCardDragEnd);
-                    }
+                // Check if card is already in deck (highest priority - Selected)
+                if (isCardInDeck(card)) {
+                    errors.push({ type: 'selected', message: '! Selected' });
+                    return errors; // Return immediately, no other errors matter
                 }
 
-                // Re-add drag and drop event listeners to slots
-                slot.addEventListener('dragover', handleDragOver);
-                slot.addEventListener('dragenter', handleDragEnter);
-                slot.addEventListener('dragleave', handleDragLeave);
-                slot.addEventListener('drop', handleDrop);
-            });
-        }
+                // Check if selected character matches card character (Trainee - second priority)
+                if (selectedCharacter && selectedCharacter.char_id === card.char_id) {
+                    errors.push({ type: 'trainee', message: '! Trainee' });
+                    return errors; // Return immediately, Trainee overrides Duplicate Support
+                }
+
+                // Check if character is already in deck (duplicate support - lowest priority)
+                if (isCharacterInDeck(card.char_id)) {
+                    errors.push({ type: 'duplicate', message: '! Duplicate Support' });
+                }
+
+                return errors;
+            }
+
+        function updateDeckDisplay() {
+                const slots = document.querySelectorAll('.deck-slot');
+                const deckCount = deck.filter(card => card !== null).length;
+                const deckTitle = document.querySelector('.control-section:nth-child(3) h3');
+                deckTitle.textContent = `Deck (${deckCount}/6)`;
+
+                slots.forEach((slot, index) => {
+                    slot.innerHTML = `Slot ${index + 1}`;
+                    slot.className = 'deck-slot';
+                    slot.dataset.slotIndex = index;
+
+                    if (deck[index]) {
+                        const card = deck[index];
+                        slot.className = 'deck-slot filled';
+                        const formattedId = card.support_id.toString().padStart(5, '0');
+
+                        // Get errors for this deck card
+                        const errors = getCardErrors(card);
+                        const hasErrors = errors.length > 0;
+
+                        // Get all skills for deck cards with highlighting
+                        const eventSkills = card.event_skills || [];
+                        const hintSkills = card.hints?.hint_skills || [];
+
+                        const formatSkillsForDeck = (skills) => {
+                            return skills.map(skillId => {
+                                const skillData = skillsMap.get(skillId);
+                                if (!skillData) return '';
+
+                                const skillName = getSkillName(skillData);
+                                const isHighlighted = currentSearchTerms.length > 0 &&
+                                    currentSearchTerms.some(term =>
+                                        skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
+                                        skillName.toLowerCase() === term
+                                    );
+
+                                return `<span class="skill-number ${isHighlighted ? 'highlighted' : ''}" 
+                                title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
+                            }).join('');
+                        };
+
+                        const hintSkillsHTML = hintSkills.length > 0 ? `
+                <div class="skill-section">
+                    <div class="skill-label">Hint Skills</div>
+                    <div class="skill-list">${formatSkillsForDeck(hintSkills)}</div>
+                </div>
+            ` : '';
+
+                        const eventSkillsHTML = eventSkills.length > 0 ? `
+                <div class="skill-section">
+                    <div class="skill-label">Event Skills</div>
+                    <div class="skill-list">${formatSkillsForDeck(eventSkills)}</div>
+                </div>
+            ` : '';
+
+                        // Build deck card HTML
+                        let deckCardHTML = `
+                <div class="card deck-card ${hasErrors ? 'disabled' : ''}" draggable="true" data-card-index="${index}" style="position: relative;">
+                    <button class="deck-card-remove" onclick="removeCardFromDeck(${index})">×</button>
+                    <div class="card-image-container">
+                        <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
+                             alt="${card.char_name}" class="card-image" onerror="this.style.display='none'">
+                    </div>
+                    <div class="card-name">${card.char_name}</div>
+                    <div class="card-skills">
+                        ${hintSkillsHTML}
+                        ${eventSkillsHTML}
+                    </div>
+                </div>
+            `;
+
+                        slot.innerHTML = deckCardHTML;
+
+                        // Add error labels to deck card if any
+                        if (hasErrors) {
+                            const deckCard = slot.querySelector('.deck-card');
+                            errors.forEach(error => {
+                                const errorLabel = document.createElement('div');
+                                errorLabel.className = `card-error-label error-${error.type}`;
+                                errorLabel.textContent = error.message;
+                                deckCard.appendChild(errorLabel);
+                            });
+                        }
+
+                        // Add drag events to deck cards
+                        const deckCard = slot.querySelector('.deck-card');
+                        if (deckCard) {
+                            deckCard.addEventListener('dragstart', handleDeckCardDragStart);
+                            deckCard.addEventListener('dragend', handleDeckCardDragEnd);
+                        }
+                    }
+
+                    // Re-add drag and drop event listeners to slots
+                    slot.addEventListener('dragover', handleDragOver);
+                    slot.addEventListener('dragenter', handleDragEnter);
+                    slot.addEventListener('dragleave', handleDragLeave);
+                    slot.addEventListener('drop', handleDrop);
+                });
+            }
 
         function updateCardDisplay() {
             filterAndRenderCards();
