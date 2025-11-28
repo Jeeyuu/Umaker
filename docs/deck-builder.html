@@ -7,15 +7,6 @@
     <title>Deck Builder</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* New container for the top section with max-width */
-        .top-container {
-            max-width: 1260px;
-            margin: 0 auto;
-            width: 100%;
-            padding: 0 1rem;
-            box-sizing: border-box;
-        }
-
         .cards-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -31,8 +22,7 @@
             transition: all 0.3s ease;
             position: relative;
             width: 120px;
-            min-height: 160px;
-            /* 3/4 ratio of 120px */
+            /* Remove fixed min-height to allow dynamic sizing */
             display: flex;
             flex-direction: column;
         }
@@ -40,11 +30,6 @@
         .card.disabled {
             opacity: 0.5;
             cursor: not-allowed;
-        }
-
-        /* Changed from dimming to red border for conflicted cards */
-        .card.conflicted {
-            border: 2px solid #e74c3c;
         }
 
         .card-error-label {
@@ -108,8 +93,7 @@
             padding: 4px;
             color: #2c3e50;
             flex-grow: 1;
-            overflow: hidden;
-            /* Removed scroll bar from skill list */
+            /* Remove overflow: hidden to allow content to expand */
         }
 
         .skill-section {
@@ -125,7 +109,7 @@
         .skill-list {
             font-size: 9px;
             line-height: 1.2;
-            /* Removed max-height and overflow-y to eliminate scroll bar */
+            /* Remove max-height and overflow-y to eliminate scroll bars */
         }
 
         .skill-number {
@@ -206,8 +190,6 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 12px;
-            /* Set width to match card width */
-            width: 120px;
         }
 
         .remove-search-btn {
@@ -296,7 +278,8 @@
 
         .characters-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            /* Changed to 120px to match card width */
             gap: 0.5rem;
             margin-top: 1rem;
         }
@@ -307,8 +290,8 @@
             padding: 4px;
             cursor: pointer;
             text-align: center;
-            /* Set width to match card width */
             width: 120px;
+            /* Set fixed width to match cards */
         }
 
         .character-card.selected {
@@ -317,8 +300,11 @@
 
         .character-portrait {
             width: 120px;
-            /* Set to match card width */
-            height: auto;
+            /* Set fixed width to match cards */
+            height: 160px;
+            /* Set height to maintain 3:4 ratio (120px * 4/3 = 160px) */
+            object-fit: cover;
+            /* Ensure image fills the space properly */
             border-radius: 4px;
         }
 
@@ -347,8 +333,7 @@
             color: #7f8c8d;
             text-align: center;
             min-width: 120px;
-            min-height: 160px;
-            /* 3/4 ratio of 120px */
+            /* Remove fixed min-height to allow dynamic sizing */
             position: relative;
             /* Remove max-width and max-height constraints */
         }
@@ -359,7 +344,7 @@
             position: relative;
             /* Allow the slot to expand to fit the card */
             height: auto;
-            min-height: 160px;
+            /* Remove fixed min-height */
         }
 
         .deck-slot .card {
@@ -478,74 +463,69 @@
     <div id="header-placeholder"></div>
 
     <main>
-        <!-- Wrapped the control sections in the new container -->
-        <div class="top-container">
-            <div class="control-sections">
-                <div class="control-section">
-                    <h3>Search List</h3>
-                    <div class="search-boxes" id="search-boxes">
-                        <div class="search-box">
-                            <input type="text" class="search-input" placeholder="Enter skill or character name...">
-                            <button class="remove-search-btn">×</button>
+        <div class="control-sections">
+            <div class="control-section">
+                <h3>Search List</h3>
+                <div class="search-boxes" id="search-boxes">
+                    <div class="search-box">
+                        <input type="text" class="search-input" placeholder="Enter skill or character name...">
+                        <button class="remove-search-btn">×</button>
+                    </div>
+                </div>
+                <button class="add-search-btn" id="add-search-btn">
+                    <span>+</span> Add Search Box
+                </button>
+            </div>
+
+            <div class="control-section">
+                <h3>Character</h3>
+                <button class="character-picker-btn" onclick="openCharacterPicker()">Pick Character</button>
+                <div id="selected-character"></div>
+            </div>
+
+            <div class="control-section">
+                <h3>Deck (0/6)</h3>
+                <div class="deck-slots" id="deck-slots">
+                    <div class="deck-slot">Slot 1</div>
+                    <div class="deck-slot">Slot 2</div>
+                    <div class="deck-slot">Slot 3</div>
+                    <div class="deck-slot">Slot 4</div>
+                    <div class="deck-slot">Slot 5</div>
+                    <div class="deck-slot">Slot 6</div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Filters</h3>
+                <div class="filter-group">
+                    <div class="filter-options">
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> No condition</label>
+                            <label class="filter-option"><input type="checkbox"> Debuff</label>
                         </div>
-                    </div>
-                    <button class="add-search-btn" id="add-search-btn">
-                        <span>+</span> Add Search Box
-                    </button>
-                </div>
-
-                <div class="control-section">
-                    <h3>Character</h3>
-                    <button class="character-picker-btn" onclick="openCharacterPicker()">Pick Character</button>
-                    <div id="selected-character"></div>
-                </div>
-
-                <div class="control-section">
-                    <h3>Deck (0/6)</h3>
-                    <div class="deck-slots" id="deck-slots">
-                        <div class="deck-slot">Slot 1</div>
-                        <div class="deck-slot">Slot 2</div>
-                        <div class="deck-slot">Slot 3</div>
-                        <div class="deck-slot">Slot 4</div>
-                        <div class="deck-slot">Slot 5</div>
-                        <div class="deck-slot">Slot 6</div>
-                    </div>
-                </div>
-
-                <div class="control-section">
-                    <h3>Filters</h3>
-                    <div class="filter-group">
-                        <div class="filter-options">
-                            <div class="filter-row">
-                                <label class="filter-option"><input type="checkbox"> No condition</label>
-                                <label class="filter-option"><input type="checkbox"> Debuff</label>
-                            </div>
-                            <div class="filter-row">
-                                <label class="filter-option"><input type="checkbox"> Front</label>
-                                <label class="filter-option"><input type="checkbox"> Pace</label>
-                                <label class="filter-option"><input type="checkbox"> Late</label>
-                                <label class="filter-option"><input type="checkbox"> End</label>
-                            </div>
-                            <div class="filter-row">
-                                <label class="filter-option"><input type="checkbox"> Short</label>
-                                <label class="filter-option"><input type="checkbox"> Mile</label>
-                                <label class="filter-option"><input type="checkbox"> Medium</label>
-                                <label class="filter-option"><input type="checkbox"> Long</label>
-                            </div>
-                            <div class="filter-row">
-                                <label class="filter-option"><input type="checkbox"> Dirt</label>
-                                <label class="filter-option"><input type="checkbox"> Turf</label>
-                            </div>
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Front</label>
+                            <label class="filter-option"><input type="checkbox"> Pace</label>
+                            <label class="filter-option"><input type="checkbox"> Late</label>
+                            <label class="filter-option"><input type="checkbox"> End</label>
+                        </div>
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Short</label>
+                            <label class="filter-option"><input type="checkbox"> Mile</label>
+                            <label class="filter-option"><input type="checkbox"> Medium</label>
+                            <label class="filter-option"><input type="checkbox"> Long</label>
+                        </div>
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Dirt</label>
+                            <label class="filter-option"><input type="checkbox"> Turf</label>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="top-container">
-            <div id="cards-container" class="cards-container">
-                <div class="welcome-message">Enter search terms to find support cards</div>
-            </div>
+        <div id="cards-container" class="cards-container">
+            <div class="welcome-message">Enter search terms to find support cards</div>
         </div>
 
         <div id="character-modal" class="modal">
@@ -960,8 +940,7 @@
             const errors = getCardErrors(card, false);
             const hasErrors = errors.length > 0;
 
-            // Changed from 'disabled' class to 'conflicted' for red border
-            cardElement.className = `card ${hasErrors ? 'conflicted' : ''}`;
+            cardElement.className = `card ${hasErrors ? 'disabled' : ''}`;
 
             const formattedId = card.support_id.toString().padStart(5, '0');
             const typeMap = {
