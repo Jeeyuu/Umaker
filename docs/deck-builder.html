@@ -417,8 +417,8 @@
             font-style: italic;
         }
 
-        /* Deck Card Remove Button */
         .deck-card-remove {
+            opacity: 1 !important;
             position: absolute;
             top: -5px;
             right: -5px;
@@ -433,7 +433,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 10;
+            z-index: 100; /* Increased z-index to ensure it's above error labels */
         }
 
         .deck-card-remove:hover {
@@ -849,23 +849,23 @@
             return deck.some(deckCard => deckCard && deckCard.char_id === charId);
         }
 
-        function getCardErrors(card) {
+        function getCardErrors(card, isDeckCard = false) {
                 const errors = [];
 
-                // Check if card is already in deck (highest priority - Selected)
-                if (isCardInDeck(card)) {
+                // For search cards only: Check if card is already in deck
+                if (!isDeckCard && isCardInDeck(card)) {
                     errors.push({ type: 'selected', message: '! Selected' });
-                    return errors; // Return immediately, no other errors matter
+                    return errors;
                 }
 
-                // Check if selected character matches card character (Trainee - second priority)
+                // Check if selected character matches card character (Trainee)
                 if (selectedCharacter && selectedCharacter.char_id === card.char_id) {
                     errors.push({ type: 'trainee', message: '! Trainee' });
-                    return errors; // Return immediately, Trainee overrides Duplicate Support
+                    return errors; // Trainee overrides everything else
                 }
 
-                // Check if character is already in deck (duplicate support - lowest priority)
-                if (isCharacterInDeck(card.char_id)) {
+                // For search cards only: Check if character is already in deck
+                if (!isDeckCard && isCharacterInDeck(card.char_id)) {
                     errors.push({ type: 'duplicate', message: '! Duplicate Support' });
                 }
 
@@ -888,8 +888,8 @@
                         slot.className = 'deck-slot filled';
                         const formattedId = card.support_id.toString().padStart(5, '0');
 
-                        // Get errors for this deck card
-                        const errors = getCardErrors(card);
+                        // For deck cards, isDeckCard = true (so no "Selected" error)
+                        const errors = getCardErrors(card, true);
                         const hasErrors = errors.length > 0;
 
                         // Get all skills for deck cards with highlighting
@@ -927,9 +927,10 @@
                 </div>
             ` : '';
 
-                        // Build deck card HTML
+                        // Build deck card HTML - don't apply 'disabled' class to deck cards
+                        // but still show error labels for Trainee errors
                         let deckCardHTML = `
-                <div class="card deck-card ${hasErrors ? 'disabled' : ''}" draggable="true" data-card-index="${index}" style="position: relative;">
+                <div class="card deck-card" draggable="true" data-card-index="${index}" style="position: relative;">
                     <button class="deck-card-remove" onclick="removeCardFromDeck(${index})">×</button>
                     <div class="card-image-container">
                         <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
@@ -945,7 +946,7 @@
 
                         slot.innerHTML = deckCardHTML;
 
-                        // Add error labels to deck card if any
+                        // Add error labels to deck card if any (only Trainee errors for deck cards)
                         if (hasErrors) {
                             const deckCard = slot.querySelector('.deck-card');
                             errors.forEach(error => {
@@ -999,8 +1000,10 @@
                 cardElement.setAttribute('data-card-id', card.support_id);
                 cardElement.setAttribute('draggable', 'true');
 
-                const errors = getCardErrors(card);
+                // For search cards, isDeckCard = false
+                const errors = getCardErrors(card, false);
                 const hasErrors = errors.length > 0;
+
 
                 cardElement.className = `card ${hasErrors ? 'disabled' : ''}`;
 
