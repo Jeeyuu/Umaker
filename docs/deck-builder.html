@@ -26,6 +26,7 @@
             width: 120px;
             display: flex;
             flex-direction: column;
+            box-sizing: border-box;
         }
 
         .card.disabled {
@@ -151,7 +152,7 @@
 
         .control-sections {
             display: grid;
-            grid-template-columns: 1fr auto auto 2fr;
+            grid-template-columns: minmax(240px, 1fr) fit-content fit-content 1fr;
             gap: 1rem;
             margin-bottom: 2rem;
             padding: 1rem;
@@ -161,6 +162,7 @@
             margin-left: auto;
             margin-right: auto;
             width: 100%;
+            box-sizing: border-box;
         }
 
         .control-section {
@@ -168,6 +170,7 @@
             padding: 1rem;
             border-radius: 8px;
             border: 1px solid #e0e0e0;
+            box-sizing: border-box;
         }
 
         .control-section h3 {
@@ -176,33 +179,43 @@
             color: #2c3e50;
         }
 
-        /* Search Section - Takes available space */
+        /* Search Section - Min width 240px */
         .control-section:nth-child(1) {
-            min-width: 0;
-            /* Allow shrinking */
+            min-width: 240px;
         }
 
-        /* Character Section - Fixed width */
+        /* Character Section - Fit content */
         .control-section:nth-child(2) {
-            width: 120px;
-            min-width: 120px;
-            max-width: 120px;
+            width: fit-content;
+            min-width: fit-content;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        /* Deck Section - Fixed width based on deck slots */
+        /* Deck Section - Fit content */
         .control-section:nth-child(3) {
-            width: 400px;
-            min-width: 400px;
-            max-width: 400px;
+            width: fit-content;
+            min-width: fit-content;
         }
 
-        /* Filters Section - Takes remaining space */
+        /* Filters Section - Split into two boxes */
         .control-section:nth-child(4) {
             min-width: 0;
-            /* Allow shrinking */
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .filter-box {
+            flex: 1;
+            min-height: 0;
+        }
+
+        .filter-box h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 12px;
+            color: #2c3e50;
         }
 
         .search-boxes {
@@ -225,7 +238,7 @@
             border-radius: 4px;
             font-size: 12px;
             min-width: 0;
-            /* Allow shrinking */
+            box-sizing: border-box;
         }
 
         .remove-search-btn {
@@ -259,6 +272,7 @@
             gap: 4px;
             margin-top: 5px;
             width: 100%;
+            box-sizing: border-box;
         }
 
         .add-search-btn:hover {
@@ -279,6 +293,7 @@
             height: 120px;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }
 
         .character-slot:hover {
@@ -290,12 +305,15 @@
             border-style: solid;
             border-color: #3498db;
             background: white;
-            padding: 0;
+            padding: 4px;
+            width: 120px;
+            height: 120px;
+            box-sizing: border-box;
         }
 
         .character-portrait {
-            width: 120px;
-            height: 120px;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
             border-radius: 6px;
         }
@@ -355,6 +373,7 @@
             max-height: 80%;
             overflow-y: auto;
             width: 80%;
+            box-sizing: border-box;
         }
 
         .close-modal {
@@ -377,6 +396,7 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
+            box-sizing: border-box;
         }
 
         .characters-container {
@@ -388,13 +408,16 @@
 
         .character-picker-card {
             background: white;
-            border-radius: 8px;
+            border-radius: 12px 12px 8px 8px;
             padding: 4px;
             cursor: pointer;
             text-align: center;
             width: 120px;
-            border: 2px solid transparent;
+            border: 1px solid #e0e0e0;
             transition: all 0.3s ease;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
         }
 
         .character-picker-card:hover {
@@ -408,18 +431,23 @@
         }
 
         .character-picker-portrait {
-            width: 120px;
-            height: 120px;
+            width: 100%;
+            height: auto;
             object-fit: cover;
-            border-radius: 4px;
+            border-radius: 6px;
+            flex-shrink: 0;
         }
 
         .character-picker-name {
-            font-size: 10px;
-            margin-top: 4px;
+            font-size: 12px;
+            text-align: center;
+            font-weight: bold;
+            color: #2c3e50;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            padding: 4px;
+            flex-shrink: 0;
         }
 
         .deck-slots {
@@ -427,8 +455,7 @@
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(2, 1fr);
             gap: 0.5rem;
-            width: 100%;
-            max-width: 400px;
+            width: fit-content;
             margin: 0 auto;
         }
 
@@ -442,9 +469,10 @@
             font-size: 10px;
             color: #7f8c8d;
             text-align: center;
-            min-width: 120px;
+            width: 120px;
             min-height: 160px;
             position: relative;
+            box-sizing: border-box;
         }
 
         .deck-slot.filled {
@@ -452,12 +480,16 @@
             border-color: #3498db;
             position: relative;
             height: auto;
+            padding: 4px;
+            width: 120px;
+            box-sizing: border-box;
         }
 
         .deck-slot .card {
             width: 100%;
             height: auto;
-            padding: 4px;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         .deck-slot .card-image-container {
@@ -478,13 +510,7 @@
         }
 
         .filter-group {
-            margin-bottom: 1rem;
-        }
-
-        .filter-group h4 {
-            margin: 0 0 0.5rem 0;
-            font-size: 12px;
-            color: #2c3e50;
+            margin-bottom: 0;
         }
 
         .filter-options {
@@ -568,6 +594,7 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 1rem;
+            box-sizing: border-box;
         }
     </style>
 </head>
@@ -613,27 +640,37 @@
 
             <div class="control-section">
                 <h3>Filters</h3>
-                <div class="filter-group">
-                    <div class="filter-options">
-                        <div class="filter-row">
-                            <label class="filter-option"><input type="checkbox"> No condition</label>
-                            <label class="filter-option"><input type="checkbox"> Debuff</label>
+                <div class="filter-box">
+                    <h4>Conditions & Positions</h4>
+                    <div class="filter-group">
+                        <div class="filter-options">
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox"> No condition</label>
+                                <label class="filter-option"><input type="checkbox"> Debuff</label>
+                            </div>
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox"> Front</label>
+                                <label class="filter-option"><input type="checkbox"> Pace</label>
+                                <label class="filter-option"><input type="checkbox"> Late</label>
+                                <label class="filter-option"><input type="checkbox"> End</label>
+                            </div>
                         </div>
-                        <div class="filter-row">
-                            <label class="filter-option"><input type="checkbox"> Front</label>
-                            <label class="filter-option"><input type="checkbox"> Pace</label>
-                            <label class="filter-option"><input type="checkbox"> Late</label>
-                            <label class="filter-option"><input type="checkbox"> End</label>
-                        </div>
-                        <div class="filter-row">
-                            <label class="filter-option"><input type="checkbox"> Short</label>
-                            <label class="filter-option"><input type="checkbox"> Mile</label>
-                            <label class="filter-option"><input type="checkbox"> Medium</label>
-                            <label class="filter-option"><input type="checkbox"> Long</label>
-                        </div>
-                        <div class="filter-row">
-                            <label class="filter-option"><input type="checkbox"> Dirt</label>
-                            <label class="filter-option"><input type="checkbox"> Turf</label>
+                    </div>
+                </div>
+                <div class="filter-box">
+                    <h4>Distance & Track</h4>
+                    <div class="filter-group">
+                        <div class="filter-options">
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox"> Short</label>
+                                <label class="filter-option"><input type="checkbox"> Mile</label>
+                                <label class="filter-option"><input type="checkbox"> Medium</label>
+                                <label class="filter-option"><input type="checkbox"> Long</label>
+                            </div>
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox"> Dirt</label>
+                                <label class="filter-option"><input type="checkbox"> Turf</label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -671,6 +708,7 @@
         let draggedCard = null;
         let draggedCardIndex = null;
         let characterSearchTerm = '';
+        let searchTimeout = null;
 
         fetch('header.html').then(response => response.text()).then(data => {
             document.getElementById('header-placeholder').innerHTML = data;
@@ -804,10 +842,16 @@
             const container = document.getElementById('characters-container');
             const searchInput = document.getElementById('character-search-input');
 
-            // Setup search input
+            // Clear previous event listeners to prevent duplicates
+            searchInput.oninput = null;
+
+            // Setup search input with debouncing
             searchInput.addEventListener('input', function () {
-                characterSearchTerm = this.value.trim().toLowerCase();
-                renderCharacterPicker();
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    characterSearchTerm = this.value.trim().toLowerCase();
+                    renderCharacterPicker();
+                }, 150); // 150ms debounce delay
             });
 
             container.innerHTML = '';
