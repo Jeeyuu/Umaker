@@ -152,7 +152,7 @@
 
         .control-sections {
             display: grid;
-            grid-template-columns: minmax(240px, 1fr) fit-content fit-content 1fr;
+            grid-template-columns: minmax(240px, 1fr) minmax(120px, auto) minmax(400px, auto) minmax(200px, 1fr);
             gap: 1rem;
             margin-bottom: 2rem;
             padding: 1rem;
@@ -709,7 +709,6 @@
     <div id="footer-placeholder"></div>
 
     <script>
-        // ... (JavaScript code remains exactly the same as previous version)
         let allSupportCards = [];
         let allCharacters = [];
         let skillsMap = new Map();
@@ -1028,11 +1027,13 @@
                     const eventSkills = card.event_skills || [];
                     const hintSkills = card.hints?.hint_skills || [];
 
+                    // FIX: Only show highlighted skills when there are active search terms
                     const formatSkillsForDeck = (skills) => {
                         return skills.map(skillId => {
                             const skillData = skillsMap.get(skillId);
                             if (!skillData) return '';
                             const skillName = getSkillName(skillData);
+                            // Only highlight if there are active search terms
                             const isHighlighted = currentSearchTerms.length > 0 &&
                                 currentSearchTerms.some(term =>
                                     skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
@@ -1151,11 +1152,13 @@
             const eventSkills = card.event_skills || [];
             const hintSkills = card.hints?.hint_skills || [];
 
+            // FIX: Only show highlighted skills when there are active search terms
             const getHighlightedSkills = (skills, searchTerms) => {
                 return skills.map(skillId => {
                     const skillData = skillsMap.get(skillId);
                     if (!skillData) return null;
                     const skillName = getSkillName(skillData);
+                    // Only highlight if there are active search terms
                     const isHighlighted = searchTerms.length > 0 &&
                         searchTerms.some(term =>
                             skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
@@ -1170,6 +1173,7 @@
 
             let skillsHTML = '';
 
+            // FIX: Only show skill sections when there are active search terms
             if (searchTerms.length > 0) {
                 if (highlightedHintSkills.length > 0) {
                     skillsHTML += `
