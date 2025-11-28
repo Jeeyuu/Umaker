@@ -440,6 +440,11 @@
             background: #c0392b;
         }
 
+        /* Ensure the remove button is never affected by parent opacity */
+        .card.disabled .deck-card-remove {
+            opacity: 1 !important;
+        }
+
         /* Deck Card Dragging */
         .deck-card-dragging {
             opacity: 0.5;
