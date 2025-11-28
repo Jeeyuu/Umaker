@@ -30,7 +30,7 @@
 
         .card-error-label {
             position: absolute;
-            top: -8px;
+            top: -10px;
             left: 50%;
             transform: translateX(-50%);
             color: white;
@@ -39,9 +39,10 @@
             text-align: center;
             padding: 4px 10px;
             border-radius: 12px;
-            z-index: 10;
+            z-index: 100;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             white-space: nowrap;
+            pointer-events: none; /* Prevent the label from interfering with clicks */
         }
 
         .error-trainee {
@@ -290,7 +291,7 @@
         }
 
         .character-portrait {
-            width: 100%;
+            width: fit-content;
             height: auto;
             border-radius: 4px;
         }
@@ -974,117 +975,118 @@
         }
 
         function createCardElement(card, searchTerms = []) {
-            const cardElement = document.createElement('div');
-            cardElement.setAttribute('data-card-id', card.support_id);
-            cardElement.setAttribute('draggable', 'true');
+                const cardElement = document.createElement('div');
+                cardElement.setAttribute('data-card-id', card.support_id);
+                cardElement.setAttribute('draggable', 'true');
 
-            const errors = getCardErrors(card);
-            const hasErrors = errors.length > 0;
+                const errors = getCardErrors(card);
+                const hasErrors = errors.length > 0;
 
-            cardElement.className = `card ${hasErrors ? 'disabled' : ''}`;
+                cardElement.className = `card ${hasErrors ? 'disabled' : ''}`;
 
-            // Add error labels if any
-            if (hasErrors) {
-                errors.forEach(error => {
-                    const errorLabel = document.createElement('div');
-                    errorLabel.className = `card-error-label error-${error.type}`;
-                    errorLabel.textContent = error.message;
-                    cardElement.appendChild(errorLabel);
-                });
-            }
+                const formattedId = card.support_id.toString().padStart(5, '0');
+                const typeMap = {
+                    'speed': '00', 'stamina': '01', 'power': '02', 'guts': '03',
+                    'intelligence': '04', 'friend': '05', 'group': '06'
+                };
+                const typeIcon = typeMap[card.type];
 
-            // Drag and drop event listeners
-            cardElement.addEventListener('dragstart', handleCardDragStart);
-            cardElement.addEventListener('dragend', handleCardDragEnd);
+                const eventSkills = card.event_skills || [];
+                const hintSkills = card.hints?.hint_skills || [];
 
-            if (!hasErrors) {
-                cardElement.onclick = () => addCardToDeck(card);
-            } else {
-                cardElement.onclick = null;
-            }
+                // Get only highlighted skills
+                const getHighlightedSkills = (skills, searchTerms) => {
+                    return skills.map(skillId => {
+                        const skillData = skillsMap.get(skillId);
+                        if (!skillData) return null;
 
-            const formattedId = card.support_id.toString().padStart(5, '0');
-            const typeMap = {
-                'speed': '00', 'stamina': '01', 'power': '02', 'guts': '03',
-                'intelligence': '04', 'friend': '05', 'group': '06'
-            };
-            const typeIcon = typeMap[card.type];
+                        const skillName = getSkillName(skillData);
+                        const isHighlighted = searchTerms.length > 0 &&
+                            searchTerms.some(term =>
+                                // More specific matching - exact word match
+                                skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
+                                // Or exact phrase match for multi-word terms
+                                skillName.toLowerCase() === term
+                            );
 
-            const eventSkills = card.event_skills || [];
-            const hintSkills = card.hints?.hint_skills || [];
+                        return isHighlighted ? {
+                            id: skillId,
+                            name: skillName,
+                            highlighted: isHighlighted
+                        } : null;
+                    }).filter(skill => skill !== null);
+                };
 
-            // Get only highlighted skills
-            const getHighlightedSkills = (skills, searchTerms) => {
-                return skills.map(skillId => {
-                    const skillData = skillsMap.get(skillId);
-                    if (!skillData) return null;
+                const highlightedHintSkills = getHighlightedSkills(hintSkills, searchTerms);
+                const highlightedEventSkills = getHighlightedSkills(eventSkills, searchTerms);
 
-                    const skillName = getSkillName(skillData);
-                    const isHighlighted = searchTerms.length > 0 &&
-                        searchTerms.some(term =>
-                            // More specific matching - exact word match
-                            skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
-                            // Or exact phrase match for multi-word terms
-                            skillName.toLowerCase() === term
-                        );
+                let skillsHTML = '';
 
-                    return isHighlighted ? {
-                        id: skillId,
-                        name: skillName,
-                        highlighted: isHighlighted
-                    } : null;
-                }).filter(skill => skill !== null);
-            };
-
-            const highlightedHintSkills = getHighlightedSkills(hintSkills, searchTerms);
-            const highlightedEventSkills = getHighlightedSkills(eventSkills, searchTerms);
-
-            let skillsHTML = '';
-
-            if (searchTerms.length > 0) {
-                // Show only highlighted skills
-                if (highlightedHintSkills.length > 0) {
-                    skillsHTML += `
-                        <div class="skill-section">
-                            <div class="skill-label">Hint Skills</div>
-                            <div class="skill-list">
-                                ${highlightedHintSkills.map(skill =>
-                        `<span class="skill-number highlighted" 
-                                        title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
-                    ).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-
-                if (highlightedEventSkills.length > 0) {
-                    skillsHTML += `
-                        <div class="skill-section">
-                            <div class="skill-label">Event Skills</div>
-                            <div class="skill-list">
-                                ${highlightedEventSkills.map(skill =>
-                        `<span class="skill-number highlighted" 
-                                        title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
-                    ).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-
-            cardElement.innerHTML = `
-                <div class="card-image-container">
-                    <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
-                         alt="${card.char_name}" class="card-image" loading="lazy" onerror="this.style.display='none'">
-                    ${typeIcon ? `<img src="./images/utx_ico_obtain/utx_ico_obtain_${typeIcon}.png" 
-                         alt="${card.type}" class="card-type-icon" onerror="this.style.display='none'">` : ''}
+                if (searchTerms.length > 0) {
+                    // Show only highlighted skills
+                    if (highlightedHintSkills.length > 0) {
+                        skillsHTML += `
+                <div class="skill-section">
+                    <div class="skill-label">Hint Skills</div>
+                    <div class="skill-list">
+                        ${highlightedHintSkills.map(skill =>
+                            `<span class="skill-number highlighted" 
+                                title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
+                        ).join('')}
+                    </div>
                 </div>
-                <div class="card-name">${card.char_name}</div>
-                ${skillsHTML ? `<div class="card-skills">${skillsHTML}</div>` : ''}
             `;
+                    }
 
-            return cardElement;
-        }
+                    if (highlightedEventSkills.length > 0) {
+                        skillsHTML += `
+                <div class="skill-section">
+                    <div class="skill-label">Event Skills</div>
+                    <div class="skill-list">
+                        ${highlightedEventSkills.map(skill =>
+                            `<span class="skill-number highlighted" 
+                                title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+                    }
+                }
+
+                // Build the inner HTML FIRST
+                cardElement.innerHTML = `
+        <div class="card-image-container">
+            <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
+                 alt="${card.char_name}" class="card-image" loading="lazy" onerror="this.style.display='none'">
+            ${typeIcon ? `<img src="./images/utx_ico_obtain/utx_ico_obtain_${typeIcon}.png" 
+                 alt="${card.type}" class="card-type-icon" onerror="this.style.display='none'">` : ''}
+        </div>
+        <div class="card-name">${card.char_name}</div>
+        ${skillsHTML ? `<div class="card-skills">${skillsHTML}</div>` : ''}
+    `;
+
+                // THEN add error labels if any (AFTER setting innerHTML)
+                if (hasErrors) {
+                    errors.forEach(error => {
+                        const errorLabel = document.createElement('div');
+                        errorLabel.className = `card-error-label error-${error.type}`;
+                        errorLabel.textContent = error.message;
+                        cardElement.appendChild(errorLabel); // Append to cardElement, not innerHTML
+                    });
+                }
+
+                // Drag and drop event listeners
+                cardElement.addEventListener('dragstart', handleCardDragStart);
+                cardElement.addEventListener('dragend', handleCardDragEnd);
+
+                if (!hasErrors) {
+                    cardElement.onclick = () => addCardToDeck(card);
+                } else {
+                    cardElement.onclick = null;
+                }
+
+                return cardElement;
+            }
 
         // Drag and Drop Functions for cards from search
         function handleCardDragStart(e) {
