@@ -9,14 +9,9 @@
     <style>
         .cards-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 1rem;
             width: 100%;
-            max-width: 100%;
-            /* Same width as top sections */
-            max-height: calc(5 * (140px + 1rem));
-            /* Cap to 5 rows with min-height */
-            overflow-y: auto;
         }
 
         .card {
@@ -26,32 +21,30 @@
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
-            width: 110px;
+            width: 120px;
+            min-height: 160px;
+            /* 3/4 ratio of 120px */
             display: flex;
             flex-direction: column;
-            height: fit-content;
-            min-height: 140px;
-            /* 3:4 ratio of 110px = 82.5px, using 140px for better appearance */
         }
 
-        .card.disabled .card-image {
+        .card.disabled {
             opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .card-error-label {
             position: absolute;
-            top: -15px;
-            /* Moved higher to prevent clipping */
+            top: -10px;
             left: 50%;
             transform: translateX(-50%);
             color: white;
             font-size: 10px;
             font-weight: bold;
             text-align: center;
-            padding: 4px 8px;
+            padding: 4px 10px;
             border-radius: 12px;
-            z-index: 1000;
-            /* Higher z-index to ensure visibility */
+            z-index: 100;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
             white-space: nowrap;
             pointer-events: none;
@@ -82,7 +75,6 @@
             object-fit: cover;
             display: block;
             border-radius: 6px;
-            transition: opacity 0.3s ease;
         }
 
         .card-name {
@@ -118,8 +110,8 @@
         .skill-list {
             font-size: 9px;
             line-height: 1.2;
-            max-height: none;
-            overflow-y: visible;
+            max-height: 60px;
+            overflow-y: auto;
         }
 
         .skill-number {
@@ -168,8 +160,6 @@
             padding: 1rem;
             background: #f8f9fa;
             border-radius: 8px;
-            width: 100%;
-            max-width: 100%;
         }
 
         .control-section {
@@ -290,10 +280,9 @@
 
         .characters-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 110px));
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             gap: 0.5rem;
             margin-top: 1rem;
-            justify-content: center;
         }
 
         .character-card {
@@ -302,8 +291,6 @@
             padding: 4px;
             cursor: pointer;
             text-align: center;
-            width: 110px;
-            height: fit-content;
         }
 
         .character-card.selected {
@@ -311,13 +298,13 @@
         }
 
         .character-portrait {
-            width: 100%;
+            width: fit-content;
             height: auto;
             border-radius: 4px;
         }
 
         .character-name {
-            font-size: 12px;
+            font-size: 10px;
             margin-top: 4px;
             white-space: nowrap;
             overflow: hidden;
@@ -340,28 +327,27 @@
             font-size: 10px;
             color: #7f8c8d;
             text-align: center;
-            min-width: 110px;
-            min-height: 140px;
-            /* 3:4 ratio minimum */
+            min-width: 120px;
+            min-height: 160px;
+            /* 3/4 ratio of 120px */
             position: relative;
-            height: fit-content;
+            /* Remove max-width and max-height constraints */
         }
 
         .deck-slot.filled {
             border-style: solid;
             border-color: #3498db;
             position: relative;
-            height: fit-content;
-            min-height: 140px;
-            /* Maintain minimum height */
+            /* Allow the slot to expand to fit the card */
+            height: auto;
+            min-height: 160px;
         }
 
         .deck-slot .card {
             width: 100%;
             height: auto;
             padding: 4px;
-            min-height: 140px;
-            /* Maintain minimum height */
+            /* Remove height constraints to allow stretching */
         }
 
         .deck-slot .card-image-container {
@@ -376,7 +362,7 @@
         }
 
         .deck-slot .card-name {
-            font-size: 12px;
+            font-size: 9px;
             padding: 2px;
             margin: 0;
         }
@@ -535,7 +521,7 @@
         </div>
 
         <div id="cards-container" class="cards-container">
-            <div class="welcome-message">Loading cards...</div>
+            <div class="welcome-message">Enter search terms to find support cards</div>
         </div>
 
         <div id="character-modal" class="modal">
@@ -602,9 +588,9 @@
             const searchBox = document.createElement('div');
             searchBox.className = 'search-box';
             searchBox.innerHTML = `
-                <input type="text" class="search-input" placeholder="Enter skill or character name...">
-                <button class="remove-search-btn">×</button>
-            `;
+                    <input type="text" class="search-input" placeholder="Enter skill or character name...">
+                    <button class="remove-search-btn">×</button>
+                `;
             searchBoxesContainer.appendChild(searchBox);
             const input = searchBox.querySelector('.search-input');
             input.addEventListener('input', handleSearch);
@@ -629,37 +615,38 @@
         }
 
         function filterAndRenderCards() {
-            let filteredCards = allSupportCards;
-
-            if (currentSearchTerms.length > 0) {
-                filteredCards = allSupportCards.filter(card => {
-                    if (currentSearchTerms.some(term => card.char_name.toLowerCase().includes(term))) {
-                        return true;
-                    }
-
-                    const eventSkills = card.event_skills || [];
-                    const hasEventSkill = eventSkills.some(skillId => {
-                        const skillData = skillsMap.get(skillId);
-                        if (!skillData) return false;
-                        const skillName = getSkillName(skillData).toLowerCase();
-                        return currentSearchTerms.some(term =>
-                            skillName.split(/\s+/).some(word => word === term) || skillName === term
-                        );
-                    });
-
-                    const hintSkills = card.hints?.hint_skills || [];
-                    const hasHintSkill = hintSkills.some(skillId => {
-                        const skillData = skillsMap.get(skillId);
-                        if (!skillData) return false;
-                        const skillName = getSkillName(skillData).toLowerCase();
-                        return currentSearchTerms.some(term =>
-                            skillName.split(/\s+/).some(word => word === term) || skillName === term
-                        );
-                    });
-
-                    return hasEventSkill || hasHintSkill;
-                });
+            if (currentSearchTerms.length === 0) {
+                showWelcomeMessage();
+                return;
             }
+
+            const filteredCards = allSupportCards.filter(card => {
+                if (currentSearchTerms.some(term => card.char_name.toLowerCase().includes(term))) {
+                    return true;
+                }
+
+                const eventSkills = card.event_skills || [];
+                const hasEventSkill = eventSkills.some(skillId => {
+                    const skillData = skillsMap.get(skillId);
+                    if (!skillData) return false;
+                    const skillName = getSkillName(skillData).toLowerCase();
+                    return currentSearchTerms.some(term =>
+                        skillName.split(/\s+/).some(word => word === term) || skillName === term
+                    );
+                });
+
+                const hintSkills = card.hints?.hint_skills || [];
+                const hasHintSkill = hintSkills.some(skillId => {
+                    const skillData = skillsMap.get(skillId);
+                    if (!skillData) return false;
+                    const skillName = getSkillName(skillData).toLowerCase();
+                    return currentSearchTerms.some(term =>
+                        skillName.split(/\s+/).some(word => word === term) || skillName === term
+                    );
+                });
+
+                return hasEventSkill || hasHintSkill;
+            });
 
             renderCards(filteredCards, currentSearchTerms);
         }
@@ -694,10 +681,10 @@
                 charElement.className = `character-card ${selectedCharacter?.char_id === character.char_id ? 'selected' : ''}`;
                 charElement.onclick = () => selectCharacter(character);
                 charElement.innerHTML = `
-                    <img src="./images/chara_stand/chara_stand_${character.char_id}_${character.card_id}.png" 
-                         alt="${character.name_en}" class="character-portrait" onerror="this.style.display='none'">
-                    <div class="character-name">${character.name_en}</div>
-                `;
+                        <img src="./images/chara_stand/chara_stand_${character.char_id}_${character.card_id}.png" 
+                             alt="${character.name_en}" class="character-portrait" onerror="this.style.display='none'">
+                        <div class="character-name">${character.name_en}</div>
+                    `;
                 container.appendChild(charElement);
             });
         }
@@ -721,13 +708,13 @@
             const container = document.getElementById('selected-character');
             if (selectedCharacter) {
                 container.innerHTML = `
-                    <div class="character-card" onclick="removeSelectedCharacter()" style="cursor: pointer;">
-                        <img src="./images/chara_stand/chara_stand_${selectedCharacter.char_id}_${selectedCharacter.card_id}.png" 
-                             alt="${selectedCharacter.name_en}" class="character-portrait" onerror="this.style.display='none'">
-                        <div class="character-name">${selectedCharacter.name_en}</div>
-                        <div style="font-size: 8px; color: #e74c3c;">Click to remove</div>
-                    </div>
-                `;
+                        <div class="character-card" onclick="removeSelectedCharacter()" style="cursor: pointer;">
+                            <img src="./images/chara_stand/chara_stand_${selectedCharacter.char_id}_${selectedCharacter.card_id}.png" 
+                                 alt="${selectedCharacter.name_en}" class="character-portrait" onerror="this.style.display='none'">
+                            <div class="character-name">${selectedCharacter.name_en}</div>
+                            <div style="font-size: 8px; color: #e74c3c;">Click to remove</div>
+                        </div>
+                    `;
             } else {
                 container.innerHTML = '';
             }
@@ -849,40 +836,40 @@
                                     skillName.toLowerCase() === term
                                 );
                             return `<span class="skill-number ${isHighlighted ? 'highlighted' : ''}" 
-                                        title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
+                                            title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
                         }).join('');
                     };
 
                     const hintSkillsHTML = hintSkills.length > 0 ? `
-                        <div class="skill-section">
-                            <div class="skill-label">Hint Skills</div>
-                            <div class="skill-list">${formatSkillsForDeck(hintSkills)}</div>
-                        </div>
-                    ` : '';
+                            <div class="skill-section">
+                                <div class="skill-label">Hint Skills</div>
+                                <div class="skill-list">${formatSkillsForDeck(hintSkills)}</div>
+                            </div>
+                        ` : '';
 
                     const eventSkillsHTML = eventSkills.length > 0 ? `
-                        <div class="skill-section">
-                            <div class="skill-label">Event Skills</div>
-                            <div class="skill-list">${formatSkillsForDeck(eventSkills)}</div>
-                        </div>
-                    ` : '';
+                            <div class="skill-section">
+                                <div class="skill-label">Event Skills</div>
+                                <div class="skill-list">${formatSkillsForDeck(eventSkills)}</div>
+                            </div>
+                        ` : '';
 
                     let deckCardHTML = `
-                        <div class="card deck-card ${isTraineeError ? 'disabled' : ''}" 
-                             draggable="${!isTraineeError}" 
-                             data-card-index="${index}" 
-                             style="position: relative;">
-                            <div class="card-image-container">
-                                <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
-                                     alt="${card.char_name}" class="card-image" onerror="this.style.display='none'">
+                            <div class="card deck-card ${isTraineeError ? 'disabled' : ''}" 
+                                 draggable="${!isTraineeError}" 
+                                 data-card-index="${index}" 
+                                 style="position: relative;">
+                                <div class="card-image-container">
+                                    <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
+                                         alt="${card.char_name}" class="card-image" onerror="this.style.display='none'">
+                                </div>
+                                <div class="card-name">${card.char_name}</div>
+                                <div class="card-skills">
+                                    ${hintSkillsHTML}
+                                    ${eventSkillsHTML}
+                                </div>
                             </div>
-                            <div class="card-name">${card.char_name}</div>
-                            <div class="card-skills">
-                                ${hintSkillsHTML}
-                                ${eventSkillsHTML}
-                            </div>
-                        </div>
-                    `;
+                        `;
 
                     slot.innerHTML = deckCardHTML;
 
@@ -961,64 +948,65 @@
             const eventSkills = card.event_skills || [];
             const hintSkills = card.hints?.hint_skills || [];
 
-            // Only show skills when there are search terms
-            let skillsHTML = '';
-            if (searchTerms.length > 0) {
-                const getSkillsToShow = (skills, searchTerms) => {
-                    return skills.map(skillId => {
-                        const skillData = skillsMap.get(skillId);
-                        if (!skillData) return null;
-                        const skillName = getSkillName(skillData);
-                        const isHighlighted = searchTerms.some(term =>
+            const getHighlightedSkills = (skills, searchTerms) => {
+                return skills.map(skillId => {
+                    const skillData = skillsMap.get(skillId);
+                    if (!skillData) return null;
+                    const skillName = getSkillName(skillData);
+                    const isHighlighted = searchTerms.length > 0 &&
+                        searchTerms.some(term =>
                             skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
                             skillName.toLowerCase() === term
                         );
-                        return isHighlighted ? { id: skillId, name: skillName, highlighted: true } : null;
-                    }).filter(skill => skill !== null);
-                };
+                    return isHighlighted ? { id: skillId, name: skillName, highlighted: isHighlighted } : null;
+                }).filter(skill => skill !== null);
+            };
 
-                const hintSkillsToShow = getSkillsToShow(hintSkills, searchTerms);
-                const eventSkillsToShow = getSkillsToShow(eventSkills, searchTerms);
+            const highlightedHintSkills = getHighlightedSkills(hintSkills, searchTerms);
+            const highlightedEventSkills = getHighlightedSkills(eventSkills, searchTerms);
 
-                if (hintSkillsToShow.length > 0) {
+            let skillsHTML = '';
+
+            if (searchTerms.length > 0) {
+                if (highlightedHintSkills.length > 0) {
                     skillsHTML += `
-                        <div class="skill-section">
-                            <div class="skill-label">Hint Skills</div>
-                            <div class="skill-list">
-                                ${hintSkillsToShow.map(skill =>
-                        `<span class="skill-number ${skill.highlighted ? 'highlighted' : ''}" 
+                            <div class="skill-section">
+                                <div class="skill-label">Hint Skills</div>
+                                <div class="skill-list">
+                                    ${highlightedHintSkills.map(skill =>
+                        `<span class="skill-number highlighted" 
                                             title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
                     ).join('')}
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
                 }
 
-                if (eventSkillsToShow.length > 0) {
+                if (highlightedEventSkills.length > 0) {
                     skillsHTML += `
-                        <div class="skill-section">
-                            <div class="skill-label">Event Skills</div>
-                            <div class="skill-list">
-                                ${eventSkillsToShow.map(skill =>
-                        `<span class="skill-number ${skill.highlighted ? 'highlighted' : ''}" 
+                            <div class="skill-section">
+                                <div class="skill-label">Event Skills</div>
+                                <div class="skill-list">
+                                    ${highlightedEventSkills.map(skill =>
+                        `<span class="skill-number highlighted" 
                                             title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
                     ).join('')}
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
                 }
             }
 
             cardElement.innerHTML = `
-                <div class="card-image-container">
-                    <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
-                         alt="${card.char_name}" class="card-image" loading="lazy" onerror="this.style.display='none'">
-                    ${typeIcon ? `<img src="./images/utx_ico_obtain/utx_ico_obtain_${typeIcon}.png" 
-                         alt="${card.type}" class="card-type-icon" onerror="this.style.display='none'">` : ''}
-                </div>
-                <div class="card-name">${card.char_name}</div>
-                ${skillsHTML ? `<div class="card-skills">${skillsHTML}</div>` : ''}
-            `;
+                    <div class="card-image-container">
+                        <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
+                             alt="${card.char_name}" class="card-image" loading="lazy" onerror="this.style.display='none'">
+                        ${typeIcon ? `<img src="./images/utx_ico_obtain/utx_ico_obtain_${typeIcon}.png" 
+                             alt="${card.type}" class="card-type-icon" onerror="this.style.display='none'">` : ''}
+                    </div>
+                    <div class="card-name">${card.char_name}</div>
+                    ${skillsHTML ? `<div class="card-skills">${skillsHTML}</div>` : ''}
+                `;
 
             if (hasErrors) {
                 errors.forEach(error => {
@@ -1134,8 +1122,7 @@
             allSupportCards = await supportCardsResponse.json();
             setupSearch();
             setupDeckSlots();
-            // Show all cards at start instead of welcome message
-            filterAndRenderCards();
+            showWelcomeMessage();
         }
 
         loadCardsWithSkills();
