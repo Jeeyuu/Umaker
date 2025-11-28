@@ -23,29 +23,10 @@
         position: relative;
     }
 
+    /* Simple opacity-based dimming that works */
     .card.disabled {
-        position: relative;
+        opacity: 0.5;
         cursor: not-allowed;
-    }
-
-    /* Create a white overlay with reduced opacity for dimming effect */
-    .card.disabled::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.6);
-        border-radius: 12px 12px 8px 8px;
-        z-index: 5;
-        pointer-events: none;
-    }
-
-    /* Ensure all card content stays above the dim overlay */
-    .card>* {
-        position: relative;
-        z-index: 6;
     }
 
     .card-error-label {
@@ -437,38 +418,34 @@
         font-style: italic;
     }
 
-    /* Make sure the remove button is completely isolated from the dimming */
+    /* CRITICAL FIX: Position the remove button OUTSIDE the card container */
+    .deck-slot.filled {
+        position: relative;
+    }
+
     .deck-card-remove {
         opacity: 1 !important;
         position: absolute;
-        top: -5px;
-        right: -5px;
+        top: -8px;
+        right: -8px;
         background: #e74c3c;
         color: white;
         border: none;
         border-radius: 50%;
-        width: 16px;
-        height: 16px;
-        font-size: 10px;
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 1000 !important;
-        /* Force highest z-index */
+        z-index: 1000;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .deck-card-remove:hover {
         background: #c0392b;
-    }
-
-    /* Remove any inherited opacity */
-    .card.disabled {
-        opacity: 1 !important;
-    }
-
-    .card.disabled .deck-card-remove {
-        opacity: 1 !important;
+        transform: scale(1.1);
     }
 
     /* Deck Card Dragging */
@@ -954,26 +931,35 @@
                 </div>
             ` : '';
 
-                        // Build deck card HTML - apply 'disabled' class only for Trainee errors
+                        // In updateDeckDisplay function, replace the deckCardHTML with:
                         let deckCardHTML = `
-                <div class="card deck-card ${isTraineeError ? 'disabled' : ''}" 
-                     draggable="${!isTraineeError}" 
-                     data-card-index="${index}" 
-                     style="position: relative;">
-                    <button class="deck-card-remove" onclick="removeCardFromDeck(${index})">×</button>
-                    <div class="card-image-container">
-                        <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
-                             alt="${card.char_name}" class="card-image" onerror="this.style.display='none'">
-                    </div>
-                    <div class="card-name">${card.char_name}</div>
-                    <div class="card-skills">
-                        ${hintSkillsHTML}
-                        ${eventSkillsHTML}
-                    </div>
-                </div>
-            `;
+    <div class="card deck-card ${isTraineeError ? 'disabled' : ''}" 
+         draggable="${!isTraineeError}" 
+         data-card-index="${index}" 
+         style="position: relative;">
+        <div class="card-image-container">
+            <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
+                 alt="${card.char_name}" class="card-image" onerror="this.style.display='none'">
+        </div>
+        <div class="card-name">${card.char_name}</div>
+        <div class="card-skills">
+            ${hintSkillsHTML}
+            ${eventSkillsHTML}
+        </div>
+    </div>
+`;
 
                         slot.innerHTML = deckCardHTML;
+
+                        // Add the remove button to the SLOT, not the card
+                        const removeButton = document.createElement('button');
+                        removeButton.className = 'deck-card-remove';
+                        removeButton.innerHTML = '×';
+                        removeButton.onclick = (e) => {
+                            e.stopPropagation();
+                            removeCardFromDeck(index);
+                        };
+                        slot.appendChild(removeButton);
 
                         // Add error labels to deck card if any (only Trainee errors for deck cards)
                         if (hasErrors) {
