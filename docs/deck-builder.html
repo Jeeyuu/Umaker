@@ -801,15 +801,12 @@
 
             // Add to target position
             deck[targetSlotIndex] = card;
-            usedCharacterIds.add(card.char_id);
             updateDeckDisplay();
             updateCardDisplay();
         }
 
         function removeCardFromDeck(index) {
             if (deck[index]) {
-                const card = deck[index];
-                usedCharacterIds.delete(card.char_id);
                 deck[index] = null;
                 updateDeckDisplay();
                 updateCardDisplay();
@@ -833,16 +830,19 @@
         }
 
         function isCardDuplicate(card) {
-            // A card is duplicate if:
+            // A card is duplicate ONLY if:
             // 1. There's a selected character AND the card has the same character ID
-            // 2. OR the card's character ID is already used by another card in the deck
+            // OR
+            // 2. There's another card in the deck with the same character ID
+
+            // Check selected character first (priority)
             if (selectedCharacter && card.char_id === selectedCharacter.char_id) {
                 return true;
             }
 
-            // Check if any other card in deck has the same character ID
+            // Check deck for same character (excluding the card itself if it's already in deck)
             for (let i = 0; i < deck.length; i++) {
-                if (deck[i] && deck[i].char_id === card.char_id) {
+                if (deck[i] && deck[i] !== card && deck[i].char_id === card.char_id) {
                     return true;
                 }
             }
@@ -961,7 +961,6 @@
             cardElement.setAttribute('draggable', 'true');
 
             const isDuplicate = isCardDuplicate(card);
-            const isInDeck = deck.some(deckCard => deckCard && deckCard.support_id === card.support_id);
             cardElement.className = `card ${isDuplicate ? 'dimmed' : ''}`;
 
             // Drag and drop event listeners
@@ -970,13 +969,8 @@
 
             if (!isDuplicate) {
                 cardElement.onclick = () => addCardToDeck(card);
-            } else if (isInDeck) {
-                cardElement.onclick = () => {
-                    const deckIndex = deck.findIndex(deckCard => deckCard && deckCard.support_id === card.support_id);
-                    if (deckIndex !== -1) {
-                        removeCardFromDeck(deckIndex);
-                    }
-                };
+            } else {
+                cardElement.onclick = null;
             }
 
             const formattedId = card.support_id.toString().padStart(5, '0');
