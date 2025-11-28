@@ -322,8 +322,10 @@
 
         .deck-slots {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            /* Changed to auto-fit with minmax */
             gap: 0.5rem;
+            width: 100%;
         }
 
         .deck-slot {
@@ -337,25 +339,21 @@
             color: #7f8c8d;
             text-align: center;
             min-width: 120px;
-            /* Remove fixed min-height to allow dynamic sizing */
+            min-height: 160px;
             position: relative;
-            /* Remove max-width and max-height constraints */
         }
 
         .deck-slot.filled {
             border-style: solid;
             border-color: #3498db;
             position: relative;
-            /* Allow the slot to expand to fit the card */
             height: auto;
-            /* Remove fixed min-height */
         }
 
         .deck-slot .card {
             width: 100%;
             height: auto;
             padding: 4px;
-            /* Remove height constraints to allow stretching */
         }
 
         .deck-slot .card-image-container {
