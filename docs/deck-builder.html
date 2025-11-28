@@ -728,6 +728,7 @@
             updateSelectedCharacterDisplay();
             closeCharacterPicker();
             updateCardDisplay();
+            updateDeckDisplay(); // Update deck to show duplicates
         }
 
         function removeSelectedCharacter() {
@@ -736,6 +737,7 @@
                 selectedCharacter = null;
                 updateSelectedCharacterDisplay();
                 updateCardDisplay();
+                updateDeckDisplay(); // Update deck to remove duplicates
             }
         }
 
@@ -825,6 +827,10 @@
             updateDeckDisplay();
         }
 
+        function isCardDuplicate(card) {
+            return usedCharacterIds.has(card.char_id);
+        }
+
         function updateDeckDisplay() {
             const slots = document.querySelectorAll('.deck-slot');
             const deckCount = deck.filter(card => card !== null).length;
@@ -838,7 +844,8 @@
 
                 if (deck[index]) {
                     const card = deck[index];
-                    slot.className = 'deck-slot filled';
+                    const isDuplicate = isCardDuplicate(card);
+                    slot.className = `deck-slot filled ${isDuplicate ? 'dimmed' : ''}`;
                     const formattedId = card.support_id.toString().padStart(5, '0');
 
                     // Get all skills for deck cards with highlighting
@@ -877,7 +884,8 @@
                     ` : '';
 
                     slot.innerHTML = `
-                        <div class="card deck-card" draggable="true" data-card-index="${index}" style="position: relative;">
+                        <div class="card deck-card ${isDuplicate ? 'dimmed' : ''}" draggable="true" data-card-index="${index}" style="position: relative;">
+                            ${isDuplicate ? '<div class="duplicate-overlay">DUPLICATE</div>' : ''}
                             <button class="deck-card-remove" onclick="removeCardFromDeck(${index})">×</button>
                             <div class="card-image-container">
                                 <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
@@ -934,7 +942,7 @@
             cardElement.setAttribute('data-card-id', card.support_id);
             cardElement.setAttribute('draggable', 'true');
 
-            const isDuplicate = usedCharacterIds.has(card.char_id);
+            const isDuplicate = isCardDuplicate(card);
             const isInDeck = deck.some(deckCard => deckCard && deckCard.support_id === card.support_id);
             cardElement.className = `card ${isDuplicate ? 'dimmed' : ''}`;
 
@@ -1038,11 +1046,19 @@
 
         // Drag and Drop Functions for cards from search
         function handleCardDragStart(e) {
-            draggedCard = this;
-            this.style.opacity = '0.4';
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', this.getAttribute('data-card-id'));
-            draggedCardIndex = null; // Not from deck
+            const cardId = parseInt(this.getAttribute('data-card-id'));
+            const card = allSupportCards.find(c => c.support_id === cardId);
+
+            // Only allow dragging if not a duplicate
+            if (!isCardDuplicate(card)) {
+                draggedCard = this;
+                this.style.opacity = '0.4';
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', this.getAttribute('data-card-id'));
+                draggedCardIndex = null; // Not from deck
+            } else {
+                e.preventDefault(); // Prevent dragging of duplicate cards
+            }
         }
 
         function handleCardDragEnd(e) {
@@ -1054,11 +1070,19 @@
 
         // Drag and Drop Functions for cards in deck
         function handleDeckCardDragStart(e) {
-            draggedCard = this;
-            this.classList.add('deck-card-dragging');
-            e.dataTransfer.effectAllowed = 'move';
-            draggedCardIndex = parseInt(this.getAttribute('data-card-index'));
-            e.dataTransfer.setData('text/plain', 'deck-card:' + draggedCardIndex);
+            const cardIndex = parseInt(this.getAttribute('data-card-index'));
+            const card = deck[cardIndex];
+
+            // Only allow dragging if not a duplicate
+            if (!isCardDuplicate(card)) {
+                draggedCard = this;
+                this.classList.add('deck-card-dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                draggedCardIndex = cardIndex;
+                e.dataTransfer.setData('text/plain', 'deck-card:' + draggedCardIndex);
+            } else {
+                e.preventDefault(); // Prevent dragging of duplicate cards
+            }
         }
 
         function handleDeckCardDragEnd(e) {
@@ -1103,7 +1127,7 @@
                     const cardId = parseInt(data);
                     const card = allSupportCards.find(c => c.support_id === cardId);
 
-                    if (card && !usedCharacterIds.has(card.char_id)) {
+                    if (card && !isCardDuplicate(card)) {
                         addCardToDeck(card, targetSlotIndex);
                     }
                 }
