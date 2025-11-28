@@ -12,6 +12,9 @@
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 1rem;
             width: 100%;
+            max-width: calc(100% - 2rem);
+            /* Match container width */
+            margin: 0 auto;
         }
 
         .card {
@@ -22,7 +25,6 @@
             transition: all 0.3s ease;
             position: relative;
             width: 120px;
-            /* Remove fixed min-height to allow dynamic sizing */
             display: flex;
             flex-direction: column;
         }
@@ -93,7 +95,6 @@
             padding: 4px;
             color: #2c3e50;
             flex-grow: 1;
-            /* Remove overflow: hidden to allow content to expand */
         }
 
         .skill-section {
@@ -109,7 +110,6 @@
         .skill-list {
             font-size: 9px;
             line-height: 1.2;
-            /* Remove max-height and overflow-y to eliminate scroll bars */
         }
 
         .skill-number {
@@ -152,12 +152,15 @@
 
         .control-sections {
             display: grid;
-            grid-template-columns: 0.5fr 0.5fr 2fr 1fr;
+            grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) 2fr minmax(120px, 1fr);
             gap: 1rem;
             margin-bottom: 2rem;
             padding: 1rem;
             background: #f8f9fa;
             border-radius: 8px;
+            max-width: calc(100% - 2rem);
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .control-section {
@@ -166,7 +169,6 @@
             border-radius: 8px;
             border: 1px solid #e0e0e0;
             min-width: 120px;
-            /* Added min-width for empty character picker */
         }
 
         .control-section h3 {
@@ -193,7 +195,6 @@
             border-radius: 4px;
             font-size: 12px;
             max-width: 90px;
-            /* Added max-width for search bar */
         }
 
         .remove-search-btn {
@@ -283,7 +284,6 @@
         .characters-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            /* Changed to 120px to match card width */
             gap: 0.5rem;
             margin-top: 1rem;
         }
@@ -295,7 +295,6 @@
             cursor: pointer;
             text-align: center;
             width: 120px;
-            /* Set fixed width to match cards */
         }
 
         .character-card.selected {
@@ -304,11 +303,8 @@
 
         .character-portrait {
             width: 120px;
-            /* Set fixed width to match cards */
             height: auto;
-            /* Changed to auto to maintain aspect ratio */
             object-fit: cover;
-            /* Ensure image fills the space properly */
             border-radius: 4px;
         }
 
@@ -322,10 +318,15 @@
 
         .deck-slots {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            /* Changed to auto-fit with minmax */
+            grid-template-columns: repeat(3, 1fr);
+            /* Fixed 3 columns */
+            grid-template-rows: repeat(2, 1fr);
+            /* Fixed 2 rows */
             gap: 0.5rem;
             width: 100%;
+            max-width: 400px;
+            /* Limit max width for 3 columns */
+            margin: 0 auto;
         }
 
         .deck-slot {
@@ -457,6 +458,13 @@
 
         .deck-card-dragging {
             opacity: 0.5;
+        }
+
+        /* Ensure main content has consistent width */
+        main {
+            max-width: calc(100% - 2rem);
+            margin: 0 auto;
+            padding: 0 1rem;
         }
     </style>
 </head>
