@@ -877,12 +877,13 @@
         <div class="control-sections">
             <div class="control-section search-section">
                 <div class="search-header">
-                    <h3>Skill List</h3>
+                    <h3>Skill List</h3> <!-- Changed from Search List to Skill List -->
                     <button class="add-search-icon" id="add-search-btn">+</button>
                 </div>
                 <div class="search-boxes" id="search-boxes">
                     <div class="search-box">
                         <input type="text" class="search-input" placeholder="Enter skill name...">
+                        <!-- Changed placeholder -->
                         <button class="toggle-search-btn">✔</button>
                         <button class="remove-search-btn">✖</button>
                     </div>
@@ -1008,12 +1009,62 @@
                             </label>
                         </div>
                     </div>
+
+                    <!-- Commented out Conditions & Distance filters -->
+                    <!--
+                    <div>
+                        <h4 class="filter-header">Conditions & Positions</h4>
+                        <div class="filter-options">
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox" data-condition="nac"> No condition</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="dbf"> Debuff</label>
+                            </div>
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox" data-condition="run"> Front</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="ldr"> Pace</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="btw"> Late</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="cha"> End</label>
+                            </div>
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox" data-condition="1_0"> Early Race</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="1_1"> Mid Race</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="1_2"> Late Race</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="1_3"> Last Spurt</label>
+                            </div>
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox" data-condition="cor"> Corner</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="str"> Straight</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="f_c"> Final Corner</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="f_s"> Final Straight</label>
+                            </div>
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox" data-condition="slo"> Uphill/Downhill</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="filter-header">Distance & Track</h4>
+                        <div class="filter-options">
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox" data-condition="sho"> Short</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="mil"> Mile</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="med"> Medium</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="lng"> Long</label>
+                            </div>
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox" data-condition="dir"> Dirt</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="tur"> Turf</label>
+                            </div>
+                        </div>
+                    </div>
+                    -->
                 </div>
             </div>
         </div>
 
         <div id="cards-container" class="cards-container">
-            <div class="welcome-message">Enter skill names to find support cards</div>
+            <div class="welcome-message">Enter skill names to find support cards</div> <!-- Updated message -->
         </div>
 
         <div id="character-modal" class="modal">
@@ -1132,7 +1183,7 @@
             const searchBox = document.createElement('div');
             searchBox.className = 'search-box';
             searchBox.innerHTML = `
-                    <input type="text" class="search-input" placeholder="Enter skill name...">
+                    <input type="text" class="search-input" placeholder="Enter skill name..."> <!-- Changed placeholder -->
                     <button class="toggle-search-btn">✔</button>
                     <button class="remove-search-btn">✖</button>
                 `;
@@ -1193,7 +1244,7 @@
             });
         }
 
-        // Optimized card filtering - character search has priority
+        // Optimized card filtering - now focuses only on skills, not characters
         function filterAndRenderCards() {
             const characterSearchBar = document.getElementById('character-search-bar');
             const characterSearchTerm = characterSearchBar.value.trim().toLowerCase();
@@ -1210,13 +1261,11 @@
             }
 
             const filteredCards = allSupportCards.filter(card => {
-                // Apply character search filter - this has priority
-                if (characterSearchTerm.length > 0) {
-                    const matchesCharacter = card.char_name.toLowerCase().includes(characterSearchTerm) ||
-                        characterSearchTerm.includes(card.char_name.toLowerCase());
-                    if (!matchesCharacter) {
-                        return false;
-                    }
+                // Apply character search filter
+                if (characterSearchTerm.length > 0 &&
+                    !card.char_name.toLowerCase().includes(characterSearchTerm) &&
+                    !characterSearchTerm.includes(card.char_name.toLowerCase())) {
+                    return false;
                 }
 
                 // Apply rarity filter
@@ -1228,6 +1277,12 @@
                 // Apply type filter
                 const typeFilter = getActiveTypeFilter();
                 if (typeFilter.length > 0 && !typeFilter.includes(card.type)) {
+                    return false;
+                }
+
+                // Apply condition filters
+                const conditionFilter = getActiveConditionFilter();
+                if (conditionFilter.length > 0 && !hasMatchingCondition(card, conditionFilter)) {
                     return false;
                 }
 
@@ -1266,13 +1321,29 @@
         function getActiveFiltersKey() {
             return [
                 getActiveRarityFilter().join(','),
-                getActiveTypeFilter().join(',')
+                getActiveTypeFilter().join(','),
+                getActiveConditionFilter().join(',')
             ].join('|');
+        }
+
+        function hasMatchingCondition(card, conditionFilter) {
+            const eventSkills = card.event_skills || [];
+            const hintSkills = card.hints?.hint_skills || [];
+            const allSkills = [...eventSkills, ...hintSkills];
+
+            return allSkills.some(skillId => {
+                const skillData = skillsMap.get(skillId);
+                if (!skillData || !skillData.type) return false;
+
+                return conditionFilter.some(condition =>
+                    skillData.type.includes(condition)
+                );
+            });
         }
 
         function showWelcomeMessage() {
             const container = document.getElementById('cards-container');
-            container.innerHTML = '<div class="welcome-message">Enter skill names to find support cards</div>';
+            container.innerHTML = '<div class="welcome-message">Enter skill names to find support cards</div>'; // Updated message
         }
 
         // Sorting function
@@ -1472,7 +1543,7 @@
                         skillElement.textContent = getSkillName(skillData);
                         skillElement.title = `Skill ID: ${skillId}`;
                         skillElement.setAttribute('data-skill-id', skillId);
-                        skillElement.addEventListener('click', handleCharacterSkillClick);
+                        skillElement.addEventListener('click', handleSkillClick);
                         awakeningSkillsContainer.appendChild(skillElement);
                     }
                 });
@@ -1487,7 +1558,7 @@
                         skillElement.textContent = getSkillName(skillData);
                         skillElement.title = `Skill ID: ${skillId}`;
                         skillElement.setAttribute('data-skill-id', skillId);
-                        skillElement.addEventListener('click', handleCharacterSkillClick);
+                        skillElement.addEventListener('click', handleSkillClick);
                         innateSkillsContainer.appendChild(skillElement);
                     }
                 });
@@ -1502,7 +1573,7 @@
                         skillElement.textContent = getSkillName(skillData);
                         skillElement.title = `Skill ID: ${skillId}`;
                         skillElement.setAttribute('data-skill-id', skillId);
-                        skillElement.addEventListener('click', handleCharacterSkillClick);
+                        skillElement.addEventListener('click', handleSkillClick);
                         eventSkillsContainer.appendChild(skillElement);
                     }
                 });
@@ -1511,65 +1582,37 @@
             updateCharacterSkillsHighlight();
         }
 
-        function handleCharacterSkillClick(e) {
+        function handleSkillClick(e) {
             const skillId = this.getAttribute('data-skill-id');
             const skillData = skillsMap.get(parseInt(skillId));
             if (!skillData) return;
 
             const skillName = getSkillName(skillData);
-
-            // Check if the skill is currently highlighted
-            const isHighlighted = this.classList.contains('highlighted') || this.classList.contains('blue-highlighted');
-
-            if (isHighlighted) {
-                // If highlighted, do the blue highlight check function
-                addSkillToSearch(skillName, true);
-            } else {
-                // If not highlighted, just add to search without activating checkmark
-                addSkillToSearch(skillName, false);
-            }
+            addSkillToSearch(skillName);
         }
 
-        function addSkillToSearch(skillName, activateCheckmark = false) {
-            // Check if first search box is empty
-            const firstSearchBox = document.querySelector('.search-box');
-            const firstInput = firstSearchBox.querySelector('.search-input');
+        function addSkillToSearch(skillName) {
+            // Check if skill is already in search
+            const existingSearch = Array.from(document.querySelectorAll('.search-input'))
+                .find(input => input.value.toLowerCase() === skillName.toLowerCase());
 
-            if (firstInput.value.trim() === '') {
-                // Use the first empty slot
-                firstInput.value = skillName;
-                if (activateCheckmark) {
-                    const toggleBtn = firstSearchBox.querySelector('.toggle-search-btn');
-                    toggleBtn.classList.add('active');
-                    firstInput.classList.add('active');
-                }
+            if (existingSearch) {
+                // Toggle the checkmark
+                const searchBox = existingSearch.closest('.search-box');
+                const toggleBtn = searchBox.querySelector('.toggle-search-btn');
+                toggleBtn.classList.toggle('active');
+                existingSearch.classList.toggle('active');
             } else {
-                // Check if skill is already in search
-                const existingSearch = Array.from(document.querySelectorAll('.search-input'))
-                    .find(input => input.value.toLowerCase() === skillName.toLowerCase());
+                // Add new search box
+                addSearchBox();
+                const searchBoxes = document.querySelectorAll('.search-box');
+                const lastSearchBox = searchBoxes[searchBoxes.length - 1];
+                const input = lastSearchBox.querySelector('.search-input');
+                const toggleBtn = lastSearchBox.querySelector('.toggle-search-btn');
 
-                if (existingSearch) {
-                    if (activateCheckmark) {
-                        // Toggle the checkmark
-                        const searchBox = existingSearch.closest('.search-box');
-                        const toggleBtn = searchBox.querySelector('.toggle-search-btn');
-                        toggleBtn.classList.toggle('active');
-                        existingSearch.classList.toggle('active');
-                    }
-                } else {
-                    // Add new search box
-                    addSearchBox();
-                    const searchBoxes = document.querySelectorAll('.search-box');
-                    const lastSearchBox = searchBoxes[searchBoxes.length - 1];
-                    const input = lastSearchBox.querySelector('.search-input');
-                    const toggleBtn = lastSearchBox.querySelector('.toggle-search-btn');
-
-                    input.value = skillName;
-                    if (activateCheckmark) {
-                        toggleBtn.classList.add('active');
-                        input.classList.add('active');
-                    }
-                }
+                input.value = skillName;
+                toggleBtn.classList.add('active');
+                input.classList.add('active');
             }
 
             updateSearchTerms();
@@ -1805,17 +1848,7 @@
             if (!skillData) return;
 
             const skillName = getSkillName(skillData);
-
-            // Check if the skill is currently highlighted
-            const isHighlighted = this.classList.contains('highlighted') || this.classList.contains('blue-highlighted');
-
-            if (isHighlighted) {
-                // If highlighted, do the blue highlight check function
-                addSkillToSearch(skillName, true);
-            } else {
-                // If not highlighted, just add to search without activating checkmark
-                addSkillToSearch(skillName, false);
-            }
+            addSkillToSearch(skillName);
         }
 
         function updateCardDisplay() {
@@ -2082,6 +2115,16 @@
             return activeTypes;
         }
 
+        function getActiveConditionFilter() {
+            const activeConditions = [];
+            document.querySelectorAll('.filter-option input[data-condition]').forEach(checkbox => {
+                if (checkbox.checked) {
+                    activeConditions.push(checkbox.dataset.condition);
+                }
+            });
+            return activeConditions;
+        }
+
         function setupImageToggles() {
             const imageToggles = document.querySelectorAll('.image-toggle');
 
@@ -2136,6 +2179,14 @@
                         updateToggleState(this, input.checked);
                     }
 
+                    cardCache.clear();
+                    filterAndRenderCards();
+                });
+            });
+
+            // Add event listeners for condition filters (they still work even though hidden)
+            document.querySelectorAll('.filter-option input[data-condition]').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
                     cardCache.clear();
                     filterAndRenderCards();
                 });
