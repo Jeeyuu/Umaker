@@ -79,7 +79,7 @@
         }
 
         .card-name {
-            font-size: 12px;
+            font-size: 11px;
             text-align: center;
             font-weight: bold;
             color: #2c3e50;
@@ -88,10 +88,11 @@
             text-overflow: ellipsis;
             padding: 4px;
             flex-shrink: 0;
+            line-height: 1.2;
         }
 
         .card-skills {
-            font-size: 10px;
+            font-size: 9px;
             padding: 4px;
             color: #2c3e50;
             flex-grow: 1;
@@ -105,6 +106,7 @@
             font-weight: bold;
             color: #3498db;
             margin-bottom: 2px;
+            font-size: 9px;
         }
 
         .skill-list {
@@ -121,6 +123,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            font-size: 9px;
         }
 
         .skill-number.highlighted {
@@ -142,6 +145,7 @@
             padding: 2rem;
             color: #7f8c8d;
             grid-column: 1 / -1;
+            font-size: 11px;
         }
 
         .card-type-icon {
@@ -181,9 +185,10 @@
 
         .control-section h3 {
             margin: 0 0 1rem 0;
-            font-size: 14px;
+            font-size: 13px;
             color: #2c3e50;
             text-align: left;
+            font-weight: bold;
         }
 
         .control-section:nth-child(2) {
@@ -211,14 +216,14 @@
         .character-skill-label {
             font-weight: bold;
             color: #3498db;
-            font-size: 10px;
             margin-bottom: 2px;
+            font-size: 10px;
         }
 
         .character-skill-list {
             font-size: 9px;
             line-height: 1.2;
-            color: #000000;
+            color: #2c3e50;
         }
 
         .switch-container {
@@ -239,7 +244,7 @@
             align-items: center;
             gap: 0.25rem;
             font-size: 10px;
-            color: #000000;
+            color: #2c3e50;
             white-space: nowrap;
         }
 
@@ -306,9 +311,10 @@
             padding: 6px 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 11px;
             min-width: 0;
             box-sizing: border-box;
+            color: #2c3e50;
         }
 
         .search-input.active {
@@ -413,13 +419,14 @@
         }
 
         .character-name-display {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             color: #2c3e50;
             margin-top: 8px;
             text-align: center;
             max-width: 120px;
             word-wrap: break-word;
+            line-height: 1.2;
         }
 
         .character-remove {
@@ -535,7 +542,7 @@
         }
 
         .character-picker-name {
-            font-size: 12px;
+            font-size: 11px;
             text-align: center;
             font-weight: bold;
             color: #2c3e50;
@@ -544,6 +551,7 @@
             text-overflow: ellipsis;
             padding: 4px;
             flex-shrink: 0;
+            line-height: 1.2;
         }
 
         .deck-slots {
@@ -632,7 +640,7 @@
             align-items: center;
             gap: 0.25rem;
             font-size: 10px;
-            color: #000000;
+            color: #2c3e50;
             white-space: nowrap;
         }
 
@@ -659,6 +667,7 @@
             color: #7f8c8d;
             grid-column: 1 / -1;
             font-style: italic;
+            font-size: 11px;
         }
 
         .deck-card-remove {
@@ -774,8 +783,31 @@
 
         .filter-header {
             margin: 0 0 0.5rem 0;
-            font-size: 12px;
+            font-size: 11px;
             color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .sort-container {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .sort-select {
+            flex: 1;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 11px;
+            background-color: white;
+            color: #2c3e50;
+            cursor: pointer;
+        }
+
+        .sort-select:focus {
+            outline: none;
+            border-color: #3498db;
         }
     </style>
 </head>
@@ -791,7 +823,7 @@
                     <div class="search-box">
                         <input type="text" class="search-input" placeholder="Enter skill or character name...">
                         <button class="toggle-search-btn">✔</button>
-                        <button class="remove-search-btn">×</button>
+                        <button class="remove-search-btn">✖</button>
                     </div>
                 </div>
                 <button class="add-search-btn" id="add-search-btn">
@@ -840,6 +872,21 @@
                 <h3>Filters</h3>
 
                 <div class="filter-section">
+                    <!-- Sort Dropdowns -->
+                    <div class="sort-container">
+                        <select class="sort-select">
+                            <option value="">Sort By</option>
+                            <option value="rarity">Rarity</option>
+                            <option value="character">Character Name</option>
+                            <option value="type">Card Type</option>
+                            <option value="release">Release Date</option>
+                        </select>
+                        <select class="sort-select">
+                            <option value="asc">Ascending</option>
+                            <option value="desc">Descending</option>
+                        </select>
+                    </div>
+
                     <!-- Rarity Image Toggles (no header) -->
                     <div class="image-toggle-container">
                         <div class="image-toggle-row">
@@ -933,7 +980,7 @@
 
         <div id="character-modal" class="modal">
             <div class="modal-content">
-                <button class="close-modal" onclick="closeCharacterPicker()">×</button>
+                <button class="close-modal">✖</button>
                 <h3>Select Character</h3>
                 <div class="character-search-container">
                     <input type="text" class="character-search-input" id="character-search-input"
@@ -1018,7 +1065,7 @@
             searchBox.innerHTML = `
                     <input type="text" class="search-input" placeholder="Enter skill or character name...">
                     <button class="toggle-search-btn">✔</button>
-                    <button class="remove-search-btn">×</button>
+                    <button class="remove-search-btn">✖</button>
                 `;
             searchBoxesContainer.appendChild(searchBox);
             const input = searchBox.querySelector('.search-input');
@@ -1198,7 +1245,7 @@
                     <div class="character-slot filled" style="position: relative;">
                         <img src="./images/chara_stand/chara_stand_${selectedCharacter.char_id}_${selectedCharacter.card_id}.png" 
                              alt="${selectedCharacter.name_en}" class="character-portrait" onerror="this.style.display='none'">
-                        <button class="character-remove" onclick="removeSelectedCharacter()">×</button>
+                        <button class="character-remove" onclick="removeSelectedCharacter()">✖</button>
                     </div>
                 `;
                 nameDisplay.textContent = selectedCharacter.name_en;
@@ -1464,7 +1511,7 @@
 
                     const removeButton = document.createElement('button');
                     removeButton.className = 'deck-card-remove';
-                    removeButton.innerHTML = '×';
+                    removeButton.innerHTML = '✖';
                     removeButton.onclick = (e) => {
                         e.stopPropagation();
                         removeCardFromDeck(index);
