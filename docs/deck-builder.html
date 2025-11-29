@@ -185,7 +185,6 @@
             color: #2c3e50;
         }
 
-        /* Character Section - Expanded for skills */
         .control-section:nth-child(2) {
             width: fit-content;
             min-width: fit-content;
@@ -213,11 +212,9 @@
         .character-skill-list {
             font-size: 9px;
             line-height: 1.2;
-            /* Changed from white to black */
             color: #000000;
         }
 
-        /* Switch button styles */
         .switch-container {
             display: flex;
             flex-direction: column;
@@ -694,7 +691,6 @@
             box-sizing: border-box;
         }
 
-        /* New styles for image toggles */
         .image-toggle-container {
             display: flex;
             flex-direction: column;
@@ -725,13 +721,11 @@
             transition: all 0.3s ease;
         }
 
-        /* Rarity images - double width */
         .image-toggle.rarity img {
             width: 64px;
             height: auto;
         }
 
-        /* Type images - responsive sizing */
         .image-toggle.type-toggle {
             flex: 1;
             min-width: 0;
@@ -760,11 +754,16 @@
             height: 0;
         }
 
-        /* Combined filter section */
         .filter-section {
             display: flex;
             flex-direction: column;
             gap: 1rem;
+        }
+
+        .filter-header {
+            margin: 0 0 0.5rem 0;
+            font-size: 12px;
+            color: #2c3e50;
         }
     </style>
 </head>
@@ -797,7 +796,6 @@
                 </div>
                 <div id="character-name-display" class="character-name-display"></div>
 
-                <!-- Character Skills Sections -->
                 <div class="character-skills" id="character-skills" style="display: none;">
                     <div class="character-skill-section">
                         <div class="character-skill-label">Awakening Skills</div>
@@ -829,11 +827,9 @@
             <div class="control-section">
                 <h3>Filters</h3>
 
-                <!-- Combined filter section -->
                 <div class="filter-section">
-                    <!-- Rarity Image Toggles -->
                     <div class="image-toggle-container">
-                        <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Rarity</h4>
+                        <h4 class="filter-header">Rarity</h4>
                         <div class="image-toggle-row">
                             <label class="image-toggle rarity active" data-rarity="SSR">
                                 <input type="checkbox" checked>
@@ -850,9 +846,8 @@
                         </div>
                     </div>
 
-                    <!-- Type Image Toggles -->
                     <div class="image-toggle-container">
-                        <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Type</h4>
+                        <h4 class="filter-header">Type</h4>
                         <div class="image-toggle-row">
                             <label class="image-toggle type-toggle active" data-type="speed">
                                 <input type="checkbox" checked>
@@ -885,9 +880,8 @@
                         </div>
                     </div>
 
-                    <!-- Conditions & Positions Distance Track -->
                     <div>
-                        <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Conditions & Positions</h4>
+                        <h4 class="filter-header">Conditions & Positions</h4>
                         <div class="filter-options">
                             <div class="filter-row">
                                 <label class="filter-option"><input type="checkbox"> No condition</label>
@@ -903,7 +897,7 @@
                     </div>
 
                     <div>
-                        <h4 style="margin: 1rem 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Distance & Track</h4>
+                        <h4 class="filter-header">Distance & Track</h4>
                         <div class="filter-options">
                             <div class="filter-row">
                                 <label class="filter-option"><input type="checkbox"> Short</label>
@@ -1107,7 +1101,8 @@
 
         function showWelcomeMessage() {
             const container = document.getElementById('cards-container');
-            container.innerHTML = '<div class="welcome-message">Enter search terms to find support cards</div>';        }
+            container.innerHTML = '<div class="welcome-message">Enter search terms to find support cards</div>';
+        }
 
         async function openCharacterPicker() {
             if (allCharacters.length === 0) {
@@ -1132,16 +1127,14 @@
             const container = document.getElementById('characters-container');
             const searchInput = document.getElementById('character-search-input');
 
-            // Clear previous event listeners to prevent duplicates
             searchInput.oninput = null;
 
-            // Setup search input with debouncing
             searchInput.addEventListener('input', function () {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
                     characterSearchTerm = this.value.trim().toLowerCase();
                     renderCharacterPicker();
-                }, 150); // 150ms debounce delay
+                }, 150);
             });
 
             container.innerHTML = '';
@@ -1199,7 +1192,6 @@
                 nameDisplay.textContent = selectedCharacter.name_en;
                 skillsContainer.style.display = 'block';
 
-                // Load actual character skills from the character data
                 loadCharacterSkills(selectedCharacter);
             } else {
                 container.innerHTML = `
@@ -1212,18 +1204,15 @@
             }
         }
 
-        // New function to load character skills from character data
         function loadCharacterSkills(character) {
             const awakeningSkillsContainer = document.getElementById('awakening-skills');
             const innateSkillsContainer = document.getElementById('innate-skills');
             const eventSkillsContainer = document.getElementById('character-event-skills');
 
-            // Clear previous skills
             awakeningSkillsContainer.innerHTML = '';
             innateSkillsContainer.innerHTML = '';
             eventSkillsContainer.innerHTML = '';
 
-            // Load awakening skills
             if (character.skills_awakening && character.skills_awakening.length > 0) {
                 character.skills_awakening.forEach(skillId => {
                     const skillData = skillsMap.get(skillId);
@@ -1238,7 +1227,6 @@
                 });
             }
 
-            // Load innate skills
             if (character.skills_innate && character.skills_innate.length > 0) {
                 character.skills_innate.forEach(skillId => {
                     const skillData = skillsMap.get(skillId);
@@ -1253,7 +1241,6 @@
                 });
             }
 
-            // Load event skills
             if (character.skills_event && character.skills_event.length > 0) {
                 character.skills_event.forEach(skillId => {
                     const skillData = skillsMap.get(skillId);
@@ -1268,11 +1255,9 @@
                 });
             }
 
-            // Update highlights after loading skills
             updateCharacterSkillsHighlight();
         }
 
-        // Function to highlight character skills based on active search terms
         function updateCharacterSkillsHighlight() {
             if (!selectedCharacter) return;
 
@@ -1285,12 +1270,10 @@
                 if (skillData) {
                     const skillName = getSkillName(skillData).toLowerCase();
 
-                    // Check if this skill matches any active search term
                     const isBlueHighlighted = activeSearchTerms.some(term =>
                         skillName.split(/\s+/).some(word => word === term) || skillName === term
                     );
 
-                    // Check if this skill matches any regular search term
                     const isHighlighted = currentSearchTerms.some(term =>
                         skillName.split(/\s+/).some(word => word === term) || skillName === term
                     );
@@ -1718,14 +1701,12 @@
             return false;
         }
 
-        // Setup image toggle functionality
         function setupImageToggles() {
             const imageToggles = document.querySelectorAll('.image-toggle');
 
             imageToggles.forEach(toggle => {
                 const input = toggle.querySelector('input');
 
-                // Set initial state
                 if (input.checked) {
                     toggle.classList.add('active');
                     toggle.classList.remove('inactive');
@@ -1734,7 +1715,6 @@
                     toggle.classList.remove('active');
                 }
 
-                // Add click event listener
                 toggle.addEventListener('click', function () {
                     input.checked = !input.checked;
 
@@ -1746,7 +1726,6 @@
                         this.classList.remove('active');
                     }
 
-                    // Trigger filter update
                     filterAndRenderCards();
                 });
             });
@@ -1761,7 +1740,7 @@
             setupSearch();
             setupDeckSlots();
             updateCharacterSlotDisplay();
-            setupImageToggles(); // Initialize image toggles
+            setupImageToggles();
             showWelcomeMessage();
         }
 
