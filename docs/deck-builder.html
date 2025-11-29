@@ -848,6 +848,25 @@
             outline: none;
             border-color: #3498db;
         }
+
+        .character-search-bar {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 1rem;
+            box-sizing: border-box;
+        }
+
+        .character-search-bar:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 
@@ -858,12 +877,13 @@
         <div class="control-sections">
             <div class="control-section search-section">
                 <div class="search-header">
-                    <h3>Search List</h3>
+                    <h3>Skill List</h3> <!-- Changed from Search List to Skill List -->
                     <button class="add-search-icon" id="add-search-btn">+</button>
                 </div>
                 <div class="search-boxes" id="search-boxes">
                     <div class="search-box">
-                        <input type="text" class="search-input" placeholder="Enter skill or character name...">
+                        <input type="text" class="search-input" placeholder="Enter skill name...">
+                        <!-- Changed placeholder -->
                         <button class="toggle-search-btn">✔</button>
                         <button class="remove-search-btn">✖</button>
                     </div>
@@ -919,6 +939,10 @@
                 <h3>Filters</h3>
 
                 <div class="filter-section-content">
+                    <!-- Character Search Bar -->
+                    <input type="text" class="character-search-bar" id="character-search-bar"
+                        placeholder="Search character by name...">
+
                     <!-- Sort Dropdowns -->
                     <div class="sort-container">
                         <select class="sort-select" id="sort-by">
@@ -986,12 +1010,13 @@
                         </div>
                     </div>
 
+                    <!-- Commented out Conditions & Distance filters -->
+                    <!--
                     <div>
                         <h4 class="filter-header">Conditions & Positions</h4>
                         <div class="filter-options">
                             <div class="filter-row">
-                                <label class="filter-option"><input type="checkbox" data-condition="nac"> No
-                                    condition</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="nac"> No condition</label>
                                 <label class="filter-option"><input type="checkbox" data-condition="dbf"> Debuff</label>
                             </div>
                             <div class="filter-row">
@@ -1001,27 +1026,19 @@
                                 <label class="filter-option"><input type="checkbox" data-condition="cha"> End</label>
                             </div>
                             <div class="filter-row">
-                                <label class="filter-option"><input type="checkbox" data-condition="1_0"> Early
-                                    Race</label>
-                                <label class="filter-option"><input type="checkbox" data-condition="1_1"> Mid
-                                    Race</label>
-                                <label class="filter-option"><input type="checkbox" data-condition="1_2"> Late
-                                    Race</label>
-                                <label class="filter-option"><input type="checkbox" data-condition="1_3"> Last
-                                    Spurt</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="1_0"> Early Race</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="1_1"> Mid Race</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="1_2"> Late Race</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="1_3"> Last Spurt</label>
                             </div>
                             <div class="filter-row">
                                 <label class="filter-option"><input type="checkbox" data-condition="cor"> Corner</label>
-                                <label class="filter-option"><input type="checkbox" data-condition="str">
-                                    Straight</label>
-                                <label class="filter-option"><input type="checkbox" data-condition="f_c"> Final
-                                    Corner</label>
-                                <label class="filter-option"><input type="checkbox" data-condition="f_s"> Final
-                                    Straight</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="str"> Straight</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="f_c"> Final Corner</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="f_s"> Final Straight</label>
                             </div>
                             <div class="filter-row">
-                                <label class="filter-option"><input type="checkbox" data-condition="slo">
-                                    Uphill/Downhill</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="slo"> Uphill/Downhill</label>
                             </div>
                         </div>
                     </div>
@@ -1041,12 +1058,13 @@
                             </div>
                         </div>
                     </div>
+                    -->
                 </div>
             </div>
         </div>
 
         <div id="cards-container" class="cards-container">
-            <div class="welcome-message">Enter search terms to find support cards</div>
+            <div class="welcome-message">Enter skill names to find support cards</div> <!-- Updated message -->
         </div>
 
         <div id="character-modal" class="modal">
@@ -1148,6 +1166,16 @@
                 updateDeckDisplay();
                 updateCharacterSkillsHighlight();
             });
+
+            // Setup character search bar
+            const characterSearchBar = document.getElementById('character-search-bar');
+            characterSearchBar.addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    cardCache.clear();
+                    filterAndRenderCards();
+                }, 150);
+            });
         }
 
         function addSearchBox() {
@@ -1155,7 +1183,7 @@
             const searchBox = document.createElement('div');
             searchBox.className = 'search-box';
             searchBox.innerHTML = `
-                    <input type="text" class="search-input" placeholder="Enter skill or character name...">
+                    <input type="text" class="search-input" placeholder="Enter skill name..."> <!-- Changed placeholder -->
                     <button class="toggle-search-btn">✔</button>
                     <button class="remove-search-btn">✖</button>
                 `;
@@ -1216,20 +1244,30 @@
             });
         }
 
-        // Optimized card filtering
+        // Optimized card filtering - now focuses only on skills, not characters
         function filterAndRenderCards() {
-            if (currentSearchTerms.length === 0) {
+            const characterSearchBar = document.getElementById('character-search-bar');
+            const characterSearchTerm = characterSearchBar.value.trim().toLowerCase();
+
+            if (currentSearchTerms.length === 0 && characterSearchTerm.length === 0) {
                 showWelcomeMessage();
                 return;
             }
 
-            const cacheKey = currentSearchTerms.join('|') + getActiveFiltersKey();
+            const cacheKey = currentSearchTerms.join('|') + characterSearchTerm + getActiveFiltersKey();
             if (cardCache.has(cacheKey)) {
                 renderCards(cardCache.get(cacheKey), currentSearchTerms);
                 return;
             }
 
             const filteredCards = allSupportCards.filter(card => {
+                // Apply character search filter
+                if (characterSearchTerm.length > 0 &&
+                    !card.char_name.toLowerCase().includes(characterSearchTerm) &&
+                    !characterSearchTerm.includes(card.char_name.toLowerCase())) {
+                    return false;
+                }
+
                 // Apply rarity filter
                 const rarityFilter = getActiveRarityFilter();
                 if (rarityFilter.length > 0 && !rarityFilter.includes(getRarityText(card.rarity))) {
@@ -1248,14 +1286,12 @@
                     return false;
                 }
 
-                // Check character name with relaxed matching
-                if (currentSearchTerms.some(term =>
-                    card.char_name.toLowerCase().includes(term) ||
-                    term.includes(card.char_name.toLowerCase())
-                )) {
+                // If no skill search terms, show all cards that match character search
+                if (currentSearchTerms.length === 0) {
                     return true;
                 }
 
+                // Search only in skills (not character names)
                 const eventSkills = card.event_skills || [];
                 const hasEventSkill = eventSkills.some(skillId => {
                     const skillName = skillNameCache.get(skillId);
@@ -1307,7 +1343,7 @@
 
         function showWelcomeMessage() {
             const container = document.getElementById('cards-container');
-            container.innerHTML = '<div class="welcome-message">Enter search terms to find support cards</div>';
+            container.innerHTML = '<div class="welcome-message">Enter skill names to find support cards</div>'; // Updated message
         }
 
         // Sorting function
@@ -2148,7 +2184,7 @@
                 });
             });
 
-            // Add event listeners for condition filters
+            // Add event listeners for condition filters (they still work even though hidden)
             document.querySelectorAll('.filter-option input[data-condition]').forEach(checkbox => {
                 checkbox.addEventListener('change', function () {
                     cardCache.clear();
