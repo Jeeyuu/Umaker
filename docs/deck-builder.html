@@ -713,10 +713,12 @@
             transition: all 0.3s ease;
             border-radius: 4px;
             padding: 2px;
+            flex: 1;
+            min-width: 0;
         }
 
         .image-toggle img {
-            width: 32px;
+            width: 100%;
             height: auto;
             object-fit: contain;
             border-radius: 4px;
@@ -726,6 +728,18 @@
         /* Rarity images - double width */
         .image-toggle.rarity img {
             width: 64px;
+            height: auto;
+        }
+
+        /* Type images - responsive sizing */
+        .image-toggle.type-toggle {
+            flex: 1;
+            min-width: 0;
+            max-width: calc(100% / 7);
+        }
+
+        .image-toggle.type-toggle img {
+            width: 100%;
             height: auto;
         }
 
@@ -840,31 +854,31 @@
                     <div class="image-toggle-container">
                         <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Type</h4>
                         <div class="image-toggle-row">
-                            <label class="image-toggle active" data-type="speed">
+                            <label class="image-toggle type-toggle active" data-type="speed">
                                 <input type="checkbox" checked>
                                 <img src="./images/utx_ico_obtain/utx_ico_obtain_00.png" alt="Speed">
                             </label>
-                            <label class="image-toggle active" data-type="stamina">
+                            <label class="image-toggle type-toggle active" data-type="stamina">
                                 <input type="checkbox" checked>
                                 <img src="./images/utx_ico_obtain/utx_ico_obtain_01.png" alt="Stamina">
                             </label>
-                            <label class="image-toggle active" data-type="power">
+                            <label class="image-toggle type-toggle active" data-type="power">
                                 <input type="checkbox" checked>
                                 <img src="./images/utx_ico_obtain/utx_ico_obtain_02.png" alt="Power">
                             </label>
-                            <label class="image-toggle active" data-type="guts">
+                            <label class="image-toggle type-toggle active" data-type="guts">
                                 <input type="checkbox" checked>
                                 <img src="./images/utx_ico_obtain/utx_ico_obtain_03.png" alt="Guts">
                             </label>
-                            <label class="image-toggle active" data-type="intelligence">
+                            <label class="image-toggle type-toggle active" data-type="intelligence">
                                 <input type="checkbox" checked>
                                 <img src="./images/utx_ico_obtain/utx_ico_obtain_04.png" alt="Intelligence">
                             </label>
-                            <label class="image-toggle active" data-type="friend">
+                            <label class="image-toggle type-toggle active" data-type="friend">
                                 <input type="checkbox" checked>
                                 <img src="./images/utx_ico_obtain/utx_ico_obtain_05.png" alt="Friend">
                             </label>
-                            <label class="image-toggle active" data-type="group">
+                            <label class="image-toggle type-toggle active" data-type="group">
                                 <input type="checkbox" checked>
                                 <img src="./images/utx_ico_obtain/utx_ico_obtain_06.png" alt="Group">
                             </label>
@@ -978,6 +992,7 @@
                 updateActiveSearchTerms();
                 updateCharacterSkillsHighlight();
                 updateCardDisplay();
+                updateDeckDisplay();
             });
             const initialRemoveBtn = document.querySelector('.remove-search-btn');
             initialRemoveBtn.addEventListener('click', function () {
@@ -1011,6 +1026,7 @@
                 updateActiveSearchTerms();
                 updateCharacterSkillsHighlight();
                 updateCardDisplay();
+                updateDeckDisplay();
             });
             const removeBtn = searchBox.querySelector('.remove-search-btn');
             removeBtn.addEventListener('click', function () {
@@ -1091,7 +1107,7 @@
 
         function showWelcomeMessage() {
             const container = document.getElementById('cards-container');
-            container.innerHTML = '<div class="welcome-message">Enter search terms to find support cards</div>';
+            container.innerHTML = '<div class="welcome-message' > Enter search terms to find support cards</div > ';
         }
 
         async function openCharacterPicker() {
@@ -1271,13 +1287,21 @@
                     const skillName = getSkillName(skillData).toLowerCase();
 
                     // Check if this skill matches any active search term
-                    const isHighlighted = activeSearchTerms.some(term =>
+                    const isBlueHighlighted = activeSearchTerms.some(term =>
                         skillName.split(/\s+/).some(word => word === term) || skillName === term
                     );
 
-                    if (isHighlighted) {
+                    // Check if this skill matches any regular search term
+                    const isHighlighted = currentSearchTerms.some(term =>
+                        skillName.split(/\s+/).some(word => word === term) || skillName === term
+                    );
+
+                    if (isBlueHighlighted) {
                         element.classList.add('blue-highlighted');
                         element.classList.remove('highlighted');
+                    } else if (isHighlighted) {
+                        element.classList.add('highlighted');
+                        element.classList.remove('blue-highlighted');
                     } else {
                         element.classList.remove('blue-highlighted', 'highlighted');
                     }
