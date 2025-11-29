@@ -226,73 +226,6 @@
             color: #2c3e50;
         }
 
-        .switch-container {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .switch-row {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .switch-label {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            font-size: 11px;
-            color: #2c3e50;
-            white-space: nowrap;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 30px;
-            height: 16px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 16px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 12px;
-            width: 12px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked+.slider {
-            background-color: #2196F3;
-        }
-
-        input:checked+.slider:before {
-            transform: translateX(14px);
-        }
-
         .search-section {
             width: 250px;
             position: relative;
@@ -572,6 +505,60 @@
 
         .deck-section {
             width: fit-content;
+        }
+
+        .deck-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .deck-header h3 {
+            margin: 0;
+        }
+
+        .deck-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .deck-button {
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .save-button {
+            background: #2ecc71;
+        }
+
+        .save-button:hover {
+            background: #27ae60;
+        }
+
+        .load-button {
+            background: #3498db;
+        }
+
+        .load-button:hover {
+            background: #2980b9;
+        }
+
+        .clear-button {
+            background: #e74c3c;
+        }
+
+        .clear-button:hover {
+            background: #c0392b;
         }
 
         .deck-slots {
@@ -885,7 +872,14 @@
             </div>
 
             <div class="control-section deck-section">
-                <h3>Deck (0/6)</h3>
+                <div class="deck-header">
+                    <h3>Deck (0/6)</h3>
+                    <div class="deck-buttons">
+                        <button class="deck-button save-button" title="Save Deck">S</button>
+                        <button class="deck-button load-button" title="Load Deck">L</button>
+                        <button class="deck-button clear-button" title="Clear Deck">C</button>
+                    </div>
+                </div>
                 <div class="deck-slots" id="deck-slots">
                     <div class="deck-slot">Slot 1</div>
                     <div class="deck-slot">Slot 2</div>
@@ -905,7 +899,7 @@
                         <select class="sort-select">
                             <option value="">Skills</option>
                             <option value="rarity">Rarity</option>
-                            <option value="character">Character Name</option>
+                            <option value="character">Name</option>
                             <option value="type">Card Type</option>
                             <option value="release">Release Date</option>
                         </select>
@@ -915,7 +909,7 @@
                         </select>
                     </div>
 
-                    <!-- Rarity Image Toggles (no header) -->
+                    <!-- Rarity Image Toggles -->
                     <div class="image-toggle-container">
                         <div class="image-toggle-row">
                             <label class="image-toggle rarity active" data-rarity="SSR">
@@ -933,7 +927,7 @@
                         </div>
                     </div>
 
-                    <!-- Type Image Toggles (no header) -->
+                    <!-- Type Image Toggles -->
                     <div class="image-toggle-container">
                         <div class="image-toggle-row">
                             <label class="image-toggle type-toggle active" data-type="speed">
@@ -1855,6 +1849,62 @@
             });
         }
 
+        // Deck management functions
+        function saveDeck() {
+            const deckData = {
+                character: selectedCharacter,
+                cards: deck.filter(card => card !== null).map(card => card.support_id),
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem('savedDeck', JSON.stringify(deckData));
+            alert('Deck saved successfully!');
+        }
+
+        function loadDeck() {
+            const savedDeck = localStorage.getItem('savedDeck');
+            if (!savedDeck) {
+                alert('No saved deck found!');
+                return;
+            }
+
+            const deckData = JSON.parse(savedDeck);
+
+            // Load character
+            if (deckData.character) {
+                selectedCharacter = deckData.character;
+                updateCharacterSlotDisplay();
+            }
+
+            // Load cards
+            deck = Array(6).fill(null);
+            deckData.cards.forEach((cardId, index) => {
+                if (index < 6) {
+                    const card = allSupportCards.find(c => c.support_id === cardId);
+                    if (card) {
+                        deck[index] = card;
+                    }
+                }
+            });
+
+            updateDeckDisplay();
+            updateCardDisplay();
+            alert('Deck loaded successfully!');
+        }
+
+        function clearDeck() {
+            if (confirm('Are you sure you want to clear the deck?')) {
+                deck = Array(6).fill(null);
+                updateDeckDisplay();
+                updateCardDisplay();
+            }
+        }
+
+        function setupDeckButtons() {
+            document.querySelector('.save-button').addEventListener('click', saveDeck);
+            document.querySelector('.load-button').addEventListener('click', loadDeck);
+            document.querySelector('.clear-button').addEventListener('click', clearDeck);
+        }
+
         async function loadCardsWithSkills() {
             const [skillsData, supportCardsResponse] = await Promise.all([
                 loadSkillsData(),
@@ -1865,6 +1915,7 @@
             setupDeckSlots();
             updateCharacterSlotDisplay();
             setupImageToggles();
+            setupDeckButtons();
             showWelcomeMessage();
         }
 
