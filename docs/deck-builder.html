@@ -180,12 +180,7 @@
             color: #2c3e50;
         }
 
-        /* Search Section - Min width 240px */
-        .control-section:nth-child(1) {
-            min-width: 240px;
-        }
-
-        /* Character Section - Fit content */
+        /* Character Section - Expanded for skills */
         .control-section:nth-child(2) {
             width: fit-content;
             min-width: fit-content;
@@ -194,36 +189,93 @@
             align-items: center;
         }
 
-        /* Deck Section - Fit content */
-        .control-section:nth-child(3) {
-            width: fit-content;
-            min-width: fit-content;
+        .character-skills {
+            margin-top: 1rem;
+            width: 100%;
         }
 
-        /* Filters Section - Two separate boxes */
-        .control-section:nth-child(4) {
-            min-width: 0;
+        .character-skill-section {
+            margin-bottom: 8px;
+        }
+
+        .character-skill-label {
+            font-weight: bold;
+            color: #3498db;
+            font-size: 10px;
+            margin-bottom: 2px;
+        }
+
+        .character-skill-list {
+            font-size: 9px;
+            line-height: 1.2;
+        }
+
+        /* Switch button styles */
+        .switch-container {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
-            padding: 0;
-            background: transparent;
-            border: none;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
         }
 
-        .filter-box {
-            background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            flex: 1;
-            min-height: 0;
+        .switch-row {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
-        .filter-box h4 {
-            margin: 0 0 0.5rem 0;
-            font-size: 12px;
-            color: #2c3e50;
+        .switch-label {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 10px;
+            color: #000000;
+            white-space: nowrap;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 30px;
+            height: 16px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 16px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 12px;
+            width: 12px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #2196F3;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(14px);
         }
 
         .search-boxes {
@@ -326,12 +378,14 @@
             border-radius: 6px;
         }
 
-        .character-name {
-            font-size: 10px;
-            margin-top: 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .character-name-display {
+            font-size: 12px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-top: 8px;
+            text-align: center;
+            max-width: 120px;
+            word-wrap: break-word;
         }
 
         .character-remove {
@@ -627,6 +681,37 @@
                 <button class="add-search-btn" id="add-search-btn">
                     <span>+</span> Add Search Box
                 </button>
+
+                <!-- Moved checkboxes to top section -->
+                <div style="margin-top: 1rem;">
+                    <h4 style="margin: 1rem 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Conditions & Positions</h4>
+                    <div class="filter-options">
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> No condition</label>
+                            <label class="filter-option"><input type="checkbox"> Debuff</label>
+                        </div>
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Front</label>
+                            <label class="filter-option"><input type="checkbox"> Pace</label>
+                            <label class="filter-option"><input type="checkbox"> Late</label>
+                            <label class="filter-option"><input type="checkbox"> End</label>
+                        </div>
+                    </div>
+
+                    <h4 style="margin: 1rem 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Distance & Track</h4>
+                    <div class="filter-options">
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Short</label>
+                            <label class="filter-option"><input type="checkbox"> Mile</label>
+                            <label class="filter-option"><input type="checkbox"> Medium</label>
+                            <label class="filter-option"><input type="checkbox"> Long</label>
+                        </div>
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Dirt</label>
+                            <label class="filter-option"><input type="checkbox"> Turf</label>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="control-section">
@@ -634,6 +719,23 @@
                 <div id="character-slot-container">
                     <div class="character-slot" onclick="openCharacterPicker()">
                         Pick Character
+                    </div>
+                </div>
+                <div id="character-name-display" class="character-name-display"></div>
+
+                <!-- Character Skills Sections -->
+                <div class="character-skills" id="character-skills" style="display: none;">
+                    <div class="character-skill-section">
+                        <div class="character-skill-label">Awakening Skills</div>
+                        <div class="character-skill-list" id="awakening-skills"></div>
+                    </div>
+                    <div class="character-skill-section">
+                        <div class="character-skill-label">Innate Skills</div>
+                        <div class="character-skill-list" id="innate-skills"></div>
+                    </div>
+                    <div class="character-skill-section">
+                        <div class="character-skill-label">Event Skills</div>
+                        <div class="character-skill-list" id="character-event-skills"></div>
                     </div>
                 </div>
             </div>
@@ -651,38 +753,88 @@
             </div>
 
             <div class="control-section">
-                <div class="filter-box">
-                    <h4>Conditions & Positions</h4>
-                    <div class="filter-group">
-                        <div class="filter-options">
-                            <div class="filter-row">
-                                <label class="filter-option"><input type="checkbox"> No condition</label>
-                                <label class="filter-option"><input type="checkbox"> Debuff</label>
-                            </div>
-                            <div class="filter-row">
-                                <label class="filter-option"><input type="checkbox"> Front</label>
-                                <label class="filter-option"><input type="checkbox"> Pace</label>
-                                <label class="filter-option"><input type="checkbox"> Late</label>
-                                <label class="filter-option"><input type="checkbox"> End</label>
-                            </div>
-                        </div>
+                <h3>Filters</h3>
+                <!-- Rarity Switches -->
+                <div class="switch-container">
+                    <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Rarity</h4>
+                    <div class="switch-row">
+                        <label class="switch-label">
+                            <span>SSR</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </label>
+                        <label class="switch-label">
+                            <span>SR</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </label>
+                        <label class="switch-label">
+                            <span>R</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </label>
                     </div>
                 </div>
-                <div class="filter-box">
-                    <h4>Distance & Track</h4>
-                    <div class="filter-group">
-                        <div class="filter-options">
-                            <div class="filter-row">
-                                <label class="filter-option"><input type="checkbox"> Short</label>
-                                <label class="filter-option"><input type="checkbox"> Mile</label>
-                                <label class="filter-option"><input type="checkbox"> Medium</label>
-                                <label class="filter-option"><input type="checkbox"> Long</label>
-                            </div>
-                            <div class="filter-row">
-                                <label class="filter-option"><input type="checkbox"> Dirt</label>
-                                <label class="filter-option"><input type="checkbox"> Turf</label>
-                            </div>
-                        </div>
+
+                <!-- Type Switches -->
+                <div class="switch-container">
+                    <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Type</h4>
+                    <div class="switch-row">
+                        <label class="switch-label">
+                            <span>Speed</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </label>
+                        <label class="switch-label">
+                            <span>Stamina</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </label>
+                        <label class="switch-label">
+                            <span>Power</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </label>
+                        <label class="switch-label">
+                            <span>Guts</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </label>
+                        <label class="switch-label">
+                            <span>Intelligence</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </label>
+                        <label class="switch-label">
+                            <span>Friend</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </label>
+                        <label class="switch-label">
+                            <span>Group</span>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -754,6 +906,7 @@
                 this.parentElement.remove();
                 updateSearchTerms();
                 filterAndRenderCards();
+                updateDeckDisplay(); // Update deck highlights in real-time
             });
         }
 
@@ -773,12 +926,14 @@
                 searchBox.remove();
                 updateSearchTerms();
                 filterAndRenderCards();
+                updateDeckDisplay(); // Update deck highlights in real-time
             });
         }
 
         function handleSearch() {
             updateSearchTerms();
             filterAndRenderCards();
+            updateDeckDisplay(); // Update deck highlights in real-time
         }
 
         function updateSearchTerms() {
@@ -906,6 +1061,9 @@
 
         function updateCharacterSlotDisplay() {
             const container = document.getElementById('character-slot-container');
+            const nameDisplay = document.getElementById('character-name-display');
+            const skillsContainer = document.getElementById('character-skills');
+
             if (selectedCharacter) {
                 container.innerHTML = `
                     <div class="character-slot filled" style="position: relative;">
@@ -914,12 +1072,21 @@
                         <button class="character-remove" onclick="removeSelectedCharacter()">×</button>
                     </div>
                 `;
+                nameDisplay.textContent = selectedCharacter.name_en;
+                skillsContainer.style.display = 'block';
+
+                // Display character skills (placeholder - you'll need to load actual character skill data)
+                document.getElementById('awakening-skills').innerHTML = '<span class="skill-number">Skill 1</span><span class="skill-number">Skill 2</span>';
+                document.getElementById('innate-skills').innerHTML = '<span class="skill-number">Innate Skill 1</span>';
+                document.getElementById('character-event-skills').innerHTML = '<span class="skill-number">Event Skill 1</span><span class="skill-number">Event Skill 2</span>';
             } else {
                 container.innerHTML = `
                     <div class="character-slot" onclick="openCharacterPicker()">
                         Pick Character
                     </div>
                 `;
+                nameDisplay.textContent = '';
+                skillsContainer.style.display = 'none';
             }
         }
 
@@ -1028,13 +1195,11 @@
                     const eventSkills = card.event_skills || [];
                     const hintSkills = card.hints?.hint_skills || [];
 
-                    // FIX: Only show highlighted skills when there are active search terms
                     const formatSkillsForDeck = (skills) => {
                         return skills.map(skillId => {
                             const skillData = skillsMap.get(skillId);
                             if (!skillData) return '';
                             const skillName = getSkillName(skillData);
-                            // Only highlight if there are active search terms
                             const isHighlighted = currentSearchTerms.length > 0 &&
                                 currentSearchTerms.some(term =>
                                     skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
@@ -1153,13 +1318,11 @@
             const eventSkills = card.event_skills || [];
             const hintSkills = card.hints?.hint_skills || [];
 
-            // FIX: Only show highlighted skills when there are active search terms
             const getHighlightedSkills = (skills, searchTerms) => {
                 return skills.map(skillId => {
                     const skillData = skillsMap.get(skillId);
                     if (!skillData) return null;
                     const skillName = getSkillName(skillData);
-                    // Only highlight if there are active search terms
                     const isHighlighted = searchTerms.length > 0 &&
                         searchTerms.some(term =>
                             skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
@@ -1174,7 +1337,6 @@
 
             let skillsHTML = '';
 
-            // FIX: Only show skill sections when there are active search terms
             if (searchTerms.length > 0) {
                 if (highlightedHintSkills.length > 0) {
                     skillsHTML += `
