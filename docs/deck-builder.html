@@ -891,7 +891,7 @@
                     <!-- Sort Dropdowns -->
                     <div class="sort-container">
                         <select class="sort-select">
-                            <option value="">Sort By</option>
+                            <option value="">Skills</option>
                             <option value="rarity">Rarity</option>
                             <option value="character">Character Name</option>
                             <option value="type">Card Type</option>
@@ -1622,18 +1622,36 @@
                     const skillData = skillsMap.get(skillId);
                     if (!skillData) return null;
                     const skillName = getSkillName(skillData);
+                    // Special handling for "Standard Distance" to avoid matching "Non-Standard Distance"
+                    const isStandardDistance = skillName.toLowerCase().includes('standard distance');
+                    const isNonStandardDistance = skillName.toLowerCase().includes('non-standard distance');
+
                     const isHighlighted = searchTerms.length > 0 &&
-                        searchTerms.some(term =>
-                            skillName.toLowerCase().includes(term) || term.includes(skillName.toLowerCase()) ||
-                            skillName.toLowerCase().replace(/[^\w\s]/g, '').includes(term.replace(/[^\w\s]/g, '')) ||
-                            term.replace(/[^\w\s]/g, '').includes(skillName.toLowerCase().replace(/[^\w\s]/g, ''))
-                        );
+                        searchTerms.some(term => {
+                            // Special case for "standard distance" to avoid matching "non-standard distance"
+                            if (term === 'standard distance' && isNonStandardDistance) {
+                                return false;
+                            }
+                            if (term === 'standard distance' && isStandardDistance) {
+                                return true;
+                            }
+                            return skillName.toLowerCase().includes(term) || term.includes(skillName.toLowerCase()) ||
+                                skillName.toLowerCase().replace(/[^\w\s]/g, '').includes(term.replace(/[^\w\s]/g, '')) ||
+                                term.replace(/[^\w\s]/g, '').includes(skillName.toLowerCase().replace(/[^\w\s]/g, ''));
+                        });
                     const isBlueHighlighted = activeSearchTerms.length > 0 &&
-                        activeSearchTerms.some(term =>
-                            skillName.toLowerCase().includes(term) || term.includes(skillName.toLowerCase()) ||
-                            skillName.toLowerCase().replace(/[^\w\s]/g, '').includes(term.replace(/[^\w\s]/g, '')) ||
-                            term.replace(/[^\w\s]/g, '').includes(skillName.toLowerCase().replace(/[^\w\s]/g, ''))
-                        );
+                        activeSearchTerms.some(term => {
+                            // Special case for "standard distance" to avoid matching "non-standard distance"
+                            if (term === 'standard distance' && isNonStandardDistance) {
+                                return false;
+                            }
+                            if (term === 'standard distance' && isStandardDistance) {
+                                return true;
+                            }
+                            return skillName.toLowerCase().includes(term) || term.includes(skillName.toLowerCase()) ||
+                                skillName.toLowerCase().replace(/[^\w\s]/g, '').includes(term.replace(/[^\w\s]/g, '')) ||
+                                term.replace(/[^\w\s]/g, '').includes(skillName.toLowerCase().replace(/[^\w\s]/g, ''));
+                        });
                     return isHighlighted || isBlueHighlighted ? {
                         id: skillId,
                         name: skillName,
