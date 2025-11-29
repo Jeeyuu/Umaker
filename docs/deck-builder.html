@@ -690,10 +690,16 @@
 
         .image-toggle img {
             width: 32px;
-            height: 32px;
+            height: auto;
             object-fit: contain;
             border-radius: 4px;
             transition: all 0.3s ease;
+        }
+
+        /* Rarity images - double width */
+        .image-toggle.rarity img {
+            width: 64px;
+            height: auto;
         }
 
         .image-toggle.active img {
@@ -711,6 +717,21 @@
             opacity: 0;
             width: 0;
             height: 0;
+        }
+
+        /* Split filter section into two halves */
+        .filter-section {
+            height: 50%;
+            box-sizing: border-box;
+            padding-bottom: 1rem;
+        }
+
+        .filter-section:first-child {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .filter-section:last-child {
+            padding-top: 1rem;
         }
     </style>
 </head>
@@ -731,8 +752,6 @@
                 <button class="add-search-btn" id="add-search-btn">
                     <span>+</span> Add Search Box
                 </button>
-
-                <!-- Moved conditions positions distance track below type in filters -->
             </div>
 
             <div class="control-section">
@@ -773,66 +792,69 @@
                 </div>
             </div>
 
-            <div class="control-section">
+            <div class="control-section" style="display: flex; flex-direction: column; height: 400px;">
                 <h3>Filters</h3>
 
-                <!-- Rarity Image Toggles -->
-                <div class="image-toggle-container">
-                    <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Rarity</h4>
-                    <div class="image-toggle-row">
-                        <label class="image-toggle active" data-rarity="SSR">
-                            <input type="checkbox" checked>
-                            <img src="./images/utx_txt_rarity/utx_txt_rarity_03.png" alt="SSR">
-                        </label>
-                        <label class="image-toggle active" data-rarity="SR">
-                            <input type="checkbox" checked>
-                            <img src="./images/utx_txt_rarity/utx_txt_rarity_02.png" alt="SR">
-                        </label>
-                        <label class="image-toggle active" data-rarity="R">
-                            <input type="checkbox" checked>
-                            <img src="./images/utx_txt_rarity/utx_txt_rarity_01.png" alt="R">
-                        </label>
+                <!-- Top half: Rarity and Type -->
+                <div class="filter-section">
+                    <!-- Rarity Image Toggles -->
+                    <div class="image-toggle-container">
+                        <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Rarity</h4>
+                        <div class="image-toggle-row">
+                            <label class="image-toggle rarity active" data-rarity="SSR">
+                                <input type="checkbox" checked>
+                                <img src="./images/utx_txt_rarity/utx_txt_rarity_03.png" alt="SSR">
+                            </label>
+                            <label class="image-toggle rarity active" data-rarity="SR">
+                                <input type="checkbox" checked>
+                                <img src="./images/utx_txt_rarity/utx_txt_rarity_02.png" alt="SR">
+                            </label>
+                            <label class="image-toggle rarity active" data-rarity="R">
+                                <input type="checkbox" checked>
+                                <img src="./images/utx_txt_rarity/utx_txt_rarity_01.png" alt="R">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Type Image Toggles -->
+                    <div class="image-toggle-container">
+                        <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Type</h4>
+                        <div class="image-toggle-row">
+                            <label class="image-toggle active" data-type="speed">
+                                <input type="checkbox" checked>
+                                <img src="./images/utx_ico_obtain/utx_ico_obtain_00.png" alt="Speed">
+                            </label>
+                            <label class="image-toggle active" data-type="stamina">
+                                <input type="checkbox" checked>
+                                <img src="./images/utx_ico_obtain/utx_ico_obtain_01.png" alt="Stamina">
+                            </label>
+                            <label class="image-toggle active" data-type="power">
+                                <input type="checkbox" checked>
+                                <img src="./images/utx_ico_obtain/utx_ico_obtain_02.png" alt="Power">
+                            </label>
+                            <label class="image-toggle active" data-type="guts">
+                                <input type="checkbox" checked>
+                                <img src="./images/utx_ico_obtain/utx_ico_obtain_03.png" alt="Guts">
+                            </label>
+                            <label class="image-toggle active" data-type="intelligence">
+                                <input type="checkbox" checked>
+                                <img src="./images/utx_ico_obtain/utx_ico_obtain_04.png" alt="Intelligence">
+                            </label>
+                            <label class="image-toggle active" data-type="friend">
+                                <input type="checkbox" checked>
+                                <img src="./images/utx_ico_obtain/utx_ico_obtain_05.png" alt="Friend">
+                            </label>
+                            <label class="image-toggle active" data-type="group">
+                                <input type="checkbox" checked>
+                                <img src="./images/utx_ico_obtain/utx_ico_obtain_06.png" alt="Group">
+                            </label>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Type Image Toggles -->
-                <div class="image-toggle-container">
-                    <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Type</h4>
-                    <div class="image-toggle-row">
-                        <label class="image-toggle active" data-type="speed">
-                            <input type="checkbox" checked>
-                            <img src="./images/utx_ico_obtain/utx_ico_obtain_00.png" alt="Speed">
-                        </label>
-                        <label class="image-toggle active" data-type="stamina">
-                            <input type="checkbox" checked>
-                            <img src="./images/utx_ico_obtain/utx_ico_obtain_01.png" alt="Stamina">
-                        </label>
-                        <label class="image-toggle active" data-type="power">
-                            <input type="checkbox" checked>
-                            <img src="./images/utx_ico_obtain/utx_ico_obtain_02.png" alt="Power">
-                        </label>
-                        <label class="image-toggle active" data-type="guts">
-                            <input type="checkbox" checked>
-                            <img src="./images/utx_ico_obtain/utx_ico_obtain_03.png" alt="Guts">
-                        </label>
-                        <label class="image-toggle active" data-type="intelligence">
-                            <input type="checkbox" checked>
-                            <img src="./images/utx_ico_obtain/utx_ico_obtain_04.png" alt="Intelligence">
-                        </label>
-                        <label class="image-toggle active" data-type="friend">
-                            <input type="checkbox" checked>
-                            <img src="./images/utx_ico_obtain/utx_ico_obtain_05.png" alt="Friend">
-                        </label>
-                        <label class="image-toggle active" data-type="group">
-                            <input type="checkbox" checked>
-                            <img src="./images/utx_ico_obtain/utx_ico_obtain_06.png" alt="Group">
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Conditions & Positions Distance Track (moved from top section) -->
-                <div style="margin-top: 1rem;">
-                    <h4 style="margin: 1rem 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Conditions & Positions</h4>
+                <!-- Bottom half: Conditions & Positions Distance Track -->
+                <div class="filter-section">
+                    <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Conditions & Positions</h4>
                     <div class="filter-options">
                         <div class="filter-row">
                             <label class="filter-option"><input type="checkbox"> No condition</label>
@@ -1098,10 +1120,8 @@
                 nameDisplay.textContent = selectedCharacter.name_en;
                 skillsContainer.style.display = 'block';
 
-                // Display character skills (placeholder - you'll need to load actual character skill data)
-                document.getElementById('awakening-skills').innerHTML = '<span class="skill-number">Skill 1</span><span class="skill-number">Skill 2</span>';
-                document.getElementById('innate-skills').innerHTML = '<span class="skill-number">Innate Skill 1</span>';
-                document.getElementById('character-event-skills').innerHTML = '<span class="skill-number">Event Skill 1</span><span class="skill-number">Event Skill 2</span>';
+                // Load actual character skills from the character data
+                loadCharacterSkills(selectedCharacter);
             } else {
                 container.innerHTML = `
                     <div class="character-slot" onclick="openCharacterPicker()">
@@ -1110,6 +1130,63 @@
                 `;
                 nameDisplay.textContent = '';
                 skillsContainer.style.display = 'none';
+            }
+        }
+
+        // New function to load character skills from character data
+        function loadCharacterSkills(character) {
+            const awakeningSkillsContainer = document.getElementById('awakening-skills');
+            const innateSkillsContainer = document.getElementById('innate-skills');
+            const eventSkillsContainer = document.getElementById('character-event-skills');
+
+            // Clear previous skills
+            awakeningSkillsContainer.innerHTML = '';
+            innateSkillsContainer.innerHTML = '';
+            eventSkillsContainer.innerHTML = '';
+
+            // Load awakening skills
+            if (character.skills_awakening && character.skills_awakening.length > 0) {
+                character.skills_awakening.forEach(skillId => {
+                    const skillData = skillsMap.get(skillId);
+                    if (skillData) {
+                        const skillElement = document.createElement('span');
+                        skillElement.className = 'skill-number';
+                        skillElement.textContent = getSkillName(skillData);
+                        skillElement.title = `Skill ID: ${skillId}`;
+                        skillElement.setAttribute('data-skill-id', skillId);
+                        awakeningSkillsContainer.appendChild(skillElement);
+                    }
+                });
+            }
+
+            // Load innate skills
+            if (character.skills_innate && character.skills_innate.length > 0) {
+                character.skills_innate.forEach(skillId => {
+                    const skillData = skillsMap.get(skillId);
+                    if (skillData) {
+                        const skillElement = document.createElement('span');
+                        skillElement.className = 'skill-number';
+                        skillElement.textContent = getSkillName(skillData);
+                        skillElement.title = `Skill ID: ${skillId}`;
+                        skillElement.setAttribute('data-skill-id', skillId);
+                        innateSkillsContainer.appendChild(skillElement);
+                    }
+                });
+            }
+
+            // Load event skills
+            if (character.skills_event && character.skills_event.length > 0) {
+                character.skills_event.forEach(skillId => {
+                    const skillData = skillsMap.get(skillId);
+                    if (skillData) {
+                        const skillElement = document.createElement('span');
+                        skillElement.className = 'skill-number';
+                        skillElement.textContent = getSkillName(skillData);
+                        skillElement.title = `Skill ID: ${skillId}`;
+                        skillElement.setAttribute('data-skill-id', skillId);
+                        eventSkillsContainer.appendChild(skillElement);
+                    }
+                });
             }
         }
 
