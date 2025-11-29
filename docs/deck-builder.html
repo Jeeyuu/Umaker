@@ -344,11 +344,6 @@
             box-sizing: border-box;
         }
 
-        .character-slot:hover {
-            background: #d5dbdb;
-            border-color: #3498db;
-        }
-
         .character-slot.filled {
             border-style: solid;
             border-color: #3498db;
@@ -942,16 +937,16 @@
                     <!-- Rarity Image Toggles -->
                     <div class="image-toggle-container">
                         <div class="image-toggle-row">
-                            <label class="image-toggle rarity active" data-rarity="SSR">
-                                <input type="checkbox" checked>
+                            <label class="image-toggle rarity inactive" data-rarity="SSR">
+                                <input type="checkbox">
                                 <img src="./images/utx_txt_rarity/utx_txt_rarity_03.png" alt="SSR">
                             </label>
-                            <label class="image-toggle rarity active" data-rarity="SR">
-                                <input type="checkbox" checked>
+                            <label class="image-toggle rarity inactive" data-rarity="SR">
+                                <input type="checkbox">
                                 <img src="./images/utx_txt_rarity/utx_txt_rarity_02.png" alt="SR">
                             </label>
-                            <label class="image-toggle rarity active" data-rarity="R">
-                                <input type="checkbox" checked>
+                            <label class="image-toggle rarity inactive" data-rarity="R">
+                                <input type="checkbox">
                                 <img src="./images/utx_txt_rarity/utx_txt_rarity_01.png" alt="R">
                             </label>
                         </div>
@@ -960,32 +955,32 @@
                     <!-- Type Image Toggles -->
                     <div class="image-toggle-container">
                         <div class="image-toggle-row">
-                            <label class="image-toggle type-toggle active" data-type="speed">
-                                <input type="checkbox" checked>
+                            <label class="image-toggle type-toggle inactive" data-type="speed">
+                                <input type="checkbox">
                                 <img src="./images/utx_ico_obtain/utx_ico_obtain_00.png" alt="Speed">
                             </label>
-                            <label class="image-toggle type-toggle active" data-type="stamina">
-                                <input type="checkbox" checked>
+                            <label class="image-toggle type-toggle inactive" data-type="stamina">
+                                <input type="checkbox">
                                 <img src="./images/utx_ico_obtain/utx_ico_obtain_01.png" alt="Stamina">
                             </label>
-                            <label class="image-toggle type-toggle active" data-type="power">
-                                <input type="checkbox" checked>
+                            <label class="image-toggle type-toggle inactive" data-type="power">
+                                <input type="checkbox">
                                 <img src="./images/utx_ico_obtain/utx_ico_obtain_02.png" alt="Power">
                             </label>
-                            <label class="image-toggle type-toggle active" data-type="guts">
-                                <input type="checkbox" checked>
+                            <label class="image-toggle type-toggle inactive" data-type="guts">
+                                <input type="checkbox">
                                 <img src="./images/utx_ico_obtain/utx_ico_obtain_03.png" alt="Guts">
                             </label>
-                            <label class="image-toggle type-toggle active" data-type="intelligence">
-                                <input type="checkbox" checked>
+                            <label class="image-toggle type-toggle inactive" data-type="intelligence">
+                                <input type="checkbox">
                                 <img src="./images/utx_ico_obtain/utx_ico_obtain_04.png" alt="Intelligence">
                             </label>
-                            <label class="image-toggle type-toggle active" data-type="friend">
-                                <input type="checkbox" checked>
+                            <label class="image-toggle type-toggle inactive" data-type="friend">
+                                <input type="checkbox">
                                 <img src="./images/utx_ico_obtain/utx_ico_obtain_05.png" alt="Friend">
                             </label>
-                            <label class="image-toggle type-toggle active" data-type="group">
-                                <input type="checkbox" checked>
+                            <label class="image-toggle type-toggle inactive" data-type="group">
+                                <input type="checkbox">
                                 <img src="./images/utx_ico_obtain/utx_ico_obtain_06.png" alt="Group">
                             </label>
                         </div>
@@ -995,14 +990,38 @@
                         <h4 class="filter-header">Conditions & Positions</h4>
                         <div class="filter-options">
                             <div class="filter-row">
-                                <label class="filter-option"><input type="checkbox"> No condition</label>
-                                <label class="filter-option"><input type="checkbox"> Debuff</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="nac"> No
+                                    condition</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="dbf"> Debuff</label>
                             </div>
                             <div class="filter-row">
-                                <label class="filter-option"><input type="checkbox"> Front</label>
-                                <label class="filter-option"><input type="checkbox"> Pace</label>
-                                <label class="filter-option"><input type="checkbox"> Late</label>
-                                <label class="filter-option"><input type="checkbox"> End</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="run"> Front</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="ldr"> Pace</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="btw"> Late</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="cha"> End</label>
+                            </div>
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox" data-condition="1_0"> Early
+                                    Race</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="1_1"> Mid
+                                    Race</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="1_2"> Late
+                                    Race</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="1_3"> Last
+                                    Spurt</label>
+                            </div>
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox" data-condition="cor"> Corner</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="str">
+                                    Straight</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="f_c"> Final
+                                    Corner</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="f_s"> Final
+                                    Straight</label>
+                            </div>
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox" data-condition="slo">
+                                    Uphill/Downhill</label>
                             </div>
                         </div>
                     </div>
@@ -1011,14 +1030,14 @@
                         <h4 class="filter-header">Distance & Track</h4>
                         <div class="filter-options">
                             <div class="filter-row">
-                                <label class="filter-option"><input type="checkbox"> Short</label>
-                                <label class="filter-option"><input type="checkbox"> Mile</label>
-                                <label class="filter-option"><input type="checkbox"> Medium</label>
-                                <label class="filter-option"><input type="checkbox"> Long</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="sho"> Short</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="mil"> Mile</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="med"> Medium</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="lng"> Long</label>
                             </div>
                             <div class="filter-row">
-                                <label class="filter-option"><input type="checkbox"> Dirt</label>
-                                <label class="filter-option"><input type="checkbox"> Turf</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="dir"> Dirt</label>
+                                <label class="filter-option"><input type="checkbox" data-condition="tur"> Turf</label>
                             </div>
                         </div>
                     </div>
@@ -1061,6 +1080,11 @@
         let draggedCardIndex = null;
         let characterSearchTerm = '';
         let searchTimeout = null;
+        let skillNameCache = new Map();
+        let cardCache = new Map();
+
+        // Pre-compiled regex for performance
+        const nonWordRegex = /[^\w\s]/g;
 
         fetch('header.html').then(response => response.text()).then(data => {
             document.getElementById('header-placeholder').innerHTML = data;
@@ -1069,16 +1093,14 @@
         fetch('footer.html').then(response => response.text()).then(data => {
             document.getElementById('footer-placeholder').innerHTML = data;
         });
-        
-        // Add event listeners for sorting
-            document.getElementById('sort-by').addEventListener('change', filterAndRenderCards);
-            document.getElementById('sort-order').addEventListener('change', filterAndRenderCards);
 
         async function loadSkillsData() {
             const response = await fetch('./data/skills.json');
             const skills = await response.json();
             skills.forEach(skill => {
                 skillsMap.set(skill.id, skill);
+                // Pre-cache skill names for performance
+                skillNameCache.set(skill.id, getSkillName(skill).toLowerCase());
             });
             return skillsMap;
         }
@@ -1087,6 +1109,18 @@
             if (!skillData) return 'Unknown Skill';
             let skillName = skillData.name_en || skillData.enname || 'Unknown Skill';
             return skillName.replace(/\s+○$/, '');
+        }
+
+        // Optimized search function
+        function matchesSearchTerm(skillName, term) {
+            if (skillName.includes(term) || term.includes(skillName)) {
+                return true;
+            }
+
+            const cleanSkillName = skillName.replace(nonWordRegex, '');
+            const cleanTerm = term.replace(nonWordRegex, '');
+
+            return cleanSkillName.includes(cleanTerm) || cleanTerm.includes(cleanSkillName);
         }
 
         function setupSearch() {
@@ -1151,10 +1185,13 @@
         }
 
         function handleSearch() {
-            updateSearchTerms();
-            filterAndRenderCards();
-            updateDeckDisplay();
-            updateCharacterSkillsHighlight();
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                updateSearchTerms();
+                filterAndRenderCards();
+                updateDeckDisplay();
+                updateCharacterSkillsHighlight();
+            }, 150);
         }
 
         function updateSearchTerms() {
@@ -1179,13 +1216,38 @@
             });
         }
 
+        // Optimized card filtering
         function filterAndRenderCards() {
             if (currentSearchTerms.length === 0) {
                 showWelcomeMessage();
                 return;
             }
 
+            const cacheKey = currentSearchTerms.join('|') + getActiveFiltersKey();
+            if (cardCache.has(cacheKey)) {
+                renderCards(cardCache.get(cacheKey), currentSearchTerms);
+                return;
+            }
+
             const filteredCards = allSupportCards.filter(card => {
+                // Apply rarity filter
+                const rarityFilter = getActiveRarityFilter();
+                if (rarityFilter.length > 0 && !rarityFilter.includes(getRarityText(card.rarity))) {
+                    return false;
+                }
+
+                // Apply type filter
+                const typeFilter = getActiveTypeFilter();
+                if (typeFilter.length > 0 && !typeFilter.includes(card.type)) {
+                    return false;
+                }
+
+                // Apply condition filters
+                const conditionFilter = getActiveConditionFilter();
+                if (conditionFilter.length > 0 && !hasMatchingCondition(card, conditionFilter)) {
+                    return false;
+                }
+
                 // Check character name with relaxed matching
                 if (currentSearchTerms.some(term =>
                     card.char_name.toLowerCase().includes(term) ||
@@ -1196,39 +1258,134 @@
 
                 const eventSkills = card.event_skills || [];
                 const hasEventSkill = eventSkills.some(skillId => {
-                    const skillData = skillsMap.get(skillId);
-                    if (!skillData) return false;
-                    const skillName = getSkillName(skillData).toLowerCase();
-                    // Relaxed skill matching - check if search term is contained in skill name or vice versa
-                    return currentSearchTerms.some(term =>
-                        skillName.includes(term) || term.includes(skillName) ||
-                        skillName.replace(/[^\w\s]/g, '').includes(term.replace(/[^\w\s]/g, '')) ||
-                        term.replace(/[^\w\s]/g, '').includes(skillName.replace(/[^\w\s]/g, ''))
-                    );
+                    const skillName = skillNameCache.get(skillId);
+                    if (!skillName) return false;
+                    return currentSearchTerms.some(term => matchesSearchTerm(skillName, term));
                 });
 
                 const hintSkills = card.hints?.hint_skills || [];
                 const hasHintSkill = hintSkills.some(skillId => {
-                    const skillData = skillsMap.get(skillId);
-                    if (!skillData) return false;
-                    const skillName = getSkillName(skillData).toLowerCase();
-                    // Relaxed skill matching - check if search term is contained in skill name or vice versa
-                    return currentSearchTerms.some(term =>
-                        skillName.includes(term) || term.includes(skillName) ||
-                        skillName.replace(/[^\w\s]/g, '').includes(term.replace(/[^\w\s]/g, '')) ||
-                        term.replace(/[^\w\s]/g, '').includes(skillName.replace(/[^\w\s]/g, ''))
-                    );
+                    const skillName = skillNameCache.get(skillId);
+                    if (!skillName) return false;
+                    return currentSearchTerms.some(term => matchesSearchTerm(skillName, term));
                 });
 
                 return hasEventSkill || hasHintSkill;
             });
 
-            renderCards(filteredCards, currentSearchTerms);
+            // Apply sorting
+            const sortBy = document.getElementById('sort-by').value;
+            const sortOrder = document.getElementById('sort-order').value;
+            const sortedCards = sortCards(filteredCards, sortBy, sortOrder);
+
+            cardCache.set(cacheKey, sortedCards);
+            renderCards(sortedCards, currentSearchTerms);
+        }
+
+        function getActiveFiltersKey() {
+            return [
+                getActiveRarityFilter().join(','),
+                getActiveTypeFilter().join(','),
+                getActiveConditionFilter().join(',')
+            ].join('|');
+        }
+
+        function hasMatchingCondition(card, conditionFilter) {
+            const eventSkills = card.event_skills || [];
+            const hintSkills = card.hints?.hint_skills || [];
+            const allSkills = [...eventSkills, ...hintSkills];
+
+            return allSkills.some(skillId => {
+                const skillData = skillsMap.get(skillId);
+                if (!skillData || !skillData.type) return false;
+
+                return conditionFilter.some(condition =>
+                    skillData.type.includes(condition)
+                );
+            });
         }
 
         function showWelcomeMessage() {
             const container = document.getElementById('cards-container');
             container.innerHTML = '<div class="welcome-message">Enter search terms to find support cards</div>';
+        }
+
+        // Sorting function
+        function sortCards(cards, sortBy, sortOrder) {
+            const sortedCards = [...cards];
+
+            sortedCards.sort((a, b) => {
+                let primaryComparison = 0;
+                let secondaryComparison = 0;
+
+                switch (sortBy) {
+                    case 'skills':
+                        // Sort by number of highlighted skills (descending by default)
+                        const aHighlighted = countHighlightedSkills(a);
+                        const bHighlighted = countHighlightedSkills(b);
+                        primaryComparison = bHighlighted - aHighlighted;
+                        break;
+
+                    case 'rarity':
+                        // Sort by rarity: SSR (3) > SR (2) > R (1)
+                        primaryComparison = b.rarity - a.rarity;
+                        break;
+
+                    case 'character':
+                        // Sort by name Z-A, then by rarity
+                        primaryComparison = b.char_name.localeCompare(a.char_name);
+                        secondaryComparison = b.rarity - a.rarity;
+                        break;
+
+                    case 'type':
+                        // Sort by type order, then by rarity
+                        const typeOrder = {
+                            'speed': 0, 'stamina': 1, 'power': 2, 'guts': 3,
+                            'intelligence': 4, 'friend': 5, 'group': 6
+                        };
+                        primaryComparison = typeOrder[a.type] - typeOrder[b.type];
+                        secondaryComparison = b.rarity - a.rarity;
+                        break;
+
+                    case 'release':
+                        // Sort by release date (most recent first), then by rarity
+                        if (a.release_date && b.release_date) {
+                            primaryComparison = new Date(b.release_date) - new Date(a.release_date);
+                        }
+                        secondaryComparison = b.rarity - a.rarity;
+                        break;
+
+                    default:
+                        // Default: skills (number of highlighted skills)
+                        const aDefaultHighlighted = countHighlightedSkills(a);
+                        const bDefaultHighlighted = countHighlightedSkills(b);
+                        primaryComparison = bDefaultHighlighted - aDefaultHighlighted;
+                }
+
+                // Apply sort order
+                if (sortOrder === 'asc') {
+                    primaryComparison = -primaryComparison;
+                    secondaryComparison = -secondaryComparison;
+                }
+
+                // If primary comparison is equal, use secondary comparison
+                return primaryComparison !== 0 ? primaryComparison : secondaryComparison;
+            });
+
+            return sortedCards;
+        }
+
+        function countHighlightedSkills(card) {
+            const eventSkills = card.event_skills || [];
+            const hintSkills = card.hints?.hint_skills || [];
+            const allSkills = [...eventSkills, ...hintSkills];
+
+            return allSkills.filter(skillId => {
+                const skillName = skillNameCache.get(skillId);
+                if (!skillName) return false;
+
+                return currentSearchTerms.some(term => matchesSearchTerm(skillName, term));
+            }).length;
         }
 
         async function openCharacterPicker() {
@@ -1350,6 +1507,7 @@
                         skillElement.textContent = getSkillName(skillData);
                         skillElement.title = `Skill ID: ${skillId}`;
                         skillElement.setAttribute('data-skill-id', skillId);
+                        skillElement.addEventListener('click', handleSkillClick);
                         awakeningSkillsContainer.appendChild(skillElement);
                     }
                 });
@@ -1364,6 +1522,7 @@
                         skillElement.textContent = getSkillName(skillData);
                         skillElement.title = `Skill ID: ${skillId}`;
                         skillElement.setAttribute('data-skill-id', skillId);
+                        skillElement.addEventListener('click', handleSkillClick);
                         innateSkillsContainer.appendChild(skillElement);
                     }
                 });
@@ -1378,11 +1537,52 @@
                         skillElement.textContent = getSkillName(skillData);
                         skillElement.title = `Skill ID: ${skillId}`;
                         skillElement.setAttribute('data-skill-id', skillId);
+                        skillElement.addEventListener('click', handleSkillClick);
                         eventSkillsContainer.appendChild(skillElement);
                     }
                 });
             }
 
+            updateCharacterSkillsHighlight();
+        }
+
+        function handleSkillClick(e) {
+            const skillId = this.getAttribute('data-skill-id');
+            const skillData = skillsMap.get(parseInt(skillId));
+            if (!skillData) return;
+
+            const skillName = getSkillName(skillData);
+            addSkillToSearch(skillName);
+        }
+
+        function addSkillToSearch(skillName) {
+            // Check if skill is already in search
+            const existingSearch = Array.from(document.querySelectorAll('.search-input'))
+                .find(input => input.value.toLowerCase() === skillName.toLowerCase());
+
+            if (existingSearch) {
+                // Toggle the checkmark
+                const searchBox = existingSearch.closest('.search-box');
+                const toggleBtn = searchBox.querySelector('.toggle-search-btn');
+                toggleBtn.classList.toggle('active');
+                existingSearch.classList.toggle('active');
+            } else {
+                // Add new search box
+                addSearchBox();
+                const searchBoxes = document.querySelectorAll('.search-box');
+                const lastSearchBox = searchBoxes[searchBoxes.length - 1];
+                const input = lastSearchBox.querySelector('.search-input');
+                const toggleBtn = lastSearchBox.querySelector('.toggle-search-btn');
+
+                input.value = skillName;
+                toggleBtn.classList.add('active');
+                input.classList.add('active');
+            }
+
+            updateSearchTerms();
+            updateActiveSearchTerms();
+            filterAndRenderCards();
+            updateDeckDisplay();
             updateCharacterSkillsHighlight();
         }
 
@@ -1393,22 +1593,11 @@
 
             skillElements.forEach(element => {
                 const skillId = element.getAttribute('data-skill-id');
-                const skillData = skillsMap.get(parseInt(skillId));
+                const skillName = skillNameCache.get(parseInt(skillId));
 
-                if (skillData) {
-                    const skillName = getSkillName(skillData).toLowerCase();
-
-                    const isBlueHighlighted = activeSearchTerms.some(term =>
-                        skillName.includes(term) || term.includes(skillName) ||
-                        skillName.replace(/[^\w\s]/g, '').includes(term.replace(/[^\w\s]/g, '')) ||
-                        term.replace(/[^\w\s]/g, '').includes(skillName.replace(/[^\w\s]/g, ''))
-                    );
-
-                    const isHighlighted = currentSearchTerms.some(term =>
-                        skillName.includes(term) || term.includes(skillName) ||
-                        skillName.replace(/[^\w\s]/g, '').includes(term.replace(/[^\w\s]/g, '')) ||
-                        term.replace(/[^\w\s]/g, '').includes(skillName.replace(/[^\w\s]/g, ''))
-                    );
+                if (skillName) {
+                    const isBlueHighlighted = activeSearchTerms.some(term => matchesSearchTerm(skillName, term));
+                    const isHighlighted = currentSearchTerms.some(term => matchesSearchTerm(skillName, term));
 
                     if (isBlueHighlighted) {
                         element.classList.add('blue-highlighted');
@@ -1530,24 +1719,15 @@
 
                     const formatSkillsForDeck = (skills) => {
                         return skills.map(skillId => {
-                            const skillData = skillsMap.get(skillId);
-                            if (!skillData) return '';
-                            const skillName = getSkillName(skillData);
+                            const skillName = skillNameCache.get(skillId);
+                            if (!skillName) return '';
                             const isHighlighted = currentSearchTerms.length > 0 &&
-                                currentSearchTerms.some(term =>
-                                    skillName.toLowerCase().includes(term) || term.includes(skillName.toLowerCase()) ||
-                                    skillName.toLowerCase().replace(/[^\w\s]/g, '').includes(term.replace(/[^\w\s]/g, '')) ||
-                                    term.replace(/[^\w\s]/g, '').includes(skillName.toLowerCase().replace(/[^\w\s]/g, ''))
-                                );
+                                currentSearchTerms.some(term => matchesSearchTerm(skillName, term));
                             const isBlueHighlighted = activeSearchTerms.length > 0 &&
-                                activeSearchTerms.some(term =>
-                                    skillName.toLowerCase().includes(term) || term.includes(skillName.toLowerCase()) ||
-                                    skillName.toLowerCase().replace(/[^\w\s]/g, '').includes(term.replace(/[^\w\s]/g, '')) ||
-                                    term.replace(/[^\w\s]/g, '').includes(skillName.toLowerCase().replace(/[^\w\s]/g, ''))
-                                );
+                                activeSearchTerms.some(term => matchesSearchTerm(skillName, term));
                             const highlightClass = isBlueHighlighted ? 'blue-highlighted' : (isHighlighted ? 'highlighted' : '');
                             return `<span class="skill-number ${highlightClass}" 
-                                            title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
+                                            title="Skill ID: ${skillId}" data-skill-id="${skillId}">${getSkillName(skillsMap.get(skillId))}</span>`;
                         }).join('');
                     };
 
@@ -1603,6 +1783,14 @@
                         });
                     }
 
+                    // Add click event listeners to deck skills
+                    setTimeout(() => {
+                        const deckSkills = slot.querySelectorAll('.skill-number');
+                        deckSkills.forEach(skillElement => {
+                            skillElement.addEventListener('click', handleDeckSkillClick);
+                        });
+                    }, 0);
+
                     const deckCard = slot.querySelector('.deck-card');
                     if (deckCard && !isTraineeError) {
                         deckCard.addEventListener('dragstart', handleDeckCardDragStart);
@@ -1615,6 +1803,16 @@
                 slot.addEventListener('dragleave', handleDragLeave);
                 slot.addEventListener('drop', handleDrop);
             });
+        }
+
+        function handleDeckSkillClick(e) {
+            e.stopPropagation();
+            const skillId = this.getAttribute('data-skill-id');
+            const skillData = skillsMap.get(parseInt(skillId));
+            if (!skillData) return;
+
+            const skillName = getSkillName(skillData);
+            addSkillToSearch(skillName);
         }
 
         function updateCardDisplay() {
@@ -1661,12 +1859,12 @@
 
             const getHighlightedSkills = (skills, searchTerms) => {
                 return skills.map(skillId => {
-                    const skillData = skillsMap.get(skillId);
-                    if (!skillData) return null;
-                    const skillName = getSkillName(skillData);
+                    const skillName = skillNameCache.get(skillId);
+                    if (!skillName) return null;
+
                     // Special handling for "Standard Distance" to avoid matching "Non-Standard Distance"
-                    const isStandardDistance = skillName.toLowerCase().includes('standard distance');
-                    const isNonStandardDistance = skillName.toLowerCase().includes('non-standard distance');
+                    const isStandardDistance = skillName.includes('standard distance');
+                    const isNonStandardDistance = skillName.includes('non-standard distance');
 
                     const isHighlighted = searchTerms.length > 0 &&
                         searchTerms.some(term => {
@@ -1677,9 +1875,7 @@
                             if (term === 'standard distance' && isStandardDistance) {
                                 return true;
                             }
-                            return skillName.toLowerCase().includes(term) || term.includes(skillName.toLowerCase()) ||
-                                skillName.toLowerCase().replace(/[^\w\s]/g, '').includes(term.replace(/[^\w\s]/g, '')) ||
-                                term.replace(/[^\w\s]/g, '').includes(skillName.toLowerCase().replace(/[^\w\s]/g, ''));
+                            return matchesSearchTerm(skillName, term);
                         });
                     const isBlueHighlighted = activeSearchTerms.length > 0 &&
                         activeSearchTerms.some(term => {
@@ -1690,13 +1886,11 @@
                             if (term === 'standard distance' && isStandardDistance) {
                                 return true;
                             }
-                            return skillName.toLowerCase().includes(term) || term.includes(skillName.toLowerCase()) ||
-                                skillName.toLowerCase().replace(/[^\w\s]/g, '').includes(term.replace(/[^\w\s]/g, '')) ||
-                                term.replace(/[^\w\s]/g, '').includes(skillName.toLowerCase().replace(/[^\w\s]/g, ''));
+                            return matchesSearchTerm(skillName, term);
                         });
                     return isHighlighted || isBlueHighlighted ? {
                         id: skillId,
-                        name: skillName,
+                        name: getSkillName(skillsMap.get(skillId)),
                         highlighted: isHighlighted,
                         blueHighlighted: isBlueHighlighted
                     } : null;
@@ -1855,34 +2049,122 @@
             return false;
         }
 
+        // Filter functions
+        function getRarityText(rarityNumber) {
+            switch (rarityNumber) {
+                case 3: return 'SSR';
+                case 2: return 'SR';
+                case 1: return 'R';
+                default: return 'Unknown';
+            }
+        }
+
+        function getActiveRarityFilter() {
+            const activeRarities = [];
+            document.querySelectorAll('.image-toggle.rarity').forEach(toggle => {
+                if (toggle.classList.contains('active')) {
+                    activeRarities.push(toggle.dataset.rarity);
+                }
+            });
+            return activeRarities;
+        }
+
+        function getActiveTypeFilter() {
+            const activeTypes = [];
+            document.querySelectorAll('.image-toggle.type-toggle').forEach(toggle => {
+                if (toggle.classList.contains('active')) {
+                    activeTypes.push(toggle.dataset.type);
+                }
+            });
+            return activeTypes;
+        }
+
+        function getActiveConditionFilter() {
+            const activeConditions = [];
+            document.querySelectorAll('.filter-option input[data-condition]').forEach(checkbox => {
+                if (checkbox.checked) {
+                    activeConditions.push(checkbox.dataset.condition);
+                }
+            });
+            return activeConditions;
+        }
+
         function setupImageToggles() {
             const imageToggles = document.querySelectorAll('.image-toggle');
 
+            // Set all toggles to inactive by default
             imageToggles.forEach(toggle => {
                 const input = toggle.querySelector('input');
+                input.checked = false;
+                toggle.classList.add('inactive');
+                toggle.classList.remove('active');
+            });
 
-                if (input.checked) {
-                    toggle.classList.add('active');
-                    toggle.classList.remove('inactive');
-                } else {
-                    toggle.classList.add('inactive');
-                    toggle.classList.remove('active');
-                }
-
+            imageToggles.forEach(toggle => {
                 toggle.addEventListener('click', function () {
-                    input.checked = !input.checked;
+                    const input = this.querySelector('input');
 
-                    if (input.checked) {
-                        this.classList.add('active');
-                        this.classList.remove('inactive');
+                    // Check if we're about to turn off the last active toggle in a group
+                    const isRarity = this.classList.contains('rarity');
+                    const isType = this.classList.contains('type-toggle');
+
+                    if (isRarity) {
+                        const activeRarities = getActiveRarityFilter();
+                        // If this is the last active rarity and we're turning it off, reset to all off
+                        if (activeRarities.length === 1 && activeRarities[0] === this.dataset.rarity && input.checked) {
+                            // Don't allow turning off the last one - instead reset all to off
+                            document.querySelectorAll('.image-toggle.rarity').forEach(rarityToggle => {
+                                const rarityInput = rarityToggle.querySelector('input');
+                                rarityInput.checked = false;
+                                rarityToggle.classList.add('inactive');
+                                rarityToggle.classList.remove('active');
+                            });
+                        } else {
+                            input.checked = !input.checked;
+                            updateToggleState(this, input.checked);
+                        }
+                    } else if (isType) {
+                        const activeTypes = getActiveTypeFilter();
+                        // If this is the last active type and we're turning it off, reset to all off
+                        if (activeTypes.length === 1 && activeTypes[0] === this.dataset.type && input.checked) {
+                            // Don't allow turning off the last one - instead reset all to off
+                            document.querySelectorAll('.image-toggle.type-toggle').forEach(typeToggle => {
+                                const typeInput = typeToggle.querySelector('input');
+                                typeInput.checked = false;
+                                typeToggle.classList.add('inactive');
+                                typeToggle.classList.remove('active');
+                            });
+                        } else {
+                            input.checked = !input.checked;
+                            updateToggleState(this, input.checked);
+                        }
                     } else {
-                        this.classList.add('inactive');
-                        this.classList.remove('active');
+                        input.checked = !input.checked;
+                        updateToggleState(this, input.checked);
                     }
 
+                    cardCache.clear();
                     filterAndRenderCards();
                 });
             });
+
+            // Add event listeners for condition filters
+            document.querySelectorAll('.filter-option input[data-condition]').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    cardCache.clear();
+                    filterAndRenderCards();
+                });
+            });
+        }
+
+        function updateToggleState(toggle, isActive) {
+            if (isActive) {
+                toggle.classList.add('active');
+                toggle.classList.remove('inactive');
+            } else {
+                toggle.classList.add('inactive');
+                toggle.classList.remove('active');
+            }
         }
 
         // Deck management functions
@@ -1929,8 +2211,6 @@
 
         function takeScreenshot() {
             alert('Screenshot functionality would be implemented here!');
-            // In a real implementation, you would use a library like html2canvas
-            // to capture the deck section or entire page as an image
         }
 
         function clearDeck() {
@@ -1952,26 +2232,32 @@
             document.querySelector('.close-modal').addEventListener('click', closeCharacterPicker);
         }
 
-        async function loadCardsWithSkills() {
-                const [skillsData, supportCardsResponse] = await Promise.all([
-                    loadSkillsData(),
-                    fetch('./data/support-cards.json')
-                ]);
-                allSupportCards = await supportCardsResponse.json();
-                setupSearch();
-                setupDeckSlots();
-                updateCharacterSlotDisplay();
-                setupImageToggles();
-                setupDeckButtons();
-                setupModalClose();
-                setupSorting(); // Add this line
-                showWelcomeMessage();
-            }
+        function setupSorting() {
+            document.getElementById('sort-by').addEventListener('change', function () {
+                cardCache.clear();
+                filterAndRenderCards();
+            });
+            document.getElementById('sort-order').addEventListener('change', function () {
+                cardCache.clear();
+                filterAndRenderCards();
+            });
+        }
 
-            function setupSorting() {
-                document.getElementById('sort-by').addEventListener('change', filterAndRenderCards);
-                document.getElementById('sort-order').addEventListener('change', filterAndRenderCards);
-            }
+        async function loadCardsWithSkills() {
+            const [skillsData, supportCardsResponse] = await Promise.all([
+                loadSkillsData(),
+                fetch('./data/support-cards.json')
+            ]);
+            allSupportCards = await supportCardsResponse.json();
+            setupSearch();
+            setupDeckSlots();
+            updateCharacterSlotDisplay();
+            setupImageToggles();
+            setupDeckButtons();
+            setupModalClose();
+            setupSorting();
+            showWelcomeMessage();
+        }
 
         loadCardsWithSkills();
 
@@ -1981,254 +2267,6 @@
                 closeCharacterPicker();
             }
         }
-
-        // Add this function to handle sorting
-            function sortCards(cards, sortBy, sortOrder) {
-                const sortedCards = [...cards];
-
-                sortedCards.sort((a, b) => {
-                    let primaryComparison = 0;
-                    let secondaryComparison = 0;
-
-                    switch (sortBy) {
-                        case 'skills':
-                            // Sort by number of highlighted skills (descending by default)
-                            const aHighlighted = countHighlightedSkills(a);
-                            const bHighlighted = countHighlightedSkills(b);
-                            primaryComparison = bHighlighted - aHighlighted;
-                            break;
-
-                        case 'rarity':
-                            // Sort by rarity: SSR (3) > SR (2) > R (1)
-                            primaryComparison = b.rarity - a.rarity;
-                            break;
-
-                        case 'character':
-                            // Sort by name Z-A, then by rarity
-                            primaryComparison = b.char_name.localeCompare(a.char_name);
-                            secondaryComparison = b.rarity - a.rarity;
-                            break;
-
-                        case 'type':
-                            // Sort by type order, then by rarity
-                            const typeOrder = {
-                                'speed': 0, 'stamina': 1, 'power': 2, 'guts': 3,
-                                'intelligence': 4, 'friend': 5, 'group': 6
-                            };
-                            primaryComparison = typeOrder[a.type] - typeOrder[b.type];
-                            secondaryComparison = b.rarity - a.rarity;
-                            break;
-
-                        case 'release':
-                            // Sort by release date (most recent first), then by rarity
-                            // Assuming cards have a release_date property in format "YYYY-MM-DD"
-                            if (a.release_date && b.release_date) {
-                                primaryComparison = new Date(b.release_date) - new Date(a.release_date);
-                            }
-                            secondaryComparison = b.rarity - a.rarity;
-                            break;
-
-                        default:
-                            // Default: skills (number of highlighted skills)
-                            const aDefaultHighlighted = countHighlightedSkills(a);
-                            const bDefaultHighlighted = countHighlightedSkills(b);
-                            primaryComparison = bDefaultHighlighted - aDefaultHighlighted;
-                    }
-
-                    // Apply sort order
-                    if (sortOrder === 'asc') {
-                        primaryComparison = -primaryComparison;
-                        secondaryComparison = -secondaryComparison;
-                    }
-
-                    // If primary comparison is equal, use secondary comparison
-                    return primaryComparison !== 0 ? primaryComparison : secondaryComparison;
-                });
-
-                return sortedCards;
-            }
-
-            // Helper function to count highlighted skills
-            function countHighlightedSkills(card) {
-                const eventSkills = card.event_skills || [];
-                const hintSkills = card.hints?.hint_skills || [];
-                const allSkills = [...eventSkills, ...hintSkills];
-
-                return allSkills.filter(skillId => {
-                    const skillData = skillsMap.get(skillId);
-                    if (!skillData) return false;
-                    const skillName = getSkillName(skillData).toLowerCase();
-
-                    return currentSearchTerms.some(term =>
-                        skillName.includes(term) || term.includes(skillName) ||
-                        skillName.replace(/[^\w\s]/g, '').includes(term.replace(/[^\w\s]/g, '')) ||
-                        term.replace(/[^\w\s]/g, '').includes(skillName.replace(/[^\w\s]/g, ''))
-                    );
-                }).length;
-            }
-
-            // Update the filterAndRenderCards function to include sorting
-            function filterAndRenderCards() {
-                if (currentSearchTerms.length === 0) {
-                    showWelcomeMessage();
-                    return;
-                }
-
-                const filteredCards = allSupportCards.filter(card => {
-                    // Apply rarity filter
-                    const rarityFilter = getActiveRarityFilter();
-                    if (rarityFilter.length > 0 && !rarityFilter.includes(getRarityText(card.rarity))) {
-                        return false;
-                    }
-
-                    // Apply type filter
-                    const typeFilter = getActiveTypeFilter();
-                    if (typeFilter.length > 0 && !typeFilter.includes(card.type)) {
-                        return false;
-                    }
-
-                    // Check character name with relaxed matching
-                    if (currentSearchTerms.some(term =>
-                        card.char_name.toLowerCase().includes(term) ||
-                        term.includes(card.char_name.toLowerCase())
-                    )) {
-                        return true;
-                    }
-
-                    const eventSkills = card.event_skills || [];
-                    const hasEventSkill = eventSkills.some(skillId => {
-                        const skillData = skillsMap.get(skillId);
-                        if (!skillData) return false;
-                        const skillName = getSkillName(skillData).toLowerCase();
-                        return currentSearchTerms.some(term =>
-                            skillName.includes(term) || term.includes(skillName) ||
-                            skillName.replace(/[^\w\s]/g, '').includes(term.replace(/[^\w\s]/g, '')) ||
-                            term.replace(/[^\w\s]/g, '').includes(skillName.replace(/[^\w\s]/g, ''))
-                        );
-                    });
-
-                    const hintSkills = card.hints?.hint_skills || [];
-                    const hasHintSkill = hintSkills.some(skillId => {
-                        const skillData = skillsMap.get(skillId);
-                        if (!skillData) return false;
-                        const skillName = getSkillName(skillData).toLowerCase();
-                        return currentSearchTerms.some(term =>
-                            skillName.includes(term) || term.includes(skillName) ||
-                            skillName.replace(/[^\w\s]/g, '').includes(term.replace(/[^\w\s]/g, '')) ||
-                            term.replace(/[^\w\s]/g, '').includes(skillName.replace(/[^\w\s]/g, ''))
-                        );
-                    });
-
-                    return hasEventSkill || hasHintSkill;
-                });
-
-                // Apply sorting
-                const sortBy = document.querySelector('.sort-select:first-child').value;
-                const sortOrder = document.querySelector('.sort-select:last-child').value;
-                const sortedCards = sortCards(filteredCards, sortBy, sortOrder);
-
-                renderCards(sortedCards, currentSearchTerms);
-            }
-
-            // Helper functions for filters
-                function getRarityText(rarityNumber) {
-                    switch (rarityNumber) {
-                        case 3: return 'SSR';
-                        case 2: return 'SR';
-                        case 1: return 'R';
-                        default: return 'Unknown';
-                    }
-                }
-
-                function getActiveRarityFilter() {
-                    const activeRarities = [];
-                    document.querySelectorAll('.image-toggle.rarity').forEach(toggle => {
-                        if (toggle.classList.contains('active')) {
-                            activeRarities.push(toggle.dataset.rarity);
-                        }
-                    });
-                    return activeRarities;
-                }
-
-                function getActiveTypeFilter() {
-                    const activeTypes = [];
-                    document.querySelectorAll('.image-toggle.type-toggle').forEach(toggle => {
-                        if (toggle.classList.contains('active')) {
-                            activeTypes.push(toggle.dataset.type);
-                        }
-                    });
-                    return activeTypes;
-                }
-
-                // Update the image toggle setup to default to off
-                function setupImageToggles() {
-                    const imageToggles = document.querySelectorAll('.image-toggle');
-
-                    // Set all toggles to inactive by default
-                    imageToggles.forEach(toggle => {
-                        const input = toggle.querySelector('input');
-                        input.checked = false; // Default to off
-                        toggle.classList.add('inactive');
-                        toggle.classList.remove('active');
-                    });
-
-                    imageToggles.forEach(toggle => {
-                        toggle.addEventListener('click', function () {
-                            const input = this.querySelector('input');
-
-                            // Check if we're about to turn off the last active toggle in a group
-                            const isRarity = this.classList.contains('rarity');
-                            const isType = this.classList.contains('type-toggle');
-
-                            if (isRarity) {
-                                const activeRarities = getActiveRarityFilter();
-                                // If this is the last active rarity and we're turning it off, reset to all off
-                                if (activeRarities.length === 1 && activeRarities[0] === this.dataset.rarity && input.checked) {
-                                    // Don't allow turning off the last one - instead reset all to off
-                                    document.querySelectorAll('.image-toggle.rarity').forEach(rarityToggle => {
-                                        const rarityInput = rarityToggle.querySelector('input');
-                                        rarityInput.checked = false;
-                                        rarityToggle.classList.add('inactive');
-                                        rarityToggle.classList.remove('active');
-                                    });
-                                } else {
-                                    input.checked = !input.checked;
-                                    updateToggleState(this, input.checked);
-                                }
-                            } else if (isType) {
-                                const activeTypes = getActiveTypeFilter();
-                                // If this is the last active type and we're turning it off, reset to all off
-                                if (activeTypes.length === 1 && activeTypes[0] === this.dataset.type && input.checked) {
-                                    // Don't allow turning off the last one - instead reset all to off
-                                    document.querySelectorAll('.image-toggle.type-toggle').forEach(typeToggle => {
-                                        const typeInput = typeToggle.querySelector('input');
-                                        typeInput.checked = false;
-                                        typeToggle.classList.add('inactive');
-                                        typeToggle.classList.remove('active');
-                                    });
-                                } else {
-                                    input.checked = !input.checked;
-                                    updateToggleState(this, input.checked);
-                                }
-                            } else {
-                                input.checked = !input.checked;
-                                updateToggleState(this, input.checked);
-                            }
-
-                            filterAndRenderCards();
-                        });
-                    });
-                }
-
-                function updateToggleState(toggle, isActive) {
-                    if (isActive) {
-                        toggle.classList.add('active');
-                        toggle.classList.remove('inactive');
-                    } else {
-                        toggle.classList.add('inactive');
-                        toggle.classList.remove('active');
-                    }
-                }
     </script>
 </body>
 
