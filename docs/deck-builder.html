@@ -208,74 +208,54 @@
         .character-skill-list {
             font-size: 9px;
             line-height: 1.2;
+            color: #2c3e50;
+            /* Fixed: Changed from white to black */
         }
 
-        /* Switch button styles */
-        .switch-container {
+        /* Image toggle styles */
+        .image-toggle-container {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
             margin-bottom: 1rem;
         }
 
-        .switch-row {
+        .image-toggle-row {
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
         }
 
-        .switch-label {
+        .image-toggle-label {
             display: flex;
+            flex-direction: column;
             align-items: center;
             gap: 0.25rem;
-            font-size: 10px;
-            color: #000000;
-            white-space: nowrap;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 30px;
-            height: 16px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 16px;
         }
 
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 12px;
-            width: 12px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
+        .image-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
         }
 
-        input:checked+.slider {
-            background-color: #2196F3;
+        .image-toggle.active {
+            border-color: #3498db;
+            filter: none;
         }
 
-        input:checked+.slider:before {
-            transform: translateX(14px);
+        .image-toggle.inactive {
+            filter: grayscale(100%) brightness(0.7);
+            opacity: 0.6;
+        }
+
+        .image-toggle-text {
+            font-size: 9px;
+            color: #2c3e50;
+            text-align: center;
         }
 
         .search-boxes {
@@ -681,37 +661,6 @@
                 <button class="add-search-btn" id="add-search-btn">
                     <span>+</span> Add Search Box
                 </button>
-
-                <!-- Moved checkboxes to top section -->
-                <div style="margin-top: 1rem;">
-                    <h4 style="margin: 1rem 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Conditions & Positions</h4>
-                    <div class="filter-options">
-                        <div class="filter-row">
-                            <label class="filter-option"><input type="checkbox"> No condition</label>
-                            <label class="filter-option"><input type="checkbox"> Debuff</label>
-                        </div>
-                        <div class="filter-row">
-                            <label class="filter-option"><input type="checkbox"> Front</label>
-                            <label class="filter-option"><input type="checkbox"> Pace</label>
-                            <label class="filter-option"><input type="checkbox"> Late</label>
-                            <label class="filter-option"><input type="checkbox"> End</label>
-                        </div>
-                    </div>
-
-                    <h4 style="margin: 1rem 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Distance & Track</h4>
-                    <div class="filter-options">
-                        <div class="filter-row">
-                            <label class="filter-option"><input type="checkbox"> Short</label>
-                            <label class="filter-option"><input type="checkbox"> Mile</label>
-                            <label class="filter-option"><input type="checkbox"> Medium</label>
-                            <label class="filter-option"><input type="checkbox"> Long</label>
-                        </div>
-                        <div class="filter-row">
-                            <label class="filter-option"><input type="checkbox"> Dirt</label>
-                            <label class="filter-option"><input type="checkbox"> Turf</label>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div class="control-section">
@@ -754,87 +703,109 @@
 
             <div class="control-section">
                 <h3>Filters</h3>
-                <!-- Rarity Switches -->
-                <div class="switch-container">
-                    <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Rarity</h4>
-                    <div class="switch-row">
-                        <label class="switch-label">
-                            <span>SSR</span>
-                            <label class="switch">
-                                <input type="checkbox" checked>
-                                <span class="slider"></span>
-                            </label>
+
+                <!-- Type Image Toggles -->
+                <div class="image-toggle-container">
+                    <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Type</h4>
+                    <div class="image-toggle-row">
+                        <label class="image-toggle-label" data-type="speed">
+                            <img src="./images/utx_ico_obtain/utx_ico_obtain_00.png" class="image-toggle active"
+                                data-type="speed">
+                            <span class="image-toggle-text">Speed</span>
+                            <input type="checkbox" checked style="display: none;">
                         </label>
-                        <label class="switch-label">
-                            <span>SR</span>
-                            <label class="switch">
-                                <input type="checkbox" checked>
-                                <span class="slider"></span>
-                            </label>
+                        <label class="image-toggle-label" data-type="stamina">
+                            <img src="./images/utx_ico_obtain/utx_ico_obtain_01.png" class="image-toggle active"
+                                data-type="stamina">
+                            <span class="image-toggle-text">Stamina</span>
+                            <input type="checkbox" checked style="display: none;">
                         </label>
-                        <label class="switch-label">
-                            <span>R</span>
-                            <label class="switch">
-                                <input type="checkbox" checked>
-                                <span class="slider"></span>
-                            </label>
+                        <label class="image-toggle-label" data-type="power">
+                            <img src="./images/utx_ico_obtain/utx_ico_obtain_02.png" class="image-toggle active"
+                                data-type="power">
+                            <span class="image-toggle-text">Power</span>
+                            <input type="checkbox" checked style="display: none;">
+                        </label>
+                        <label class="image-toggle-label" data-type="guts">
+                            <img src="./images/utx_ico_obtain/utx_ico_obtain_03.png" class="image-toggle active"
+                                data-type="guts">
+                            <span class="image-toggle-text">Guts</span>
+                            <input type="checkbox" checked style="display: none;">
+                        </label>
+                        <label class="image-toggle-label" data-type="intelligence">
+                            <img src="./images/utx_ico_obtain/utx_ico_obtain_04.png" class="image-toggle active"
+                                data-type="intelligence">
+                            <span class="image-toggle-text">Intelligence</span>
+                            <input type="checkbox" checked style="display: none;">
+                        </label>
+                        <label class="image-toggle-label" data-type="friend">
+                            <img src="./images/utx_ico_obtain/utx_ico_obtain_05.png" class="image-toggle active"
+                                data-type="friend">
+                            <span class="image-toggle-text">Friend</span>
+                            <input type="checkbox" checked style="display: none;">
+                        </label>
+                        <label class="image-toggle-label" data-type="group">
+                            <img src="./images/utx_ico_obtain/utx_ico_obtain_06.png" class="image-toggle active"
+                                data-type="group">
+                            <span class="image-toggle-text">Group</span>
+                            <input type="checkbox" checked style="display: none;">
                         </label>
                     </div>
                 </div>
 
-                <!-- Type Switches -->
-                <div class="switch-container">
-                    <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Type</h4>
-                    <div class="switch-row">
-                        <label class="switch-label">
-                            <span>Speed</span>
-                            <label class="switch">
-                                <input type="checkbox" checked>
-                                <span class="slider"></span>
-                            </label>
+                <!-- Rarity Image Toggles -->
+                <div class="image-toggle-container">
+                    <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Rarity</h4>
+                    <div class="image-toggle-row">
+                        <label class="image-toggle-label" data-rarity="ssr">
+                            <img src="./images/utx_txt_rarity/utx_txt_rarity_03.png" class="image-toggle active"
+                                data-rarity="ssr">
+                            <span class="image-toggle-text">SSR</span>
+                            <input type="checkbox" checked style="display: none;">
                         </label>
-                        <label class="switch-label">
-                            <span>Stamina</span>
-                            <label class="switch">
-                                <input type="checkbox" checked>
-                                <span class="slider"></span>
-                            </label>
+                        <label class="image-toggle-label" data-rarity="sr">
+                            <img src="./images/utx_txt_rarity/utx_txt_rarity_02.png" class="image-toggle active"
+                                data-rarity="sr">
+                            <span class="image-toggle-text">SR</span>
+                            <input type="checkbox" checked style="display: none;">
                         </label>
-                        <label class="switch-label">
-                            <span>Power</span>
-                            <label class="switch">
-                                <input type="checkbox" checked>
-                                <span class="slider"></span>
-                            </label>
+                        <label class="image-toggle-label" data-rarity="r">
+                            <img src="./images/utx_txt_rarity/utx_txt_rarity_01.png" class="image-toggle active"
+                                data-rarity="r">
+                            <span class="image-toggle-text">R</span>
+                            <input type="checkbox" checked style="display: none;">
                         </label>
-                        <label class="switch-label">
-                            <span>Guts</span>
-                            <label class="switch">
-                                <input type="checkbox" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </label>
-                        <label class="switch-label">
-                            <span>Intelligence</span>
-                            <label class="switch">
-                                <input type="checkbox" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </label>
-                        <label class="switch-label">
-                            <span>Friend</span>
-                            <label class="switch">
-                                <input type="checkbox" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </label>
-                        <label class="switch-label">
-                            <span>Group</span>
-                            <label class="switch">
-                                <input type="checkbox" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </label>
+                    </div>
+                </div>
+
+                <!-- Moved back Conditions & Positions and Distance & Track -->
+                <div style="margin-top: 1rem;">
+                    <h4 style="margin: 1rem 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Conditions & Positions</h4>
+                    <div class="filter-options">
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> No condition</label>
+                            <label class="filter-option"><input type="checkbox"> Debuff</label>
+                        </div>
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Front</label>
+                            <label class="filter-option"><input type="checkbox"> Pace</label>
+                            <label class="filter-option"><input type="checkbox"> Late</label>
+                            <label class="filter-option"><input type="checkbox"> End</label>
+                        </div>
+                    </div>
+
+                    <h4 style="margin: 1rem 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Distance & Track</h4>
+                    <div class="filter-options">
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Short</label>
+                            <label class="filter-option"><input type="checkbox"> Mile</label>
+                            <label class="filter-option"><input type="checkbox"> Medium</label>
+                            <label class="filter-option"><input type="checkbox"> Long</label>
+                        </div>
+                        <div class="filter-row">
+                            <label class="filter-option"><input type="checkbox"> Dirt</label>
+                            <label class="filter-option"><input type="checkbox"> Turf</label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -872,6 +843,43 @@
         let draggedCardIndex = null;
         let characterSearchTerm = '';
         let searchTimeout = null;
+
+        // Initialize image toggles
+        function initializeImageToggles() {
+            // Type toggles
+            document.querySelectorAll('.image-toggle-label[data-type]').forEach(label => {
+                const img = label.querySelector('.image-toggle');
+                const checkbox = label.querySelector('input[type="checkbox"]');
+
+                label.addEventListener('click', () => {
+                    checkbox.checked = !checkbox.checked;
+                    if (checkbox.checked) {
+                        img.classList.remove('inactive');
+                        img.classList.add('active');
+                    } else {
+                        img.classList.remove('active');
+                        img.classList.add('inactive');
+                    }
+                });
+            });
+
+            // Rarity toggles
+            document.querySelectorAll('.image-toggle-label[data-rarity]').forEach(label => {
+                const img = label.querySelector('.image-toggle');
+                const checkbox = label.querySelector('input[type="checkbox"]');
+
+                label.addEventListener('click', () => {
+                    checkbox.checked = !checkbox.checked;
+                    if (checkbox.checked) {
+                        img.classList.remove('inactive');
+                        img.classList.add('active');
+                    } else {
+                        img.classList.remove('active');
+                        img.classList.add('inactive');
+                    }
+                });
+            });
+        }
 
         fetch('header.html').then(response => response.text()).then(data => {
             document.getElementById('header-placeholder').innerHTML = data;
@@ -1106,6 +1114,8 @@
             }
             updateDeckDisplay();
         }
+
+        // ... (rest of the JavaScript functions
 
         function addCardToDeck(card, targetSlotIndex) {
             if (isCardInDeck(card)) return;
