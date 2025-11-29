@@ -428,14 +428,35 @@
             box-sizing: border-box;
         }
 
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+
         .close-modal {
-            position: absolute;
-            top: 10px;
-            right: 10px;
             background: none;
             border: none;
             font-size: 20px;
             cursor: pointer;
+            color: #7f8c8d;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            color: #2c3e50;
         }
 
         .character-search-container {
@@ -551,6 +572,14 @@
 
         .load-button:hover {
             background: #2980b9;
+        }
+
+        .screenshot-button {
+            background: #9b59b6;
+        }
+
+        .screenshot-button:hover {
+            background: #8e44ad;
         }
 
         .clear-button {
@@ -875,9 +904,10 @@
                 <div class="deck-header">
                     <h3>Deck (0/6)</h3>
                     <div class="deck-buttons">
-                        <button class="deck-button save-button" title="Save Deck">S</button>
-                        <button class="deck-button load-button" title="Load Deck">L</button>
-                        <button class="deck-button clear-button" title="Clear Deck">C</button>
+                        <button class="deck-button save-button" title="Save Deck">💾</button>
+                        <button class="deck-button load-button" title="Load Deck">📂</button>
+                        <button class="deck-button screenshot-button" title="Screenshot">📷</button>
+                        <button class="deck-button clear-button" title="Clear Deck">🗑️</button>
                     </div>
                 </div>
                 <div class="deck-slots" id="deck-slots">
@@ -1002,8 +1032,10 @@
 
         <div id="character-modal" class="modal">
             <div class="modal-content">
-                <button class="close-modal">✖</button>
-                <h3>Select Character</h3>
+                <div class="modal-header">
+                    <h3>Select Character</h3>
+                    <button class="close-modal">✖</button>
+                </div>
                 <div class="character-search-container">
                     <input type="text" class="character-search-input" id="character-search-input"
                         placeholder="Search character by name...">
@@ -1891,6 +1923,12 @@
             alert('Deck loaded successfully!');
         }
 
+        function takeScreenshot() {
+            alert('Screenshot functionality would be implemented here!');
+            // In a real implementation, you would use a library like html2canvas
+            // to capture the deck section or entire page as an image
+        }
+
         function clearDeck() {
             if (confirm('Are you sure you want to clear the deck?')) {
                 deck = Array(6).fill(null);
@@ -1902,7 +1940,12 @@
         function setupDeckButtons() {
             document.querySelector('.save-button').addEventListener('click', saveDeck);
             document.querySelector('.load-button').addEventListener('click', loadDeck);
+            document.querySelector('.screenshot-button').addEventListener('click', takeScreenshot);
             document.querySelector('.clear-button').addEventListener('click', clearDeck);
+        }
+
+        function setupModalClose() {
+            document.querySelector('.close-modal').addEventListener('click', closeCharacterPicker);
         }
 
         async function loadCardsWithSkills() {
@@ -1916,6 +1959,7 @@
             updateCharacterSlotDisplay();
             setupImageToggles();
             setupDeckButtons();
+            setupModalClose();
             showWelcomeMessage();
         }
 
