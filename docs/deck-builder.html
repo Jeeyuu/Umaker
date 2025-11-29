@@ -229,6 +229,8 @@
         .search-section {
             width: 250px;
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
         .search-header {
@@ -266,6 +268,7 @@
             flex-direction: column;
             gap: 8px;
             width: 100%;
+            flex-grow: 1;
         }
 
         .search-box {
@@ -857,16 +860,9 @@
         }
 
         .character-search-section {
-            margin-top: 1rem;
+            margin-top: auto;
             padding-top: 1rem;
             border-top: 1px solid #e0e0e0;
-        }
-
-        .character-search-header {
-            font-size: 12px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 8px;
         }
 
         .character-search-box {
@@ -875,24 +871,13 @@
             width: 100%;
         }
 
-        .character-results-section {
-            margin-bottom: 2rem;
-        }
-
-        .character-results-header {
-            font-size: 14px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #3498db;
-        }
-
         .character-results-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 1rem;
-            margin-bottom: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto 2rem auto;
         }
     </style>
 </head>
@@ -914,12 +899,13 @@
                         <button class="toggle-search-btn">✔</button>
                         <button class="remove-search-btn">✖</button>
                     </div>
-                    
+
                     <!-- Character search section at the bottom -->
                     <div class="character-search-section">
-                        <div class="character-search-header">Character Search</div>
+                        <div class="search-divider"></div>
                         <div class="character-search-box">
-                            <input type="text" class="search-input character-search-input" placeholder="Search for characters...">
+                            <input type="text" class="search-input character-search-input"
+                                placeholder="Search for characters...">
                         </div>
                     </div>
                 </div>
@@ -1044,13 +1030,10 @@
             </div>
         </div>
 
-        <!-- Character Results Section -->
-        <div id="character-results-section" class="character-results-section" style="display: none;">
-            <div class="character-results-header">Character Results</div>
-            <div id="character-results-container" class="character-results-container"></div>
-        </div>
+        <!-- Character Results Container -->
+        <div id="character-results-container" class="character-results-container"></div>
 
-        <!-- Normal Results Section -->
+        <!-- Normal Results Container -->
         <div id="cards-container" class="cards-container">
             <div class="welcome-message">Enter search terms to find support cards</div>
         </div>
@@ -1132,11 +1115,11 @@
         function setupSearch() {
             const addSearchBtn = document.getElementById('add-search-btn');
             addSearchBtn.addEventListener('click', addSearchBox);
-            
+
             // Set up the character search box (no checkmark or X)
             const characterSearchInput = document.querySelector('.search-input.character-search-input');
             characterSearchInput.addEventListener('input', handleCharacterSearch);
-            
+
             // Set up normal search boxes
             const normalInputs = document.querySelectorAll('.search-input:not(.character-search-input)');
             normalInputs.forEach(input => {
@@ -1167,7 +1150,6 @@
         function handleCharacterSearch() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                updateSearchTerms();
                 filterAndRenderCards();
                 updateDeckDisplay();
                 updateCharacterSkillsHighlight();
@@ -1186,7 +1168,7 @@
             // Insert before the character search section
             const characterSection = document.querySelector('.character-search-section');
             searchBoxesContainer.insertBefore(searchBox, characterSection);
-            
+
             const input = searchBox.querySelector('.search-input');
             input.addEventListener('input', handleSearch);
             const toggleBtn = searchBox.querySelector('.toggle-search-btn');
@@ -1250,19 +1232,6 @@
         function filterAndRenderCards() {
             const characterSearchInput = document.querySelector('.search-input.character-search-input');
             const characterSearchTerm = characterSearchInput.value.trim().toLowerCase();
-            
-            // Show/hide character results section
-            const characterResultsSection = document.getElementById('character-results-section');
-            if (characterSearchTerm) {
-                characterResultsSection.style.display = 'block';
-            } else {
-                characterResultsSection.style.display = 'none';
-            }
-
-            if (currentSearchTerms.length === 0 && !characterSearchTerm) {
-                showWelcomeMessage();
-                return;
-            }
 
             const cacheKey = currentSearchTerms.join('|') + getActiveFiltersKey() + '|char:' + characterSearchTerm;
             if (cardCache.has(cacheKey)) {
@@ -1283,22 +1252,27 @@
                     return false;
                 }
 
-                // Check normal search terms
-                const eventSkills = card.event_skills || [];
-                const hasEventSkill = eventSkills.some(skillId => {
-                    const skillName = skillNameCache.get(skillId);
-                    if (!skillName) return false;
-                    return currentSearchTerms.some(term => matchesSearchTerm(skillName, term));
-                });
+                // If we have normal search terms, filter by them
+                if (currentSearchTerms.length > 0) {
+                    const eventSkills = card.event_skills || [];
+                    const hasEventSkill = eventSkills.some(skillId => {
+                        const skillName = skillNameCache.get(skillId);
+                        if (!skillName) return false;
+                        return currentSearchTerms.some(term => matchesSearchTerm(skillName, term));
+                    });
 
-                const hintSkills = card.hints?.hint_skills || [];
-                const hasHintSkill = hintSkills.some(skillId => {
-                    const skillName = skillNameCache.get(skillId);
-                    if (!skillName) return false;
-                    return currentSearchTerms.some(term => matchesSearchTerm(skillName, term));
-                });
+                    const hintSkills = card.hints?.hint_skills || [];
+                    const hasHintSkill = hintSkills.some(skillId => {
+                        const skillName = skillNameCache.get(skillId);
+                        if (!skillName) return false;
+                        return currentSearchTerms.some(term => matchesSearchTerm(skillName, term));
+                    });
 
-                return hasEventSkill || hasHintSkill;
+                    return hasEventSkill || hasHintSkill;
+                }
+
+                // If no normal search terms, show all cards that match filters
+                return true;
             });
 
             // Apply sorting
@@ -1408,20 +1382,15 @@
         function renderCards(cards, searchTerms = [], characterSearchTerm = '') {
             const characterResultsContainer = document.getElementById('character-results-container');
             const normalContainer = document.getElementById('cards-container');
-            
+
             // Clear both containers
             characterResultsContainer.innerHTML = '';
             normalContainer.innerHTML = '';
 
-            if (cards.length === 0 && !characterSearchTerm) {
-                normalContainer.innerHTML = '<div class="no-results">No cards match your search criteria.</div>';
-                return;
-            }
-
             // Separate character matches from normal matches
             const characterMatches = [];
             const normalMatches = [];
-            
+
             if (characterSearchTerm) {
                 cards.forEach(card => {
                     if (card.char_name.toLowerCase().includes(characterSearchTerm)) {
@@ -1452,16 +1421,14 @@
                     fragment.appendChild(cardElement);
                 });
                 normalContainer.appendChild(fragment);
-            } else if (!characterSearchTerm) {
+            } else if (currentSearchTerms.length === 0 && !characterSearchTerm) {
+                showWelcomeMessage();
+            } else if (normalMatches.length === 0) {
                 normalContainer.innerHTML = '<div class="no-results">No cards match your search criteria.</div>';
             }
         }
 
-        // Rest of the functions remain the same as before...
-        // (setupDeckSlots, addCardToDeck, removeCardFromDeck, swapCardsInDeck, 
-        // isCardInDeck, isCharacterInDeck, getCardErrors, updateDeckDisplay, etc.)
-
-        // ... [All the remaining functions from the previous code remain unchanged] ...
+        // ... [All the remaining functions remain the same] ...
 
         async function openCharacterPicker() {
             if (allCharacters.length === 0) {
