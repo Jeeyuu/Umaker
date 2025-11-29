@@ -128,6 +128,11 @@
             border-left: 2px solid #ffc107;
         }
 
+        .skill-number.blue-highlighted {
+            background-color: #d6eaf8;
+            border-left: 2px solid #3498db;
+        }
+
         .skill-number:hover {
             background-color: #f0f0f0;
         }
@@ -303,6 +308,11 @@
             box-sizing: border-box;
         }
 
+        .search-input.active {
+            border-color: #3498db;
+            background-color: #ebf5fb;
+        }
+
         .remove-search-btn {
             background: #e74c3c;
             color: white;
@@ -319,6 +329,25 @@
 
         .remove-search-btn:hover {
             background: #c0392b;
+        }
+
+        .toggle-search-btn {
+            background: #bdc3c7;
+            color: white;
+            border: none;
+            width: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-search-btn.active {
+            background: #3498db;
         }
 
         .add-search-btn {
@@ -669,14 +698,12 @@
         .image-toggle-container {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
         }
 
         .image-toggle-row {
             display: flex;
-            gap: 0.5rem;
             flex-wrap: wrap;
+            justify-content: center;
         }
 
         .image-toggle {
@@ -719,19 +746,11 @@
             height: 0;
         }
 
-        /* Split filter section into two halves */
+        /* Combined filter section */
         .filter-section {
-            height: 50%;
-            box-sizing: border-box;
-            padding-bottom: 1rem;
-        }
-
-        .filter-section:first-child {
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .filter-section:last-child {
-            padding-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
     </style>
 </head>
@@ -746,6 +765,7 @@
                 <div class="search-boxes" id="search-boxes">
                     <div class="search-box">
                         <input type="text" class="search-input" placeholder="Enter skill or character name...">
+                        <button class="toggle-search-btn">✔</button>
                         <button class="remove-search-btn">×</button>
                     </div>
                 </div>
@@ -792,10 +812,10 @@
                 </div>
             </div>
 
-            <div class="control-section" style="display: flex; flex-direction: column; height: 400px;">
+            <div class="control-section">
                 <h3>Filters</h3>
 
-                <!-- Top half: Rarity and Type -->
+                <!-- Combined filter section -->
                 <div class="filter-section">
                     <!-- Rarity Image Toggles -->
                     <div class="image-toggle-container">
@@ -850,35 +870,37 @@
                             </label>
                         </div>
                     </div>
-                </div>
 
-                <!-- Bottom half: Conditions & Positions Distance Track -->
-                <div class="filter-section">
-                    <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Conditions & Positions</h4>
-                    <div class="filter-options">
-                        <div class="filter-row">
-                            <label class="filter-option"><input type="checkbox"> No condition</label>
-                            <label class="filter-option"><input type="checkbox"> Debuff</label>
-                        </div>
-                        <div class="filter-row">
-                            <label class="filter-option"><input type="checkbox"> Front</label>
-                            <label class="filter-option"><input type="checkbox"> Pace</label>
-                            <label class="filter-option"><input type="checkbox"> Late</label>
-                            <label class="filter-option"><input type="checkbox"> End</label>
+                    <!-- Conditions & Positions Distance Track -->
+                    <div>
+                        <h4 style="margin: 0 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Conditions & Positions</h4>
+                        <div class="filter-options">
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox"> No condition</label>
+                                <label class="filter-option"><input type="checkbox"> Debuff</label>
+                            </div>
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox"> Front</label>
+                                <label class="filter-option"><input type="checkbox"> Pace</label>
+                                <label class="filter-option"><input type="checkbox"> Late</label>
+                                <label class="filter-option"><input type="checkbox"> End</label>
+                            </div>
                         </div>
                     </div>
 
-                    <h4 style="margin: 1rem 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Distance & Track</h4>
-                    <div class="filter-options">
-                        <div class="filter-row">
-                            <label class="filter-option"><input type="checkbox"> Short</label>
-                            <label class="filter-option"><input type="checkbox"> Mile</label>
-                            <label class="filter-option"><input type="checkbox"> Medium</label>
-                            <label class="filter-option"><input type="checkbox"> Long</label>
-                        </div>
-                        <div class="filter-row">
-                            <label class="filter-option"><input type="checkbox"> Dirt</label>
-                            <label class="filter-option"><input type="checkbox"> Turf</label>
+                    <div>
+                        <h4 style="margin: 1rem 0 0.5rem 0; font-size: 12px; color: #2c3e50;">Distance & Track</h4>
+                        <div class="filter-options">
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox"> Short</label>
+                                <label class="filter-option"><input type="checkbox"> Mile</label>
+                                <label class="filter-option"><input type="checkbox"> Medium</label>
+                                <label class="filter-option"><input type="checkbox"> Long</label>
+                            </div>
+                            <div class="filter-row">
+                                <label class="filter-option"><input type="checkbox"> Dirt</label>
+                                <label class="filter-option"><input type="checkbox"> Turf</label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -913,6 +935,7 @@
         let selectedCharacter = null;
         let deck = Array(6).fill(null);
         let currentSearchTerms = [];
+        let activeSearchTerms = [];
         let draggedCard = null;
         let draggedCardIndex = null;
         let characterSearchTerm = '';
@@ -946,12 +969,24 @@
             addSearchBtn.addEventListener('click', addSearchBox);
             const initialInput = document.querySelector('.search-input');
             initialInput.addEventListener('input', handleSearch);
+            const initialToggleBtn = document.querySelector('.toggle-search-btn');
+            initialToggleBtn.addEventListener('click', function () {
+                this.classList.toggle('active');
+                const searchBox = this.parentElement;
+                const input = searchBox.querySelector('.search-input');
+                input.classList.toggle('active');
+                updateActiveSearchTerms();
+                updateCharacterSkillsHighlight();
+                updateCardDisplay();
+            });
             const initialRemoveBtn = document.querySelector('.remove-search-btn');
             initialRemoveBtn.addEventListener('click', function () {
                 this.parentElement.remove();
                 updateSearchTerms();
+                updateActiveSearchTerms();
                 filterAndRenderCards();
-                updateDeckDisplay(); // Update deck highlights in real-time
+                updateDeckDisplay();
+                updateCharacterSkillsHighlight();
             });
         }
 
@@ -961,24 +996,38 @@
             searchBox.className = 'search-box';
             searchBox.innerHTML = `
                     <input type="text" class="search-input" placeholder="Enter skill or character name...">
+                    <button class="toggle-search-btn">✔</button>
                     <button class="remove-search-btn">×</button>
                 `;
             searchBoxesContainer.appendChild(searchBox);
             const input = searchBox.querySelector('.search-input');
             input.addEventListener('input', handleSearch);
+            const toggleBtn = searchBox.querySelector('.toggle-search-btn');
+            toggleBtn.addEventListener('click', function () {
+                this.classList.toggle('active');
+                const searchBox = this.parentElement;
+                const input = searchBox.querySelector('.search-input');
+                input.classList.toggle('active');
+                updateActiveSearchTerms();
+                updateCharacterSkillsHighlight();
+                updateCardDisplay();
+            });
             const removeBtn = searchBox.querySelector('.remove-search-btn');
             removeBtn.addEventListener('click', function () {
                 searchBox.remove();
                 updateSearchTerms();
+                updateActiveSearchTerms();
                 filterAndRenderCards();
-                updateDeckDisplay(); // Update deck highlights in real-time
+                updateDeckDisplay();
+                updateCharacterSkillsHighlight();
             });
         }
 
         function handleSearch() {
             updateSearchTerms();
             filterAndRenderCards();
-            updateDeckDisplay(); // Update deck highlights in real-time
+            updateDeckDisplay();
+            updateCharacterSkillsHighlight();
         }
 
         function updateSearchTerms() {
@@ -986,6 +1035,21 @@
             currentSearchTerms = Array.from(inputs)
                 .map(input => input.value.trim().toLowerCase())
                 .filter(term => term.length > 0);
+        }
+
+        function updateActiveSearchTerms() {
+            const searchBoxes = document.querySelectorAll('.search-box');
+            activeSearchTerms = [];
+
+            searchBoxes.forEach(box => {
+                const input = box.querySelector('.search-input');
+                const toggleBtn = box.querySelector('.toggle-search-btn');
+                const term = input.value.trim().toLowerCase();
+
+                if (term.length > 0 && toggleBtn.classList.contains('active')) {
+                    activeSearchTerms.push(term);
+                }
+            });
         }
 
         function filterAndRenderCards() {
@@ -1188,6 +1252,37 @@
                     }
                 });
             }
+
+            // Update highlights after loading skills
+            updateCharacterSkillsHighlight();
+        }
+
+        // Function to highlight character skills based on active search terms
+        function updateCharacterSkillsHighlight() {
+            if (!selectedCharacter) return;
+
+            const skillElements = document.querySelectorAll('.character-skill-list .skill-number');
+
+            skillElements.forEach(element => {
+                const skillId = element.getAttribute('data-skill-id');
+                const skillData = skillsMap.get(parseInt(skillId));
+
+                if (skillData) {
+                    const skillName = getSkillName(skillData).toLowerCase();
+
+                    // Check if this skill matches any active search term
+                    const isHighlighted = activeSearchTerms.some(term =>
+                        skillName.split(/\s+/).some(word => word === term) || skillName === term
+                    );
+
+                    if (isHighlighted) {
+                        element.classList.add('blue-highlighted');
+                        element.classList.remove('highlighted');
+                    } else {
+                        element.classList.remove('blue-highlighted', 'highlighted');
+                    }
+                }
+            });
         }
 
         function setupDeckSlots() {
@@ -1305,7 +1400,13 @@
                                     skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
                                     skillName.toLowerCase() === term
                                 );
-                            return `<span class="skill-number ${isHighlighted ? 'highlighted' : ''}" 
+                            const isBlueHighlighted = activeSearchTerms.length > 0 &&
+                                activeSearchTerms.some(term =>
+                                    skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
+                                    skillName.toLowerCase() === term
+                                );
+                            const highlightClass = isBlueHighlighted ? 'blue-highlighted' : (isHighlighted ? 'highlighted' : '');
+                            return `<span class="skill-number ${highlightClass}" 
                                             title="Skill ID: ${skillId}" data-skill-id="${skillId}">${skillName}</span>`;
                         }).join('');
                     };
@@ -1428,7 +1529,17 @@
                             skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
                             skillName.toLowerCase() === term
                         );
-                    return isHighlighted ? { id: skillId, name: skillName, highlighted: isHighlighted } : null;
+                    const isBlueHighlighted = activeSearchTerms.length > 0 &&
+                        activeSearchTerms.some(term =>
+                            skillName.toLowerCase().split(/\s+/).some(word => word === term) ||
+                            skillName.toLowerCase() === term
+                        );
+                    return isHighlighted || isBlueHighlighted ? {
+                        id: skillId,
+                        name: skillName,
+                        highlighted: isHighlighted,
+                        blueHighlighted: isBlueHighlighted
+                    } : null;
                 }).filter(skill => skill !== null);
             };
 
@@ -1437,14 +1548,14 @@
 
             let skillsHTML = '';
 
-            if (searchTerms.length > 0) {
+            if (searchTerms.length > 0 || activeSearchTerms.length > 0) {
                 if (highlightedHintSkills.length > 0) {
                     skillsHTML += `
                             <div class="skill-section">
                                 <div class="skill-label">Hint Skills</div>
                                 <div class="skill-list">
                                     ${highlightedHintSkills.map(skill =>
-                        `<span class="skill-number highlighted" 
+                        `<span class="skill-number ${skill.blueHighlighted ? 'blue-highlighted' : 'highlighted'}" 
                                             title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
                     ).join('')}
                                 </div>
@@ -1458,7 +1569,7 @@
                                 <div class="skill-label">Event Skills</div>
                                 <div class="skill-list">
                                     ${highlightedEventSkills.map(skill =>
-                        `<span class="skill-number highlighted" 
+                        `<span class="skill-number ${skill.blueHighlighted ? 'blue-highlighted' : 'highlighted'}" 
                                             title="Skill ID: ${skill.id}" data-skill-id="${skill.id}">${skill.name}</span>`
                     ).join('')}
                                 </div>
