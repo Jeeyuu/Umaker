@@ -521,6 +521,8 @@
 
         .deck-section {
             width: fit-content;
+            display: flex;
+            flex-direction: column;
         }
 
         .deck-header {
@@ -882,6 +884,30 @@
         .character-results-container:empty {
             display: none;
         }
+
+        .character-divider {
+            height: 2px;
+            background-color: #3498db;
+            margin: 1rem 0;
+            width: 100%;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .character-divider:empty {
+            display: none;
+        }
+
+        .deck-bonus-info {
+            margin-top: auto;
+            padding-top: 1rem;
+            font-size: 11px;
+            color: #7f8c8d;
+            font-style: italic;
+            text-align: center;
+            border-top: 1px solid #e0e0e0;
+        }
     </style>
 </head>
 
@@ -947,6 +973,9 @@
                     <div class="deck-slot">Slot 4</div>
                     <div class="deck-slot">Slot 5</div>
                     <div class="deck-slot">Slot 6</div>
+                </div>
+                <div class="deck-bonus-info" id="deck-bonus-info">
+                    Race Bonus: 0 | Fan Bonus: 0
                 </div>
             </div>
 
@@ -1025,12 +1054,16 @@
                     <div class="character-search-section">
                         <div class="character-search-header">Character Search</div>
                         <div class="character-search-box">
-                            <input type="text" class="search-input character-search-input" placeholder="Search for characters...">
+                            <input type="text" class="search-input character-search-input"
+                                placeholder="Search for characters...">
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Character Results Divider -->
+        <div id="character-divider" class="character-divider"></div>
 
         <!-- Character Results Container -->
         <div id="character-results-container" class="character-results-container"></div>
@@ -1117,11 +1150,11 @@
         function setupSearch() {
             const addSearchBtn = document.getElementById('add-search-btn');
             addSearchBtn.addEventListener('click', addSearchBox);
-            
+
             // Set up the character search box (no checkmark or X)
             const characterSearchInput = document.querySelector('.search-input.character-search-input');
             characterSearchInput.addEventListener('input', handleCharacterSearch);
-            
+
             // Set up normal search boxes
             const normalInputs = document.querySelectorAll('.search-input:not(.character-search-input)');
             normalInputs.forEach(input => {
@@ -1139,7 +1172,17 @@
                 });
                 const removeBtn = input.parentElement.querySelector('.remove-search-btn');
                 removeBtn.addEventListener('click', function () {
-                    this.parentElement.remove();
+                    const searchBoxes = document.querySelectorAll('.search-box');
+                    if (searchBoxes.length <= 1) {
+                        // Don't remove the last search box, just clear it
+                        const input = this.parentElement.querySelector('.search-input');
+                        input.value = '';
+                        input.classList.remove('active');
+                        const toggleBtn = this.parentElement.querySelector('.toggle-search-btn');
+                        toggleBtn.classList.remove('active');
+                    } else {
+                        this.parentElement.remove();
+                    }
                     updateSearchTerms();
                     updateActiveSearchTerms();
                     filterAndRenderCards();
@@ -1168,7 +1211,7 @@
                     <button class="remove-search-btn">✖</button>
                 `;
             searchBoxesContainer.appendChild(searchBox);
-            
+
             const input = searchBox.querySelector('.search-input');
             input.addEventListener('input', handleSearch);
             const toggleBtn = searchBox.querySelector('.toggle-search-btn');
@@ -1184,7 +1227,17 @@
             });
             const removeBtn = searchBox.querySelector('.remove-search-btn');
             removeBtn.addEventListener('click', function () {
-                searchBox.remove();
+                const searchBoxes = document.querySelectorAll('.search-box');
+                if (searchBoxes.length <= 1) {
+                    // Don't remove the last search box, just clear it
+                    const input = this.parentElement.querySelector('.search-input');
+                    input.value = '';
+                    input.classList.remove('active');
+                    const toggleBtn = this.parentElement.querySelector('.toggle-search-btn');
+                    toggleBtn.classList.remove('active');
+                } else {
+                    this.parentElement.remove();
+                }
                 updateSearchTerms();
                 updateActiveSearchTerms();
                 filterAndRenderCards();
@@ -1232,7 +1285,7 @@
         function filterAndRenderCards() {
             const characterSearchInput = document.querySelector('.search-input.character-search-input');
             const characterSearchTerm = characterSearchInput.value.trim().toLowerCase();
-            
+
             const cacheKey = currentSearchTerms.join('|') + getActiveFiltersKey() + '|char:' + characterSearchTerm;
             if (cardCache.has(cacheKey)) {
                 renderCards(cardCache.get(cacheKey), currentSearchTerms, characterSearchTerm);
@@ -1303,6 +1356,7 @@
             sortedCards.sort((a, b) => {
                 let primaryComparison = 0;
                 let secondaryComparison = 0;
+                let tertiaryComparison = 0;
 
                 switch (sortBy) {
                     case 'skills':
@@ -1318,6 +1372,8 @@
                         } else if (!a.release && b.release) {
                             secondaryComparison = 1;
                         }
+                        // Tertiary: rarity (SSR > SR > R)
+                        tertiaryComparison = b.rarity - a.rarity;
                         break;
 
                     case 'rarity':
@@ -1340,7 +1396,7 @@
                         break;
 
                     case 'type':
-                        // Sort by type order, then by release date (latest first)
+                        // Sort by type order, then by release date (latest first), then by rarity
                         const typeOrder = {
                             'speed': 0, 'stamina': 1, 'power': 2, 'guts': 3,
                             'intelligence': 4, 'friend': 5, 'group': 6
@@ -1353,6 +1409,8 @@
                         } else if (!a.release && b.release) {
                             secondaryComparison = 1;
                         }
+                        // Tertiary: rarity (SSR > SR > R)
+                        tertiaryComparison = b.rarity - a.rarity;
                         break;
 
                     case 'release':
@@ -1380,16 +1438,20 @@
                         } else if (!a.release && b.release) {
                             secondaryComparison = 1;
                         }
+                        // Tertiary: rarity (SSR > SR > R)
+                        tertiaryComparison = b.rarity - a.rarity;
                 }
 
                 // Apply sort order
                 if (sortOrder === 'asc') {
                     primaryComparison = -primaryComparison;
                     secondaryComparison = -secondaryComparison;
+                    tertiaryComparison = -tertiaryComparison;
                 }
 
-                // If primary comparison is equal, use secondary comparison
-                return primaryComparison !== 0 ? primaryComparison : secondaryComparison;
+                // If primary comparison is equal, use secondary comparison, then tertiary
+                return primaryComparison !== 0 ? primaryComparison :
+                    (secondaryComparison !== 0 ? secondaryComparison : tertiaryComparison);
             });
 
             return sortedCards;
@@ -1410,16 +1472,18 @@
 
         function renderCards(cards, searchTerms = [], characterSearchTerm = '') {
             const characterResultsContainer = document.getElementById('character-results-container');
+            const characterDivider = document.getElementById('character-divider');
             const normalContainer = document.getElementById('cards-container');
-            
+
             // Clear both containers
             characterResultsContainer.innerHTML = '';
+            characterDivider.innerHTML = '';
             normalContainer.innerHTML = '';
 
             // Separate character matches from normal matches
             const characterMatches = [];
             const normalMatches = [];
-            
+
             if (characterSearchTerm) {
                 cards.forEach(card => {
                     if (card.char_name.toLowerCase().includes(characterSearchTerm)) {
@@ -1434,12 +1498,18 @@
 
             // Render character matches in the special section
             if (characterMatches.length > 0) {
+                // Show divider
+                characterDivider.style.display = 'block';
+
                 const fragment = document.createDocumentFragment();
                 characterMatches.forEach(card => {
                     const cardElement = createCardElement(card, searchTerms);
                     fragment.appendChild(cardElement);
                 });
                 characterResultsContainer.appendChild(fragment);
+            } else {
+                // Hide divider when no character results
+                characterDivider.style.display = 'none';
             }
 
             // Render normal matches in the normal container
@@ -1461,542 +1531,6 @@
             } else if (normalMatches.length === 0) {
                 normalContainer.innerHTML = '<div class="no-results">No cards match your search criteria.</div>';
             }
-        }
-
-        // ... [All the remaining functions remain the same until setupImageToggles] ...
-
-        function setupImageToggles() {
-            const imageToggles = document.querySelectorAll('.image-toggle');
-
-            // Set all toggles to inactive by default
-            imageToggles.forEach(toggle => {
-                const input = toggle.querySelector('input');
-                input.checked = false;
-                toggle.classList.add('inactive');
-                toggle.classList.remove('active');
-            });
-
-            imageToggles.forEach(toggle => {
-                toggle.addEventListener('click', function () {
-                    const input = this.querySelector('input');
-
-                    // Check if we're about to turn off the last active toggle in a group
-                    const isRarity = this.classList.contains('rarity');
-                    const isType = this.classList.contains('type-toggle');
-
-                    if (isRarity) {
-                        const activeRarities = getActiveRarityFilter();
-                        // If this is the last active rarity and we're turning it off, reset to all off
-                        if (activeRarities.length === 1 && activeRarities[0] === this.dataset.rarity && input.checked) {
-                            // Don't allow turning off the last one - instead reset all to off
-                            document.querySelectorAll('.image-toggle.rarity').forEach(rarityToggle => {
-                                const rarityInput = rarityToggle.querySelector('input');
-                                rarityInput.checked = false;
-                                rarityToggle.classList.add('inactive');
-                                rarityToggle.classList.remove('active');
-                            });
-                        } else {
-                            input.checked = !input.checked;
-                            updateToggleState(this, input.checked);
-                        }
-                    } else if (isType) {
-                        const activeTypes = getActiveTypeFilter();
-                        // If this is the last active type and we're turning it off, reset to all off
-                        if (activeTypes.length === 1 && activeTypes[0] === this.dataset.type && input.checked) {
-                            // Don't allow turning off the last one - instead reset all to off
-                            document.querySelectorAll('.image-toggle.type-toggle').forEach(typeToggle => {
-                                const typeInput = typeToggle.querySelector('input');
-                                typeInput.checked = false;
-                                typeToggle.classList.add('inactive');
-                                typeToggle.classList.remove('active');
-                            });
-                        } else {
-                            input.checked = !input.checked;
-                            updateToggleState(this, input.checked);
-                        }
-                    } else {
-                        input.checked = !input.checked;
-                        updateToggleState(this, input.checked);
-                    }
-
-                    // Check if all toggles in a group are active and reset to dimmed state
-                    checkAndResetAllActive();
-
-                    cardCache.clear();
-                    filterAndRenderCards();
-                });
-            });
-        }
-
-        function checkAndResetAllActive() {
-            // Check rarity toggles
-            const rarityToggles = document.querySelectorAll('.image-toggle.rarity');
-            const activeRarities = getActiveRarityFilter();
-            if (activeRarities.length === rarityToggles.length) {
-                // All rarities are selected, reset to none
-                rarityToggles.forEach(toggle => {
-                    const input = toggle.querySelector('input');
-                    input.checked = false;
-                    toggle.classList.add('inactive');
-                    toggle.classList.remove('active');
-                });
-            }
-
-            // Check type toggles
-            const typeToggles = document.querySelectorAll('.image-toggle.type-toggle');
-            const activeTypes = getActiveTypeFilter();
-            if (activeTypes.length === typeToggles.length) {
-                // All types are selected, reset to none
-                typeToggles.forEach(toggle => {
-                    const input = toggle.querySelector('input');
-                    input.checked = false;
-                    toggle.classList.add('inactive');
-                    toggle.classList.remove('active');
-                });
-            }
-        }
-
-        function updateToggleState(toggle, isActive) {
-            if (isActive) {
-                toggle.classList.add('active');
-                toggle.classList.remove('inactive');
-            } else {
-                toggle.classList.add('inactive');
-                toggle.classList.remove('active');
-            }
-        }
-
-        // ... [Rest of the functions remain the same] ...
-
-        async function openCharacterPicker() {
-            if (allCharacters.length === 0) {
-                await loadCharacters();
-            }
-            document.getElementById('character-modal').style.display = 'block';
-            renderCharacterPicker();
-        }
-
-        function closeCharacterPicker() {
-            document.getElementById('character-modal').style.display = 'none';
-            characterSearchTerm = '';
-            document.getElementById('character-search-input').value = '';
-        }
-
-        async function loadCharacters() {
-            const response = await fetch('./data/character-cards.json');
-            allCharacters = await response.json();
-        }
-
-        function renderCharacterPicker() {
-            const container = document.getElementById('characters-container');
-            const searchInput = document.getElementById('character-search-input');
-
-            searchInput.oninput = null;
-
-            searchInput.addEventListener('input', function () {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    characterSearchTerm = this.value.trim().toLowerCase();
-                    renderCharacterPicker();
-                }, 150);
-            });
-
-            container.innerHTML = '';
-
-            const filteredCharacters = allCharacters.filter(character =>
-                character.name_en.toLowerCase().includes(characterSearchTerm) ||
-                characterSearchTerm.includes(character.name_en.toLowerCase())
-            );
-
-            if (filteredCharacters.length === 0) {
-                container.innerHTML = '<div class="loading">No characters found</div>';
-                return;
-            }
-
-            filteredCharacters.forEach(character => {
-                const charElement = document.createElement('div');
-                charElement.className = `character-picker-card ${selectedCharacter?.char_id === character.char_id ? 'selected' : ''}`;
-                charElement.onclick = () => selectCharacter(character);
-                charElement.innerHTML = `
-                        <img src="./images/chara_stand/chara_stand_${character.char_id}_${character.card_id}.png" 
-                             alt="${character.name_en}" class="character-picker-portrait" onerror="this.style.display='none'">
-                        <div class="character-picker-name">${character.name_en}</div>
-                    `;
-                container.appendChild(charElement);
-            });
-        }
-
-        function selectCharacter(character) {
-            selectedCharacter = character;
-            updateCharacterSlotDisplay();
-            closeCharacterPicker();
-            updateCardDisplay();
-            updateDeckDisplay();
-        }
-
-        function removeSelectedCharacter() {
-            selectedCharacter = null;
-            updateCharacterSlotDisplay();
-            updateCardDisplay();
-            updateDeckDisplay();
-        }
-
-        function updateCharacterSlotDisplay() {
-            const container = document.getElementById('character-slot-container');
-            const nameDisplay = document.getElementById('character-name-display');
-            const skillsContainer = document.getElementById('character-skills');
-
-            if (selectedCharacter) {
-                container.innerHTML = `
-                    <div class="character-slot filled" style="position: relative;">
-                        <img src="./images/chara_stand/chara_stand_${selectedCharacter.char_id}_${selectedCharacter.card_id}.png" 
-                             alt="${selectedCharacter.name_en}" class="character-portrait" onerror="this.style.display='none'">
-                        <button class="character-remove" onclick="removeSelectedCharacter()">✖</button>
-                    </div>
-                `;
-                nameDisplay.textContent = selectedCharacter.name_en;
-                skillsContainer.style.display = 'block';
-
-                loadCharacterSkills(selectedCharacter);
-            } else {
-                container.innerHTML = `
-                    <div class="character-slot" onclick="openCharacterPicker()">
-                        Pick Character
-                    </div>
-                `;
-                nameDisplay.textContent = '';
-                skillsContainer.style.display = 'none';
-            }
-        }
-
-        function loadCharacterSkills(character) {
-            const awakeningSkillsContainer = document.getElementById('awakening-skills');
-            const innateSkillsContainer = document.getElementById('innate-skills');
-            const eventSkillsContainer = document.getElementById('character-event-skills');
-
-            awakeningSkillsContainer.innerHTML = '';
-            innateSkillsContainer.innerHTML = '';
-            eventSkillsContainer.innerHTML = '';
-
-            if (character.skills_awakening && character.skills_awakening.length > 0) {
-                character.skills_awakening.forEach(skillId => {
-                    const skillData = skillsMap.get(skillId);
-                    if (skillData) {
-                        const skillElement = document.createElement('span');
-                        skillElement.className = 'skill-number';
-                        skillElement.textContent = getSkillName(skillData);
-                        skillElement.title = `Skill ID: ${skillId}`;
-                        skillElement.setAttribute('data-skill-id', skillId);
-                        skillElement.addEventListener('click', handleSkillClick);
-                        awakeningSkillsContainer.appendChild(skillElement);
-                    }
-                });
-            }
-
-            if (character.skills_innate && character.skills_innate.length > 0) {
-                character.skills_innate.forEach(skillId => {
-                    const skillData = skillsMap.get(skillId);
-                    if (skillData) {
-                        const skillElement = document.createElement('span');
-                        skillElement.className = 'skill-number';
-                        skillElement.textContent = getSkillName(skillData);
-                        skillElement.title = `Skill ID: ${skillId}`;
-                        skillElement.setAttribute('data-skill-id', skillId);
-                        skillElement.addEventListener('click', handleSkillClick);
-                        innateSkillsContainer.appendChild(skillElement);
-                    }
-                });
-            }
-
-            if (character.skills_event && character.skills_event.length > 0) {
-                character.skills_event.forEach(skillId => {
-                    const skillData = skillsMap.get(skillId);
-                    if (skillData) {
-                        const skillElement = document.createElement('span');
-                        skillElement.className = 'skill-number';
-                        skillElement.textContent = getSkillName(skillData);
-                        skillElement.title = `Skill ID: ${skillId}`;
-                        skillElement.setAttribute('data-skill-id', skillId);
-                        skillElement.addEventListener('click', handleSkillClick);
-                        eventSkillsContainer.appendChild(skillElement);
-                    }
-                });
-            }
-
-            updateCharacterSkillsHighlight();
-        }
-
-        function handleSkillClick(e) {
-            const skillId = this.getAttribute('data-skill-id');
-            const skillData = skillsMap.get(parseInt(skillId));
-            if (!skillData) return;
-
-            const skillName = getSkillName(skillData);
-            addSkillToSearch(skillName);
-        }
-
-        function addSkillToSearch(skillName) {
-            // Check if skill is already in search
-            const existingSearch = Array.from(document.querySelectorAll('.search-input:not(.character-search-input)'))
-                .find(input => input.value.toLowerCase() === skillName.toLowerCase());
-
-            if (existingSearch) {
-                // Toggle the checkmark
-                const searchBox = existingSearch.closest('.search-box');
-                const toggleBtn = searchBox.querySelector('.toggle-search-btn');
-                toggleBtn.classList.toggle('active');
-                existingSearch.classList.toggle('active');
-            } else {
-                // Add new search box
-                addSearchBox();
-                const searchBoxes = document.querySelectorAll('.search-box');
-                const lastSearchBox = searchBoxes[searchBoxes.length - 1];
-                const input = lastSearchBox.querySelector('.search-input');
-                const toggleBtn = lastSearchBox.querySelector('.toggle-search-btn');
-
-                input.value = skillName;
-                toggleBtn.classList.add('active');
-                input.classList.add('active');
-            }
-
-            updateSearchTerms();
-            updateActiveSearchTerms();
-            filterAndRenderCards();
-            updateDeckDisplay();
-            updateCharacterSkillsHighlight();
-        }
-
-        function updateCharacterSkillsHighlight() {
-            if (!selectedCharacter) return;
-
-            const skillElements = document.querySelectorAll('.character-skill-list .skill-number');
-
-            skillElements.forEach(element => {
-                const skillId = element.getAttribute('data-skill-id');
-                const skillName = skillNameCache.get(parseInt(skillId));
-
-                if (skillName) {
-                    const isBlueHighlighted = activeSearchTerms.some(term => matchesSearchTerm(skillName, term));
-                    const isHighlighted = currentSearchTerms.some(term => matchesSearchTerm(skillName, term));
-
-                    if (isBlueHighlighted) {
-                        element.classList.add('blue-highlighted');
-                        element.classList.remove('highlighted');
-                    } else if (isHighlighted) {
-                        element.classList.add('highlighted');
-                        element.classList.remove('blue-highlighted');
-                    } else {
-                        element.classList.remove('blue-highlighted', 'highlighted');
-                    }
-                }
-            });
-        }
-
-        function setupDeckSlots() {
-            const slots = document.getElementById('deck-slots');
-            slots.innerHTML = '';
-            for (let i = 0; i < 6; i++) {
-                const slot = document.createElement('div');
-                slot.className = 'deck-slot';
-                slot.innerHTML = `Slot ${i + 1}`;
-                slot.dataset.slotIndex = i;
-                slot.addEventListener('dragover', handleDragOver);
-                slot.addEventListener('dragenter', handleDragEnter);
-                slot.addEventListener('dragleave', handleDragLeave);
-                slot.addEventListener('drop', handleDrop);
-                slots.appendChild(slot);
-            }
-            updateDeckDisplay();
-        }
-
-        function addCardToDeck(card, targetSlotIndex) {
-            if (isCardInDeck(card)) return;
-            if (isCharacterInDeck(card.char_id)) return;
-            if (selectedCharacter && selectedCharacter.char_id === card.char_id) return;
-
-            if (targetSlotIndex === undefined) {
-                targetSlotIndex = deck.findIndex(slot => slot === null);
-                if (targetSlotIndex === -1) return;
-            }
-
-            if (draggedCardIndex !== null) {
-                deck[draggedCardIndex] = null;
-                draggedCardIndex = null;
-            }
-
-            deck[targetSlotIndex] = card;
-            updateDeckDisplay();
-            updateCardDisplay();
-        }
-
-        function removeCardFromDeck(index) {
-            if (deck[index]) {
-                deck[index] = null;
-                updateDeckDisplay();
-                updateCardDisplay();
-            }
-        }
-
-        function swapCardsInDeck(index1, index2) {
-            if (deck[index1] && deck[index2]) {
-                [deck[index1], deck[index2]] = [deck[index2], deck[index1]];
-            } else if (deck[index1] && !deck[index2]) {
-                deck[index2] = deck[index1];
-                deck[index1] = null;
-            } else if (!deck[index1] && deck[index2]) {
-                deck[index1] = deck[index2];
-                deck[index2] = null;
-            }
-            updateDeckDisplay();
-        }
-
-        function isCardInDeck(card) {
-            return deck.some(deckCard => deckCard && deckCard.support_id === card.support_id);
-        }
-
-        function isCharacterInDeck(charId) {
-            return deck.some(deckCard => deckCard && deckCard.char_id === charId);
-        }
-
-        function getCardErrors(card, isDeckCard = false) {
-            const errors = [];
-            if (!isDeckCard && isCardInDeck(card)) {
-                errors.push({ type: 'selected', message: '! Selected' });
-                return errors;
-            }
-            if (selectedCharacter && selectedCharacter.char_id === card.char_id) {
-                errors.push({ type: 'trainee', message: '! Trainee' });
-                return errors;
-            }
-            if (!isDeckCard && isCharacterInDeck(card.char_id)) {
-                errors.push({ type: 'duplicate', message: '! Duplicate Support' });
-            }
-            return errors;
-        }
-
-        function updateDeckDisplay() {
-            const slots = document.querySelectorAll('.deck-slot');
-            const deckCount = deck.filter(card => card !== null).length;
-            const deckTitle = document.querySelector('.deck-section h3');
-            deckTitle.textContent = `Deck (${deckCount}/6)`;
-
-            slots.forEach((slot, index) => {
-                slot.innerHTML = `Slot ${index + 1}`;
-                slot.className = 'deck-slot';
-                slot.dataset.slotIndex = index;
-
-                if (deck[index]) {
-                    const card = deck[index];
-                    slot.className = 'deck-slot filled';
-                    const formattedId = card.support_id.toString().padStart(5, '0');
-
-                    const errors = getCardErrors(card, true);
-                    const hasErrors = errors.length > 0;
-                    const isTraineeError = hasErrors && errors.some(error => error.type === 'trainee');
-
-                    const eventSkills = card.event_skills || [];
-                    const hintSkills = card.hints?.hint_skills || [];
-
-                    const formatSkillsForDeck = (skills) => {
-                        return skills.map(skillId => {
-                            const skillName = skillNameCache.get(skillId);
-                            if (!skillName) return '';
-                            const isHighlighted = currentSearchTerms.length > 0 &&
-                                currentSearchTerms.some(term => matchesSearchTerm(skillName, term));
-                            const isBlueHighlighted = activeSearchTerms.length > 0 &&
-                                activeSearchTerms.some(term => matchesSearchTerm(skillName, term));
-                            const highlightClass = isBlueHighlighted ? 'blue-highlighted' : (isHighlighted ? 'highlighted' : '');
-                            return `<span class="skill-number ${highlightClass}" 
-                                            title="Skill ID: ${skillId}" data-skill-id="${skillId}">${getSkillName(skillsMap.get(skillId))}</span>`;
-                        }).join('');
-                    };
-
-                    const hintSkillsHTML = hintSkills.length > 0 ? `
-                            <div class="skill-section">
-                                <div class="skill-label">Hint Skills</div>
-                                <div class="skill-list">${formatSkillsForDeck(hintSkills)}</div>
-                            </div>
-                        ` : '';
-
-                    const eventSkillsHTML = eventSkills.length > 0 ? `
-                            <div class="skill-section">
-                                <div class="skill-label">Event Skills</div>
-                                <div class="skill-list">${formatSkillsForDeck(eventSkills)}</div>
-                            </div>
-                        ` : '';
-
-                    let deckCardHTML = `
-                            <div class="card deck-card ${isTraineeError ? 'disabled' : ''}" 
-                                 draggable="${!isTraineeError}" 
-                                 data-card-index="${index}" 
-                                 style="position: relative;">
-                                <div class="card-image-container">
-                                    <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
-                                         alt="${card.char_name}" class="card-image" onerror="this.style.display='none'">
-                                </div>
-                                <div class="card-name">${card.char_name}</div>
-                                <div class="card-skills">
-                                    ${hintSkillsHTML}
-                                    ${eventSkillsHTML}
-                                </div>
-                            </div>
-                        `;
-
-                    slot.innerHTML = deckCardHTML;
-
-                    const removeButton = document.createElement('button');
-                    removeButton.className = 'deck-card-remove';
-                    removeButton.innerHTML = '✖';
-                    removeButton.onclick = (e) => {
-                        e.stopPropagation();
-                        removeCardFromDeck(index);
-                    };
-                    slot.appendChild(removeButton);
-
-                    if (hasErrors) {
-                        const deckCard = slot.querySelector('.deck-card');
-                        errors.forEach(error => {
-                            const errorLabel = document.createElement('div');
-                            errorLabel.className = `card-error-label error-${error.type}`;
-                            errorLabel.textContent = error.message;
-                            deckCard.appendChild(errorLabel);
-                        });
-                    }
-
-                    // Add click event listeners to deck skills
-                    setTimeout(() => {
-                        const deckSkills = slot.querySelectorAll('.skill-number');
-                        deckSkills.forEach(skillElement => {
-                            skillElement.addEventListener('click', handleDeckSkillClick);
-                        });
-                    }, 0);
-
-                    const deckCard = slot.querySelector('.deck-card');
-                    if (deckCard && !isTraineeError) {
-                        deckCard.addEventListener('dragstart', handleDeckCardDragStart);
-                        deckCard.addEventListener('dragend', handleDeckCardDragEnd);
-                    }
-                }
-
-                slot.addEventListener('dragover', handleDragOver);
-                slot.addEventListener('dragenter', handleDragEnter);
-                slot.addEventListener('dragleave', handleDragLeave);
-                slot.addEventListener('drop', handleDrop);
-            });
-        }
-
-        function handleDeckSkillClick(e) {
-            e.stopPropagation();
-            const skillId = this.getAttribute('data-skill-id');
-            const skillData = skillsMap.get(parseInt(skillId));
-            if (!skillData) return;
-
-            const skillName = getSkillName(skillData);
-            addSkillToSearch(skillName);
-        }
-
-        function updateCardDisplay() {
-            filterAndRenderCards();
         }
 
         function createCardElement(card, searchTerms = []) {
@@ -2239,6 +1773,554 @@
                 }
             });
             return activeTypes;
+        }
+
+        function setupImageToggles() {
+            const imageToggles = document.querySelectorAll('.image-toggle');
+
+            // Set all toggles to inactive by default
+            imageToggles.forEach(toggle => {
+                const input = toggle.querySelector('input');
+                input.checked = false;
+                toggle.classList.add('inactive');
+                toggle.classList.remove('active');
+            });
+
+            imageToggles.forEach(toggle => {
+                toggle.addEventListener('click', function () {
+                    const input = this.querySelector('input');
+
+                    // Check if we're about to turn off the last active toggle in a group
+                    const isRarity = this.classList.contains('rarity');
+                    const isType = this.classList.contains('type-toggle');
+
+                    if (isRarity) {
+                        const activeRarities = getActiveRarityFilter();
+                        // If this is the last active rarity and we're turning it off, reset to all off
+                        if (activeRarities.length === 1 && activeRarities[0] === this.dataset.rarity && input.checked) {
+                            // Don't allow turning off the last one - instead reset all to off
+                            document.querySelectorAll('.image-toggle.rarity').forEach(rarityToggle => {
+                                const rarityInput = rarityToggle.querySelector('input');
+                                rarityInput.checked = false;
+                                rarityToggle.classList.add('inactive');
+                                rarityToggle.classList.remove('active');
+                            });
+                        } else {
+                            input.checked = !input.checked;
+                            updateToggleState(this, input.checked);
+                        }
+                    } else if (isType) {
+                        const activeTypes = getActiveTypeFilter();
+                        // If this is the last active type and we're turning it off, reset to all off
+                        if (activeTypes.length === 1 && activeTypes[0] === this.dataset.type && input.checked) {
+                            // Don't allow turning off the last one - instead reset all to off
+                            document.querySelectorAll('.image-toggle.type-toggle').forEach(typeToggle => {
+                                const typeInput = typeToggle.querySelector('input');
+                                typeInput.checked = false;
+                                typeToggle.classList.add('inactive');
+                                typeToggle.classList.remove('active');
+                            });
+                        } else {
+                            input.checked = !input.checked;
+                            updateToggleState(this, input.checked);
+                        }
+                    } else {
+                        input.checked = !input.checked;
+                        updateToggleState(this, input.checked);
+                    }
+
+                    // Check if all toggles in a group are active and reset to dimmed state
+                    checkAndResetAllActive();
+
+                    cardCache.clear();
+                    filterAndRenderCards();
+                });
+            });
+        }
+
+        function checkAndResetAllActive() {
+            // Check rarity toggles
+            const rarityToggles = document.querySelectorAll('.image-toggle.rarity');
+            const activeRarities = getActiveRarityFilter();
+            if (activeRarities.length === rarityToggles.length) {
+                // All rarities are selected, reset to none
+                rarityToggles.forEach(toggle => {
+                    const input = toggle.querySelector('input');
+                    input.checked = false;
+                    toggle.classList.add('inactive');
+                    toggle.classList.remove('active');
+                });
+            }
+
+            // Check type toggles
+            const typeToggles = document.querySelectorAll('.image-toggle.type-toggle');
+            const activeTypes = getActiveTypeFilter();
+            if (activeTypes.length === typeToggles.length) {
+                // All types are selected, reset to none
+                typeToggles.forEach(toggle => {
+                    const input = toggle.querySelector('input');
+                    input.checked = false;
+                    toggle.classList.add('inactive');
+                    toggle.classList.remove('active');
+                });
+            }
+        }
+
+        function updateToggleState(toggle, isActive) {
+            if (isActive) {
+                toggle.classList.add('active');
+                toggle.classList.remove('inactive');
+            } else {
+                toggle.classList.add('inactive');
+                toggle.classList.remove('active');
+            }
+        }
+
+        function setupDeckSlots() {
+            const slots = document.getElementById('deck-slots');
+            slots.innerHTML = '';
+            for (let i = 0; i < 6; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'deck-slot';
+                slot.innerHTML = `Slot ${i + 1}`;
+                slot.dataset.slotIndex = i;
+                slot.addEventListener('dragover', handleDragOver);
+                slot.addEventListener('dragenter', handleDragEnter);
+                slot.addEventListener('dragleave', handleDragLeave);
+                slot.addEventListener('drop', handleDrop);
+                slots.appendChild(slot);
+            }
+            updateDeckDisplay();
+        }
+
+        function addCardToDeck(card, targetSlotIndex) {
+            if (isCardInDeck(card)) return;
+            if (isCharacterInDeck(card.char_id)) return;
+            if (selectedCharacter && selectedCharacter.char_id === card.char_id) return;
+
+            if (targetSlotIndex === undefined) {
+                targetSlotIndex = deck.findIndex(slot => slot === null);
+                if (targetSlotIndex === -1) return;
+            }
+
+            if (draggedCardIndex !== null) {
+                deck[draggedCardIndex] = null;
+                draggedCardIndex = null;
+            }
+
+            deck[targetSlotIndex] = card;
+            updateDeckDisplay();
+            updateCardDisplay();
+        }
+
+        function removeCardFromDeck(index) {
+            if (deck[index]) {
+                deck[index] = null;
+                updateDeckDisplay();
+                updateCardDisplay();
+            }
+        }
+
+        function swapCardsInDeck(index1, index2) {
+            if (deck[index1] && deck[index2]) {
+                [deck[index1], deck[index2]] = [deck[index2], deck[index1]];
+            } else if (deck[index1] && !deck[index2]) {
+                deck[index2] = deck[index1];
+                deck[index1] = null;
+            } else if (!deck[index1] && deck[index2]) {
+                deck[index1] = deck[index2];
+                deck[index2] = null;
+            }
+            updateDeckDisplay();
+        }
+
+        function isCardInDeck(card) {
+            return deck.some(deckCard => deckCard && deckCard.support_id === card.support_id);
+        }
+
+        function isCharacterInDeck(charId) {
+            return deck.some(deckCard => deckCard && deckCard.char_id === charId);
+        }
+
+        function getCardErrors(card, isDeckCard = false) {
+            const errors = [];
+            if (!isDeckCard && isCardInDeck(card)) {
+                errors.push({ type: 'selected', message: '! Selected' });
+                return errors;
+            }
+            if (selectedCharacter && selectedCharacter.char_id === card.char_id) {
+                errors.push({ type: 'trainee', message: '! Trainee' });
+                return errors;
+            }
+            if (!isDeckCard && isCharacterInDeck(card.char_id)) {
+                errors.push({ type: 'duplicate', message: '! Duplicate Support' });
+            }
+            return errors;
+        }
+
+        function updateDeckDisplay() {
+            const slots = document.querySelectorAll('.deck-slot');
+            const deckCount = deck.filter(card => card !== null).length;
+            const deckTitle = document.querySelector('.deck-section h3');
+            deckTitle.textContent = `Deck (${deckCount}/6)`;
+
+            // Calculate bonuses
+            let raceBonus = 0;
+            let fanBonus = 0;
+
+            deck.forEach(card => {
+                if (card) {
+                    // Simple calculation - you can adjust this based on your actual bonus logic
+                    raceBonus += card.rarity || 0;
+                    fanBonus += (card.rarity || 0) * 100;
+                }
+            });
+
+            // Update bonus display
+            const bonusInfo = document.getElementById('deck-bonus-info');
+            bonusInfo.textContent = `Race Bonus: ${raceBonus} | Fan Bonus: ${fanBonus}`;
+
+            slots.forEach((slot, index) => {
+                slot.innerHTML = `Slot ${index + 1}`;
+                slot.className = 'deck-slot';
+                slot.dataset.slotIndex = index;
+
+                if (deck[index]) {
+                    const card = deck[index];
+                    slot.className = 'deck-slot filled';
+                    const formattedId = card.support_id.toString().padStart(5, '0');
+
+                    const errors = getCardErrors(card, true);
+                    const hasErrors = errors.length > 0;
+                    const isTraineeError = hasErrors && errors.some(error => error.type === 'trainee');
+
+                    const eventSkills = card.event_skills || [];
+                    const hintSkills = card.hints?.hint_skills || [];
+
+                    const formatSkillsForDeck = (skills) => {
+                        return skills.map(skillId => {
+                            const skillName = skillNameCache.get(skillId);
+                            if (!skillName) return '';
+                            const isHighlighted = currentSearchTerms.length > 0 &&
+                                currentSearchTerms.some(term => matchesSearchTerm(skillName, term));
+                            const isBlueHighlighted = activeSearchTerms.length > 0 &&
+                                activeSearchTerms.some(term => matchesSearchTerm(skillName, term));
+                            const highlightClass = isBlueHighlighted ? 'blue-highlighted' : (isHighlighted ? 'highlighted' : '');
+                            return `<span class="skill-number ${highlightClass}" 
+                                            title="Skill ID: ${skillId}" data-skill-id="${skillId}">${getSkillName(skillsMap.get(skillId))}</span>`;
+                        }).join('');
+                    };
+
+                    const hintSkillsHTML = hintSkills.length > 0 ? `
+                            <div class="skill-section">
+                                <div class="skill-label">Hint Skills</div>
+                                <div class="skill-list">${formatSkillsForDeck(hintSkills)}</div>
+                            </div>
+                        ` : '';
+
+                    const eventSkillsHTML = eventSkills.length > 0 ? `
+                            <div class="skill-section">
+                                <div class="skill-label">Event Skills</div>
+                                <div class="skill-list">${formatSkillsForDeck(eventSkills)}</div>
+                            </div>
+                        ` : '';
+
+                    let deckCardHTML = `
+                            <div class="card deck-card ${isTraineeError ? 'disabled' : ''}" 
+                                 draggable="${!isTraineeError}" 
+                                 data-card-index="${index}" 
+                                 style="position: relative;">
+                                <div class="card-image-container">
+                                    <img src="./images/support_card_s/support_card_s_${formattedId}.png" 
+                                         alt="${card.char_name}" class="card-image" onerror="this.style.display='none'">
+                                </div>
+                                <div class="card-name">${card.char_name}</div>
+                                <div class="card-skills">
+                                    ${hintSkillsHTML}
+                                    ${eventSkillsHTML}
+                                </div>
+                            </div>
+                        `;
+
+                    slot.innerHTML = deckCardHTML;
+
+                    const removeButton = document.createElement('button');
+                    removeButton.className = 'deck-card-remove';
+                    removeButton.innerHTML = '✖';
+                    removeButton.onclick = (e) => {
+                        e.stopPropagation();
+                        removeCardFromDeck(index);
+                    };
+                    slot.appendChild(removeButton);
+
+                    if (hasErrors) {
+                        const deckCard = slot.querySelector('.deck-card');
+                        errors.forEach(error => {
+                            const errorLabel = document.createElement('div');
+                            errorLabel.className = `card-error-label error-${error.type}`;
+                            errorLabel.textContent = error.message;
+                            deckCard.appendChild(errorLabel);
+                        });
+                    }
+
+                    // Add click event listeners to deck skills
+                    setTimeout(() => {
+                        const deckSkills = slot.querySelectorAll('.skill-number');
+                        deckSkills.forEach(skillElement => {
+                            skillElement.addEventListener('click', handleDeckSkillClick);
+                        });
+                    }, 0);
+
+                    const deckCard = slot.querySelector('.deck-card');
+                    if (deckCard && !isTraineeError) {
+                        deckCard.addEventListener('dragstart', handleDeckCardDragStart);
+                        deckCard.addEventListener('dragend', handleDeckCardDragEnd);
+                    }
+                }
+
+                slot.addEventListener('dragover', handleDragOver);
+                slot.addEventListener('dragenter', handleDragEnter);
+                slot.addEventListener('dragleave', handleDragLeave);
+                slot.addEventListener('drop', handleDrop);
+            });
+        }
+
+        function handleDeckSkillClick(e) {
+            e.stopPropagation();
+            const skillId = this.getAttribute('data-skill-id');
+            const skillData = skillsMap.get(parseInt(skillId));
+            if (!skillData) return;
+
+            const skillName = getSkillName(skillData);
+            addSkillToSearch(skillName);
+        }
+
+        function updateCardDisplay() {
+            filterAndRenderCards();
+        }
+
+        async function openCharacterPicker() {
+            if (allCharacters.length === 0) {
+                await loadCharacters();
+            }
+            document.getElementById('character-modal').style.display = 'block';
+            renderCharacterPicker();
+        }
+
+        function closeCharacterPicker() {
+            document.getElementById('character-modal').style.display = 'none';
+            characterSearchTerm = '';
+            document.getElementById('character-search-input').value = '';
+        }
+
+        async function loadCharacters() {
+            const response = await fetch('./data/character-cards.json');
+            allCharacters = await response.json();
+        }
+
+        function renderCharacterPicker() {
+            const container = document.getElementById('characters-container');
+            const searchInput = document.getElementById('character-search-input');
+
+            searchInput.oninput = null;
+
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    characterSearchTerm = this.value.trim().toLowerCase();
+                    renderCharacterPicker();
+                }, 150);
+            });
+
+            container.innerHTML = '';
+
+            const filteredCharacters = allCharacters.filter(character =>
+                character.name_en.toLowerCase().includes(characterSearchTerm) ||
+                characterSearchTerm.includes(character.name_en.toLowerCase())
+            );
+
+            if (filteredCharacters.length === 0) {
+                container.innerHTML = '<div class="loading">No characters found</div>';
+                return;
+            }
+
+            filteredCharacters.forEach(character => {
+                const charElement = document.createElement('div');
+                charElement.className = `character-picker-card ${selectedCharacter?.char_id === character.char_id ? 'selected' : ''}`;
+                charElement.onclick = () => selectCharacter(character);
+                charElement.innerHTML = `
+                        <img src="./images/chara_stand/chara_stand_${character.char_id}_${character.card_id}.png" 
+                             alt="${character.name_en}" class="character-picker-portrait" onerror="this.style.display='none'">
+                        <div class="character-picker-name">${character.name_en}</div>
+                    `;
+                container.appendChild(charElement);
+            });
+        }
+
+        function selectCharacter(character) {
+            selectedCharacter = character;
+            updateCharacterSlotDisplay();
+            closeCharacterPicker();
+            updateCardDisplay();
+            updateDeckDisplay();
+        }
+
+        function removeSelectedCharacter() {
+            selectedCharacter = null;
+            updateCharacterSlotDisplay();
+            updateCardDisplay();
+            updateDeckDisplay();
+        }
+
+        function updateCharacterSlotDisplay() {
+            const container = document.getElementById('character-slot-container');
+            const nameDisplay = document.getElementById('character-name-display');
+            const skillsContainer = document.getElementById('character-skills');
+
+            if (selectedCharacter) {
+                container.innerHTML = `
+                    <div class="character-slot filled" style="position: relative;">
+                        <img src="./images/chara_stand/chara_stand_${selectedCharacter.char_id}_${selectedCharacter.card_id}.png" 
+                             alt="${selectedCharacter.name_en}" class="character-portrait" onerror="this.style.display='none'">
+                        <button class="character-remove" onclick="removeSelectedCharacter()">✖</button>
+                    </div>
+                `;
+                nameDisplay.textContent = selectedCharacter.name_en;
+                skillsContainer.style.display = 'block';
+
+                loadCharacterSkills(selectedCharacter);
+            } else {
+                container.innerHTML = `
+                    <div class="character-slot" onclick="openCharacterPicker()">
+                        Pick Character
+                    </div>
+                `;
+                nameDisplay.textContent = '';
+                skillsContainer.style.display = 'none';
+            }
+        }
+
+        function loadCharacterSkills(character) {
+            const awakeningSkillsContainer = document.getElementById('awakening-skills');
+            const innateSkillsContainer = document.getElementById('innate-skills');
+            const eventSkillsContainer = document.getElementById('character-event-skills');
+
+            awakeningSkillsContainer.innerHTML = '';
+            innateSkillsContainer.innerHTML = '';
+            eventSkillsContainer.innerHTML = '';
+
+            if (character.skills_awakening && character.skills_awakening.length > 0) {
+                character.skills_awakening.forEach(skillId => {
+                    const skillData = skillsMap.get(skillId);
+                    if (skillData) {
+                        const skillElement = document.createElement('span');
+                        skillElement.className = 'skill-number';
+                        skillElement.textContent = getSkillName(skillData);
+                        skillElement.title = `Skill ID: ${skillId}`;
+                        skillElement.setAttribute('data-skill-id', skillId);
+                        skillElement.addEventListener('click', handleSkillClick);
+                        awakeningSkillsContainer.appendChild(skillElement);
+                    }
+                });
+            }
+
+            if (character.skills_innate && character.skills_innate.length > 0) {
+                character.skills_innate.forEach(skillId => {
+                    const skillData = skillsMap.get(skillId);
+                    if (skillData) {
+                        const skillElement = document.createElement('span');
+                        skillElement.className = 'skill-number';
+                        skillElement.textContent = getSkillName(skillData);
+                        skillElement.title = `Skill ID: ${skillId}`;
+                        skillElement.setAttribute('data-skill-id', skillId);
+                        skillElement.addEventListener('click', handleSkillClick);
+                        innateSkillsContainer.appendChild(skillElement);
+                    }
+                });
+            }
+
+            if (character.skills_event && character.skills_event.length > 0) {
+                character.skills_event.forEach(skillId => {
+                    const skillData = skillsMap.get(skillId);
+                    if (skillData) {
+                        const skillElement = document.createElement('span');
+                        skillElement.className = 'skill-number';
+                        skillElement.textContent = getSkillName(skillData);
+                        skillElement.title = `Skill ID: ${skillId}`;
+                        skillElement.setAttribute('data-skill-id', skillId);
+                        skillElement.addEventListener('click', handleSkillClick);
+                        eventSkillsContainer.appendChild(skillElement);
+                    }
+                });
+            }
+
+            updateCharacterSkillsHighlight();
+        }
+
+        function handleSkillClick(e) {
+            const skillId = this.getAttribute('data-skill-id');
+            const skillData = skillsMap.get(parseInt(skillId));
+            if (!skillData) return;
+
+            const skillName = getSkillName(skillData);
+            addSkillToSearch(skillName);
+        }
+
+        function addSkillToSearch(skillName) {
+            // Check if skill is already in search
+            const existingSearch = Array.from(document.querySelectorAll('.search-input:not(.character-search-input)'))
+                .find(input => input.value.toLowerCase() === skillName.toLowerCase());
+
+            if (existingSearch) {
+                // Toggle the checkmark
+                const searchBox = existingSearch.closest('.search-box');
+                const toggleBtn = searchBox.querySelector('.toggle-search-btn');
+                toggleBtn.classList.toggle('active');
+                existingSearch.classList.toggle('active');
+            } else {
+                // Add new search box
+                addSearchBox();
+                const searchBoxes = document.querySelectorAll('.search-box');
+                const lastSearchBox = searchBoxes[searchBoxes.length - 1];
+                const input = lastSearchBox.querySelector('.search-input');
+                const toggleBtn = lastSearchBox.querySelector('.toggle-search-btn');
+
+                input.value = skillName;
+                toggleBtn.classList.add('active');
+                input.classList.add('active');
+            }
+
+            updateSearchTerms();
+            updateActiveSearchTerms();
+            filterAndRenderCards();
+            updateDeckDisplay();
+            updateCharacterSkillsHighlight();
+        }
+
+        function updateCharacterSkillsHighlight() {
+            if (!selectedCharacter) return;
+
+            const skillElements = document.querySelectorAll('.character-skill-list .skill-number');
+
+            skillElements.forEach(element => {
+                const skillId = element.getAttribute('data-skill-id');
+                const skillName = skillNameCache.get(parseInt(skillId));
+
+                if (skillName) {
+                    const isBlueHighlighted = activeSearchTerms.some(term => matchesSearchTerm(skillName, term));
+                    const isHighlighted = currentSearchTerms.some(term => matchesSearchTerm(skillName, term));
+
+                    if (isBlueHighlighted) {
+                        element.classList.add('blue-highlighted');
+                        element.classList.remove('highlighted');
+                    } else if (isHighlighted) {
+                        element.classList.add('highlighted');
+                        element.classList.remove('blue-highlighted');
+                    } else {
+                        element.classList.remove('blue-highlighted', 'highlighted');
+                    }
+                }
+            });
         }
 
         // Deck management functions
