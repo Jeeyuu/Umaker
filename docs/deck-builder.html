@@ -1010,9 +1010,9 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: white;
-            padding: 2rem;
+            padding: 1.5rem;
             border-radius: 8px;
-            max-width: 600px;
+            max-width: 500px;
             width: 90%;
             box-sizing: border-box;
             color: #2c3e50;
@@ -1048,6 +1048,7 @@
             display: flex;
             gap: 10px;
             margin-bottom: 1rem;
+            align-items: center;
         }
 
         .deck-code-display {
@@ -1058,7 +1059,9 @@
             background: #f8f9fa;
             font-size: 12px;
             box-sizing: border-box;
-            word-break: break-all;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
             color: #2c3e50;
             /* Fix text color to black */
         }
@@ -1073,6 +1076,8 @@
             font-size: 14px;
             transition: all 0.3s ease;
             white-space: nowrap;
+            height: 40px;
+            /* Match input height */
         }
 
         .copy-code-button:hover {
@@ -1086,13 +1091,16 @@
         }
 
         .modal-button {
-            padding: 8px 16px;
+            padding: 10px 16px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
             transition: all 0.3s ease;
             color: white;
+            height: 40px;
+            /* Match input height */
+            box-sizing: border-box;
         }
 
         .modal-button.primary {
@@ -1128,7 +1136,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: white;
-            padding: 2rem;
+            padding: 1.5rem;
             border-radius: 8px;
             max-width: 800px;
             width: 90%;
@@ -1176,6 +1184,8 @@
             border-radius: 6px;
             margin-right: 10px;
             object-fit: cover;
+            background: #ecf0f1;
+            border: 1px dashed #bdc3c7;
         }
 
         .saved-deck-cards {
@@ -1189,6 +1199,8 @@
             height: 40px;
             border-radius: 4px;
             object-fit: cover;
+            background: #ecf0f1;
+            border: 1px dashed #bdc3c7;
         }
 
         .saved-deck-name {
@@ -1218,6 +1230,8 @@
             box-sizing: border-box;
             color: #2c3e50;
             /* Fix text color to black */
+            height: 40px;
+            /* Match button height */
         }
 
         .deck-code-buttons {
@@ -1319,6 +1333,8 @@
             border-radius: 6px;
             margin-right: 15px;
             object-fit: cover;
+            background: #ecf0f1;
+            border: 1px dashed #bdc3c7;
         }
 
         .deck-preview-cards {
@@ -1333,6 +1349,35 @@
             height: 50px;
             border-radius: 4px;
             object-fit: cover;
+            background: #ecf0f1;
+            border: 1px dashed #bdc3c7;
+        }
+
+        .empty-character-slot {
+            width: 80px;
+            height: 80px;
+            border-radius: 6px;
+            margin-right: 15px;
+            background: #ecf0f1;
+            border: 2px dashed #bdc3c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            font-size: 11px;
+        }
+
+        .empty-card-slot {
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            background: #ecf0f1;
+            border: 2px dashed #bdc3c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            font-size: 9px;
         }
     </style>
 </head>
@@ -1528,7 +1573,7 @@
                     <button class="close-modal" id="close-save-modal">✖</button>
                 </div>
                 <div class="deck-preview-container">
-                    <div class="deck-preview-title">Deck Preview</div>
+                    <div class="deck-preview-title" id="deck-preview-title">Deck Preview</div>
                     <div class="deck-preview-content" id="deck-preview-content">
                         <!-- Preview will be populated by JavaScript -->
                     </div>
@@ -1612,6 +1657,14 @@
         }
 
         function matchesSearchTerm(skillName, term) {
+            // Fix for Standard Distance vs Non-Standard Distance
+            if (term === 'standard distance' && skillName.includes('non-standard distance')) {
+                return false;
+            }
+            if (term === 'non-standard distance' && skillName.includes('standard distance') && !skillName.includes('non-standard distance')) {
+                return false;
+            }
+
             if (skillName.includes(term) || term.includes(skillName)) {
                 return true;
             }
@@ -2842,29 +2895,58 @@
 
             // Update deck preview
             updateDeckPreview();
+
+            // Add event listener for deck name input
+            const deckNameInput = document.getElementById('deck-name-input');
+            deckNameInput.oninput = updateDeckPreviewTitle;
+        }
+
+        function updateDeckPreviewTitle() {
+            const deckName = document.getElementById('deck-name-input').value.trim();
+            const previewTitle = document.getElementById('deck-preview-title');
+
+            if (deckName) {
+                previewTitle.textContent = deckName;
+            } else {
+                previewTitle.textContent = 'Deck Preview';
+            }
         }
 
         function updateDeckPreview() {
             const previewContainer = document.getElementById('deck-preview-content');
 
-            // Create character image
-            const characterImg = selectedCharacter ?
-                `./images/chara_stand/chara_stand_${selectedCharacter.char_id}_${selectedCharacter.card_id}.png` :
-                './images/empty-character.png';
+            // Create character preview
+            let characterHTML = '';
+            if (selectedCharacter) {
+                const characterImg = `./images/chara_stand/chara_stand_${selectedCharacter.char_id}_${selectedCharacter.card_id}.png`;
+                characterHTML = `
+                    <img src="${characterImg}" alt="Character" class="deck-preview-character" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="empty-character-slot" style="display: none;">No Character</div>
+                `;
+            } else {
+                characterHTML = '<div class="empty-character-slot">No Character</div>';
+            }
 
             // Create card images
-            const cardImages = deck.map(card => {
-                if (!card) return './images/empty-card.png';
-                const formattedId = card.support_id.toString().padStart(5, '0');
-                return `./images/support_card_s/support_card_s_${formattedId}.png`;
-            });
+            const cardHTML = deck.map((card, index) => {
+                if (card) {
+                    const formattedId = card.support_id.toString().padStart(5, '0');
+                    const cardImg = `./images/support_card_s/support_card_s_${formattedId}.png`;
+                    return `
+                        <img src="${cardImg}" alt="Card" class="deck-preview-card" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="empty-card-slot" style="display: none;">Empty</div>
+                    `;
+                } else {
+                    return '<div class="empty-card-slot">Empty</div>';
+                }
+            }).join('');
 
             previewContainer.innerHTML = `
-                <img src="${characterImg}" alt="Character" class="deck-preview-character" onerror="this.src='./images/empty-character.png'">
+                ${characterHTML}
                 <div class="deck-preview-cards">
-                    ${cardImages.map(imgSrc =>
-                `<img src="${imgSrc}" alt="Card" class="deck-preview-card" onerror="this.src='./images/empty-card.png'">`
-            ).join('')}
+                    ${cardHTML}
                 </div>
             `;
         }
@@ -2906,17 +2988,34 @@
                 deckElement.onclick = () => loadSavedDeck(deckData);
 
                 // Create deck preview
-                const characterImg = deckData.character ?
-                    `./images/chara_stand/chara_stand_${deckData.character.char_id}_${deckData.character.card_id}.png` :
-                    './images/empty-character.png';
+                let characterHTML = '';
+                if (deckData.character) {
+                    const characterImg = `./images/chara_stand/chara_stand_${deckData.character.char_id}_${deckData.character.card_id}.png`;
+                    characterHTML = `
+                        <img src="${characterImg}" alt="Character" class="saved-deck-character" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="empty-character-slot" style="display: none; width: 60px; height: 60px; font-size: 9px;">No Character</div>
+                    `;
+                } else {
+                    characterHTML = '<div class="empty-character-slot" style="width: 60px; height: 60px; font-size: 9px;">No Character</div>';
+                }
 
-                const cardImages = deckData.cards.map(cardId => {
-                    if (!cardId) return './images/empty-card.png';
-                    const card = allSupportCards.find(c => c.support_id === cardId);
-                    if (!card) return './images/empty-card.png';
-                    const formattedId = card.support_id.toString().padStart(5, '0');
-                    return `./images/support_card_s/support_card_s_${formattedId}.png`;
-                });
+                // Create card images
+                const cardHTML = deckData.cards.map((cardId, index) => {
+                    if (cardId) {
+                        const card = allSupportCards.find(c => c.support_id === cardId);
+                        if (card) {
+                            const formattedId = card.support_id.toString().padStart(5, '0');
+                            const cardImg = `./images/support_card_s/support_card_s_${formattedId}.png`;
+                            return `
+                                <img src="${cardImg}" alt="Card" class="saved-deck-card" 
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="empty-card-slot" style="display: none; width: 40px; height: 40px; font-size: 8px;">Empty</div>
+                            `;
+                        }
+                    }
+                    return '<div class="empty-card-slot" style="width: 40px; height: 40px; font-size: 8px;">Empty</div>';
+                }).join('');
 
                 deckElement.innerHTML = `
                     <div class="saved-deck-header">
@@ -2926,11 +3025,9 @@
                     </div>
                     <div class="saved-deck-date">${new Date(deckData.timestamp).toLocaleDateString()}</div>
                     <div class="saved-deck-preview">
-                        <img src="${characterImg}" alt="Character" class="saved-deck-character" onerror="this.src='./images/empty-character.png'">
+                        ${characterHTML}
                         <div class="saved-deck-cards">
-                            ${cardImages.map(imgSrc =>
-                    `<img src="${imgSrc}" alt="Card" class="saved-deck-card" onerror="this.src='./images/empty-card.png'">`
-                ).join('')}
+                            ${cardHTML}
                         </div>
                     </div>
                 `;
@@ -2989,13 +3086,13 @@
                 }
             });
 
-            // Load search terms - preserve at least one search box
+            // Load search terms - clear all but keep one empty search box
             if (deckData.searchTerms && deckData.searchTerms.length > 0) {
                 currentSearchTerms = deckData.searchTerms;
                 updateSearchInputs(deckData.searchTerms, deckData.activeSearchTerms || []);
             } else {
-                // If no search terms in saved deck, keep the current search boxes
-                updateSearchTerms();
+                // If no search terms in saved deck, clear all but keep one empty search box
+                clearAllSearches();
             }
 
             // Update UI
@@ -3006,21 +3103,12 @@
         }
 
         function updateSearchInputs(searchTerms, activeTerms) {
-            // Clear existing search boxes but keep at least one
+            // Clear existing search boxes
             const searchBoxesContainer = document.getElementById('search-boxes');
-            const existingBoxes = document.querySelectorAll('.search-box');
+            searchBoxesContainer.innerHTML = '';
 
-            // Remove all but the first search box
-            for (let i = existingBoxes.length - 1; i > 0; i--) {
-                existingBoxes[i].remove();
-            }
-
-            // Clear the first search box
-            const firstInput = searchBoxesContainer.querySelector('.search-input');
-            const firstToggle = searchBoxesContainer.querySelector('.toggle-search-btn');
-            firstInput.value = '';
-            firstInput.classList.remove('active');
-            firstToggle.classList.remove('active');
+            // Add one empty search box first
+            addSearchBox();
 
             // Add search boxes for each term
             searchTerms.forEach((term, index) => {
