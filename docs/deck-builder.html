@@ -1012,9 +1012,11 @@
             background: white;
             padding: 2rem;
             border-radius: 8px;
-            max-width: 500px;
+            max-width: 600px;
             width: 90%;
             box-sizing: border-box;
+            color: #2c3e50;
+            /* Fix text color to black */
         }
 
         .save-modal-header {
@@ -1038,18 +1040,43 @@
             font-size: 14px;
             margin-bottom: 1rem;
             box-sizing: border-box;
+            color: #2c3e50;
+            /* Fix text color to black */
+        }
+
+        .deck-code-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
         }
 
         .deck-code-display {
-            width: 100%;
+            flex: 1;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             background: #f8f9fa;
             font-size: 12px;
-            margin-bottom: 1rem;
             box-sizing: border-box;
             word-break: break-all;
+            color: #2c3e50;
+            /* Fix text color to black */
+        }
+
+        .copy-code-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .copy-code-button:hover {
+            background: #2980b9;
         }
 
         .save-modal-buttons {
@@ -1065,11 +1092,11 @@
             cursor: pointer;
             font-size: 14px;
             transition: all 0.3s ease;
+            color: white;
         }
 
         .modal-button.primary {
             background: #3498db;
-            color: white;
         }
 
         .modal-button.primary:hover {
@@ -1078,7 +1105,6 @@
 
         .modal-button.secondary {
             background: #95a5a6;
-            color: white;
         }
 
         .modal-button.secondary:hover {
@@ -1109,6 +1135,8 @@
             max-height: 80%;
             overflow-y: auto;
             box-sizing: border-box;
+            color: #2c3e50;
+            /* Fix text color to black */
         }
 
         .saved-decks-container {
@@ -1126,6 +1154,9 @@
             padding: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
+            color: #2c3e50;
+            /* Fix text color to black */
         }
 
         .saved-deck:hover {
@@ -1185,6 +1216,8 @@
             font-size: 14px;
             margin-bottom: 1rem;
             box-sizing: border-box;
+            color: #2c3e50;
+            /* Fix text color to black */
         }
 
         .deck-code-buttons {
@@ -1219,12 +1252,36 @@
             transition: opacity 0.3s ease;
         }
 
-        .saved-deck:hover .delete-deck-button {
+        .copy-deck-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 5px;
+            right: 30px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .saved-deck:hover .delete-deck-button,
+        .saved-deck:hover .copy-deck-button {
             opacity: 1;
         }
 
         .delete-deck-button:hover {
             background: #c0392b;
+        }
+
+        .copy-deck-button:hover {
+            background: #2980b9;
         }
 
         .saved-deck-header {
@@ -1233,6 +1290,49 @@
             align-items: center;
             margin-bottom: 0.5rem;
             position: relative;
+        }
+
+        /* New styles for deck preview in save modal */
+        .deck-preview-container {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .deck-preview-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .deck-preview-content {
+            display: flex;
+            align-items: center;
+        }
+
+        .deck-preview-character {
+            width: 80px;
+            height: 80px;
+            border-radius: 6px;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .deck-preview-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            flex: 1;
+        }
+
+        .deck-preview-card {
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            object-fit: cover;
         }
     </style>
 </head>
@@ -1427,9 +1527,18 @@
                     <h3>Save Deck</h3>
                     <button class="close-modal" id="close-save-modal">✖</button>
                 </div>
+                <div class="deck-preview-container">
+                    <div class="deck-preview-title">Deck Preview</div>
+                    <div class="deck-preview-content" id="deck-preview-content">
+                        <!-- Preview will be populated by JavaScript -->
+                    </div>
+                </div>
                 <input type="text" class="deck-name-input" id="deck-name-input" placeholder="Enter deck name..."
                     maxlength="30">
-                <div class="deck-code-display" id="deck-code-display"></div>
+                <div class="deck-code-section">
+                    <div class="deck-code-display" id="deck-code-display"></div>
+                    <button class="copy-code-button" id="copy-code-button">Copy Code</button>
+                </div>
                 <div class="save-modal-buttons">
                     <button class="modal-button secondary" id="cancel-save">Cancel</button>
                     <button class="modal-button primary" id="confirm-save">Save Deck</button>
@@ -2654,7 +2763,7 @@
                 for (let i = 0; i < searchBoxes.length; i++) {
                     const input = searchBoxes[i].querySelector('.search-input');
                     if (input.value.trim() === '') {
-                        input.value = skillName;
+                        input.value = toProperCase(skillName);
                         if (autoHighlight) {
                             const toggleBtn = searchBoxes[i].querySelector('.toggle-search-btn');
                             toggleBtn.classList.add('active');
@@ -2673,13 +2782,19 @@
                     const input = lastSearchBox.querySelector('.search-input');
                     const toggleBtn = lastSearchBox.querySelector('.toggle-search-btn');
 
-                    input.value = skillName;
+                    input.value = toProperCase(skillName);
                     if (autoHighlight) {
                         toggleBtn.classList.add('active');
                         input.classList.add('active');
                     }
                 }
             }
+        }
+
+        function toProperCase(str) {
+            return str.replace(/\w\S*/g, function (txt) {
+                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            });
         }
 
         function updateCharacterSkillsHighlight() {
@@ -2724,6 +2839,34 @@
             // Generate and display deck code
             const deckCode = generateDeckCode();
             document.getElementById('deck-code-display').textContent = deckCode;
+
+            // Update deck preview
+            updateDeckPreview();
+        }
+
+        function updateDeckPreview() {
+            const previewContainer = document.getElementById('deck-preview-content');
+
+            // Create character image
+            const characterImg = selectedCharacter ?
+                `./images/chara_stand/chara_stand_${selectedCharacter.char_id}_${selectedCharacter.card_id}.png` :
+                './images/empty-character.png';
+
+            // Create card images
+            const cardImages = deck.map(card => {
+                if (!card) return './images/empty-card.png';
+                const formattedId = card.support_id.toString().padStart(5, '0');
+                return `./images/support_card_s/support_card_s_${formattedId}.png`;
+            });
+
+            previewContainer.innerHTML = `
+                <img src="${characterImg}" alt="Character" class="deck-preview-character" onerror="this.src='./images/empty-character.png'">
+                <div class="deck-preview-cards">
+                    ${cardImages.map(imgSrc =>
+                `<img src="${imgSrc}" alt="Card" class="deck-preview-card" onerror="this.src='./images/empty-card.png'">`
+            ).join('')}
+                </div>
+            `;
         }
 
         function generateDeckCode() {
@@ -2778,6 +2921,7 @@
                 deckElement.innerHTML = `
                     <div class="saved-deck-header">
                         <div class="saved-deck-name">${deckData.name}</div>
+                        <button class="copy-deck-button" onclick="event.stopPropagation(); copyDeckCode(${index})">📋</button>
                         <button class="delete-deck-button" onclick="event.stopPropagation(); deleteSavedDeck(${index})">✖</button>
                     </div>
                     <div class="saved-deck-date">${new Date(deckData.timestamp).toLocaleDateString()}</div>
@@ -2793,6 +2937,31 @@
 
                 container.appendChild(deckElement);
             });
+        }
+
+        function copyDeckCode(index) {
+            const deckData = savedDecks[index];
+            const deckCode = generateDeckCodeFromData(deckData);
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(deckCode).then(() => {
+                alert('Deck code copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy deck code: ', err);
+                alert('Failed to copy deck code. Please try again.');
+            });
+        }
+
+        function generateDeckCodeFromData(deckData) {
+            const codeData = {
+                character: deckData.character,
+                cards: deckData.cards,
+                searchTerms: deckData.searchTerms,
+                activeSearchTerms: deckData.activeSearchTerms
+            };
+
+            const jsonString = JSON.stringify(codeData);
+            return btoa(unescape(encodeURIComponent(jsonString)));
         }
 
         function loadSavedDeck(deckData) {
@@ -2820,10 +2989,13 @@
                 }
             });
 
-            // Load search terms
-            if (deckData.searchTerms) {
+            // Load search terms - preserve at least one search box
+            if (deckData.searchTerms && deckData.searchTerms.length > 0) {
                 currentSearchTerms = deckData.searchTerms;
                 updateSearchInputs(deckData.searchTerms, deckData.activeSearchTerms || []);
+            } else {
+                // If no search terms in saved deck, keep the current search boxes
+                updateSearchTerms();
             }
 
             // Update UI
@@ -2834,23 +3006,49 @@
         }
 
         function updateSearchInputs(searchTerms, activeTerms) {
-            // Clear existing search boxes
+            // Clear existing search boxes but keep at least one
             const searchBoxesContainer = document.getElementById('search-boxes');
-            searchBoxesContainer.innerHTML = '';
+            const existingBoxes = document.querySelectorAll('.search-box');
+
+            // Remove all but the first search box
+            for (let i = existingBoxes.length - 1; i > 0; i--) {
+                existingBoxes[i].remove();
+            }
+
+            // Clear the first search box
+            const firstInput = searchBoxesContainer.querySelector('.search-input');
+            const firstToggle = searchBoxesContainer.querySelector('.toggle-search-btn');
+            firstInput.value = '';
+            firstInput.classList.remove('active');
+            firstToggle.classList.remove('active');
 
             // Add search boxes for each term
             searchTerms.forEach((term, index) => {
-                addSearchBox();
-                const searchBoxes = document.querySelectorAll('.search-box');
-                const lastBox = searchBoxes[searchBoxes.length - 1];
-                const input = lastBox.querySelector('.search-input');
-                const toggleBtn = lastBox.querySelector('.toggle-search-btn');
+                if (index === 0) {
+                    // Use the first search box
+                    const firstInput = searchBoxesContainer.querySelector('.search-input');
+                    const firstToggle = searchBoxesContainer.querySelector('.toggle-search-btn');
 
-                input.value = term;
+                    firstInput.value = toProperCase(term);
 
-                if (activeTerms.includes(term)) {
-                    toggleBtn.classList.add('active');
-                    input.classList.add('active');
+                    if (activeTerms.includes(term)) {
+                        firstToggle.classList.add('active');
+                        firstInput.classList.add('active');
+                    }
+                } else {
+                    // Add new search boxes for additional terms
+                    addSearchBox();
+                    const searchBoxes = document.querySelectorAll('.search-box');
+                    const lastBox = searchBoxes[searchBoxes.length - 1];
+                    const input = lastBox.querySelector('.search-input');
+                    const toggleBtn = lastBox.querySelector('.toggle-search-btn');
+
+                    input.value = toProperCase(term);
+
+                    if (activeTerms.includes(term)) {
+                        toggleBtn.classList.add('active');
+                        input.classList.add('active');
+                    }
                 }
             });
 
@@ -2868,8 +3066,8 @@
 
         function takeScreenshot() {
             // Create a canvas element to capture the deck section
-            const deckSection = document.querySelector('.deck-section');
             const characterSection = document.querySelector('.character-section');
+            const deckSection = document.querySelector('.deck-section');
 
             // Combine both sections for the screenshot
             const screenshotContainer = document.createElement('div');
@@ -2880,6 +3078,10 @@
             screenshotContainer.style.padding = '20px';
             screenshotContainer.style.borderRadius = '8px';
             screenshotContainer.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+            screenshotContainer.style.display = 'flex';
+            screenshotContainer.style.flexDirection = 'row';
+            screenshotContainer.style.alignItems = 'flex-start';
+            screenshotContainer.style.gap = '20px';
 
             // Clone the sections
             const characterClone = characterSection.cloneNode(true);
@@ -2980,6 +3182,18 @@
             }
         }
 
+        function copyDeckCodeToClipboard() {
+            const deckCode = document.getElementById('deck-code-display').textContent;
+
+            // Copy to clipboard
+            navigator.clipboard.writeText(deckCode).then(() => {
+                alert('Deck code copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy deck code: ', err);
+                alert('Failed to copy deck code. Please try again.');
+            });
+        }
+
         function setupDeckButtons() {
             document.querySelector('.save-button').addEventListener('click', saveDeck);
             document.querySelector('.load-button').addEventListener('click', loadDeck);
@@ -2990,6 +3204,7 @@
             document.getElementById('close-save-modal').addEventListener('click', closeSaveModal);
             document.getElementById('cancel-save').addEventListener('click', closeSaveModal);
             document.getElementById('confirm-save').addEventListener('click', confirmSave);
+            document.getElementById('copy-code-button').addEventListener('click', copyDeckCodeToClipboard);
 
             document.getElementById('close-load-modal').addEventListener('click', closeLoadModal);
             document.getElementById('cancel-load').addEventListener('click', closeLoadModal);
