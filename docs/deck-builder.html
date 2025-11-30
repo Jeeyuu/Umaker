@@ -7,6 +7,7 @@
     <title>Deck Builder</title>
     <link rel="stylesheet" href="styles.css">
     <style>
+        /* Previous CSS styles remain the same */
         .cards-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -989,6 +990,249 @@
         .filter-controls .sort-container {
             margin-bottom: 0.5rem;
         }
+
+        /* New styles for save/load functionality */
+        .save-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+
+        .save-modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            box-sizing: border-box;
+        }
+
+        .save-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .save-modal-header h3 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+
+        .deck-name-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 1rem;
+            box-sizing: border-box;
+        }
+
+        .deck-code-display {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f8f9fa;
+            font-size: 12px;
+            margin-bottom: 1rem;
+            box-sizing: border-box;
+            word-break: break-all;
+        }
+
+        .save-modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .modal-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-button.primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .modal-button.primary:hover {
+            background: #2980b9;
+        }
+
+        .modal-button.secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .modal-button.secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .load-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+
+        .load-modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .saved-decks-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .saved-deck {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .saved-deck:hover {
+            border-color: #3498db;
+            background: #f8f9fa;
+        }
+
+        .saved-deck-preview {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .saved-deck-character {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+
+        .saved-deck-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+
+        .saved-deck-card {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+
+        .saved-deck-name {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+            font-size: 14px;
+        }
+
+        .saved-deck-date {
+            font-size: 11px;
+            color: #7f8c8d;
+        }
+
+        .deck-code-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .deck-code-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 1rem;
+            box-sizing: border-box;
+        }
+
+        .deck-code-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .no-saved-decks {
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .delete-deck-button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .saved-deck:hover .delete-deck-button {
+            opacity: 1;
+        }
+
+        .delete-deck-button:hover {
+            background: #c0392b;
+        }
+
+        .saved-deck-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
     </style>
 </head>
 
@@ -1174,6 +1418,45 @@
                 </div>
             </div>
         </div>
+
+        <!-- Save Deck Modal -->
+        <div id="save-modal" class="save-modal">
+            <div class="save-modal-content">
+                <div class="save-modal-header">
+                    <h3>Save Deck</h3>
+                    <button class="close-modal" id="close-save-modal">✖</button>
+                </div>
+                <input type="text" class="deck-name-input" id="deck-name-input" placeholder="Enter deck name..."
+                    maxlength="30">
+                <div class="deck-code-display" id="deck-code-display"></div>
+                <div class="save-modal-buttons">
+                    <button class="modal-button secondary" id="cancel-save">Cancel</button>
+                    <button class="modal-button primary" id="confirm-save">Save Deck</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Load Deck Modal -->
+        <div id="load-modal" class="load-modal">
+            <div class="load-modal-content">
+                <div class="save-modal-header">
+                    <h3>Load Deck</h3>
+                    <button class="close-modal" id="close-load-modal">✖</button>
+                </div>
+                <div id="saved-decks-container" class="saved-decks-container">
+                    <div class="no-saved-decks">No saved decks found</div>
+                </div>
+                <div class="deck-code-section">
+                    <h4>Load by Code</h4>
+                    <input type="text" class="deck-code-input" id="deck-code-input"
+                        placeholder="Paste deck code here...">
+                    <div class="deck-code-buttons">
+                        <button class="modal-button secondary" id="cancel-load">Cancel</button>
+                        <button class="modal-button primary" id="confirm-load">Load Deck</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <div id="footer-placeholder"></div>
@@ -1192,6 +1475,7 @@
         let searchTimeout = null;
         let skillNameCache = new Map();
         let cardCache = new Map();
+        let savedDecks = JSON.parse(localStorage.getItem('savedDecks') || '[]');
 
         fetch('header.html').then(response => response.text()).then(data => {
             document.getElementById('header-placeholder').innerHTML = data;
@@ -2423,33 +2707,111 @@
             });
         }
 
-        function saveDeck() {
-            const deckData = {
-                character: selectedCharacter,
-                cards: deck.filter(card => card !== null).map(card => card.support_id),
-                timestamp: new Date().toISOString()
-            };
-            localStorage.setItem('savedDeck', JSON.stringify(deckData));
-            alert('Deck saved successfully!');
-        }
+        // NEW SAVE/LOAD/SCREENSHOT FUNCTIONALITY
 
-        function loadDeck() {
-            const savedDeck = localStorage.getItem('savedDeck');
-            if (!savedDeck) {
-                alert('No saved deck found!');
+        function saveDeck() {
+            // Check if there's anything to save
+            if (!selectedCharacter && deck.every(card => card === null)) {
+                alert('Cannot save an empty deck!');
                 return;
             }
 
-            const deckData = JSON.parse(savedDeck);
+            // Show save modal
+            document.getElementById('save-modal').style.display = 'block';
+            document.getElementById('deck-name-input').value = '';
 
-            if (deckData.character) {
-                selectedCharacter = deckData.character;
-                updateCharacterSlotDisplay();
+            // Generate and display deck code
+            const deckCode = generateDeckCode();
+            document.getElementById('deck-code-display').textContent = deckCode;
+        }
+
+        function generateDeckCode() {
+            const deckData = {
+                character: selectedCharacter ? {
+                    char_id: selectedCharacter.char_id,
+                    card_id: selectedCharacter.card_id
+                } : null,
+                cards: deck.map(card => card ? card.support_id : null),
+                searchTerms: currentSearchTerms,
+                activeSearchTerms: activeSearchTerms
+            };
+
+            // Convert to base64 for sharing
+            const jsonString = JSON.stringify(deckData);
+            return btoa(unescape(encodeURIComponent(jsonString)));
+        }
+
+        function loadDeck() {
+            // Show load modal
+            document.getElementById('load-modal').style.display = 'block';
+            renderSavedDecks();
+        }
+
+        function renderSavedDecks() {
+            const container = document.getElementById('saved-decks-container');
+            container.innerHTML = '';
+
+            if (savedDecks.length === 0) {
+                container.innerHTML = '<div class="no-saved-decks">No saved decks found</div>';
+                return;
             }
 
+            savedDecks.forEach((deckData, index) => {
+                const deckElement = document.createElement('div');
+                deckElement.className = 'saved-deck';
+                deckElement.onclick = () => loadSavedDeck(deckData);
+
+                // Create deck preview
+                const characterImg = deckData.character ?
+                    `./images/chara_stand/chara_stand_${deckData.character.char_id}_${deckData.character.card_id}.png` :
+                    './images/empty-character.png';
+
+                const cardImages = deckData.cards.map(cardId => {
+                    if (!cardId) return './images/empty-card.png';
+                    const card = allSupportCards.find(c => c.support_id === cardId);
+                    if (!card) return './images/empty-card.png';
+                    const formattedId = card.support_id.toString().padStart(5, '0');
+                    return `./images/support_card_s/support_card_s_${formattedId}.png`;
+                });
+
+                deckElement.innerHTML = `
+                    <div class="saved-deck-header">
+                        <div class="saved-deck-name">${deckData.name}</div>
+                        <button class="delete-deck-button" onclick="event.stopPropagation(); deleteSavedDeck(${index})">✖</button>
+                    </div>
+                    <div class="saved-deck-date">${new Date(deckData.timestamp).toLocaleDateString()}</div>
+                    <div class="saved-deck-preview">
+                        <img src="${characterImg}" alt="Character" class="saved-deck-character" onerror="this.src='./images/empty-character.png'">
+                        <div class="saved-deck-cards">
+                            ${cardImages.map(imgSrc =>
+                    `<img src="${imgSrc}" alt="Card" class="saved-deck-card" onerror="this.src='./images/empty-card.png'">`
+                ).join('')}
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(deckElement);
+            });
+        }
+
+        function loadSavedDeck(deckData) {
+            // Load character
+            if (deckData.character) {
+                const character = allCharacters.find(c =>
+                    c.char_id === deckData.character.char_id &&
+                    c.card_id === deckData.character.card_id
+                );
+                if (character) {
+                    selectedCharacter = character;
+                }
+            } else {
+                selectedCharacter = null;
+            }
+
+            // Load cards
             deck = Array(6).fill(null);
             deckData.cards.forEach((cardId, index) => {
-                if (index < 6) {
+                if (cardId && index < 6) {
                     const card = allSupportCards.find(c => c.support_id === cardId);
                     if (card) {
                         deck[index] = card;
@@ -2457,13 +2819,99 @@
                 }
             });
 
+            // Load search terms
+            if (deckData.searchTerms) {
+                currentSearchTerms = deckData.searchTerms;
+                updateSearchInputs(deckData.searchTerms, deckData.activeSearchTerms || []);
+            }
+
+            // Update UI
+            updateCharacterSlotDisplay();
             updateDeckDisplay();
             updateCardDisplay();
-            alert('Deck loaded successfully!');
+            closeLoadModal();
+        }
+
+        function updateSearchInputs(searchTerms, activeTerms) {
+            // Clear existing search boxes
+            const searchBoxesContainer = document.getElementById('search-boxes');
+            searchBoxesContainer.innerHTML = '';
+
+            // Add search boxes for each term
+            searchTerms.forEach((term, index) => {
+                addSearchBox();
+                const searchBoxes = document.querySelectorAll('.search-box');
+                const lastBox = searchBoxes[searchBoxes.length - 1];
+                const input = lastBox.querySelector('.search-input');
+                const toggleBtn = lastBox.querySelector('.toggle-search-btn');
+
+                input.value = term;
+
+                if (activeTerms.includes(term)) {
+                    toggleBtn.classList.add('active');
+                    input.classList.add('active');
+                }
+            });
+
+            updateSearchTerms();
+            updateActiveSearchTerms();
+        }
+
+        function deleteSavedDeck(index) {
+            if (confirm('Are you sure you want to delete this deck?')) {
+                savedDecks.splice(index, 1);
+                localStorage.setItem('savedDecks', JSON.stringify(savedDecks));
+                renderSavedDecks();
+            }
         }
 
         function takeScreenshot() {
-            alert('Screenshot functionality would be implemented here!');
+            // Create a canvas element to capture the deck section
+            const deckSection = document.querySelector('.deck-section');
+            const characterSection = document.querySelector('.character-section');
+
+            // Combine both sections for the screenshot
+            const screenshotContainer = document.createElement('div');
+            screenshotContainer.style.position = 'absolute';
+            screenshotContainer.style.left = '-9999px';
+            screenshotContainer.style.top = '-9999px';
+            screenshotContainer.style.backgroundColor = 'white';
+            screenshotContainer.style.padding = '20px';
+            screenshotContainer.style.borderRadius = '8px';
+            screenshotContainer.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+
+            // Clone the sections
+            const characterClone = characterSection.cloneNode(true);
+            const deckClone = deckSection.cloneNode(true);
+
+            // Remove buttons from clones
+            characterClone.querySelector('.character-remove')?.remove();
+            deckClone.querySelectorAll('.deck-card-remove').forEach(btn => btn.remove());
+
+            // Add to container
+            screenshotContainer.appendChild(characterClone);
+            screenshotContainer.appendChild(deckClone);
+            document.body.appendChild(screenshotContainer);
+
+            // Use html2canvas to capture the screenshot
+            if (typeof html2canvas !== 'undefined') {
+                html2canvas(screenshotContainer).then(canvas => {
+                    // Convert canvas to image
+                    const image = canvas.toDataURL('image/png');
+
+                    // Create download link
+                    const link = document.createElement('a');
+                    link.download = 'deck-screenshot.png';
+                    link.href = image;
+                    link.click();
+
+                    // Clean up
+                    document.body.removeChild(screenshotContainer);
+                });
+            } else {
+                alert('Screenshot functionality requires html2canvas library. Please include it in your project.');
+                document.body.removeChild(screenshotContainer);
+            }
         }
 
         function clearDeck() {
@@ -2474,11 +2922,77 @@
             }
         }
 
+        function closeSaveModal() {
+            document.getElementById('save-modal').style.display = 'none';
+        }
+
+        function closeLoadModal() {
+            document.getElementById('load-modal').style.display = 'none';
+        }
+
+        function confirmSave() {
+            const deckName = document.getElementById('deck-name-input').value.trim();
+            if (!deckName) {
+                alert('Please enter a deck name');
+                return;
+            }
+
+            // Create deck data
+            const deckData = {
+                name: deckName,
+                character: selectedCharacter ? {
+                    char_id: selectedCharacter.char_id,
+                    card_id: selectedCharacter.card_id
+                } : null,
+                cards: deck.map(card => card ? card.support_id : null),
+                searchTerms: currentSearchTerms,
+                activeSearchTerms: activeSearchTerms,
+                timestamp: new Date().toISOString()
+            };
+
+            // Save to localStorage
+            savedDecks.push(deckData);
+            localStorage.setItem('savedDecks', JSON.stringify(savedDecks));
+
+            closeSaveModal();
+            alert('Deck saved successfully!');
+        }
+
+        function confirmLoadFromCode() {
+            const deckCode = document.getElementById('deck-code-input').value.trim();
+            if (!deckCode) {
+                alert('Please enter a deck code');
+                return;
+            }
+
+            try {
+                // Decode base64
+                const jsonString = decodeURIComponent(escape(atob(deckCode)));
+                const deckData = JSON.parse(jsonString);
+
+                // Load the deck
+                loadSavedDeck(deckData);
+                closeLoadModal();
+            } catch (error) {
+                alert('Invalid deck code. Please check and try again.');
+                console.error('Error loading deck from code:', error);
+            }
+        }
+
         function setupDeckButtons() {
             document.querySelector('.save-button').addEventListener('click', saveDeck);
             document.querySelector('.load-button').addEventListener('click', loadDeck);
             document.querySelector('.screenshot-button').addEventListener('click', takeScreenshot);
             document.querySelector('.clear-button').addEventListener('click', clearDeck);
+
+            // Setup modal buttons
+            document.getElementById('close-save-modal').addEventListener('click', closeSaveModal);
+            document.getElementById('cancel-save').addEventListener('click', closeSaveModal);
+            document.getElementById('confirm-save').addEventListener('click', confirmSave);
+
+            document.getElementById('close-load-modal').addEventListener('click', closeLoadModal);
+            document.getElementById('cancel-load').addEventListener('click', closeLoadModal);
+            document.getElementById('confirm-load').addEventListener('click', confirmLoadFromCode);
         }
 
         function setupModalClose() {
@@ -2515,9 +3029,18 @@
         loadCardsWithSkills();
 
         window.onclick = function (event) {
-            const modal = document.getElementById('character-modal');
-            if (event.target === modal) {
+            const characterModal = document.getElementById('character-modal');
+            const saveModal = document.getElementById('save-modal');
+            const loadModal = document.getElementById('load-modal');
+
+            if (event.target === characterModal) {
                 closeCharacterPicker();
+            }
+            if (event.target === saveModal) {
+                closeSaveModal();
+            }
+            if (event.target === loadModal) {
+                closeLoadModal();
             }
         }
     </script>
