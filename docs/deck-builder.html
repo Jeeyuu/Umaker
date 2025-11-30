@@ -817,7 +817,7 @@
         .filter-section-content {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 1rem;
             flex-grow: 1;
         }
 
@@ -831,7 +831,7 @@
         .sort-container {
             display: flex;
             gap: 0.5rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
             width: 100%;
             box-sizing: border-box;
         }
@@ -860,35 +860,16 @@
         }
 
         .character-search-header {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
             color: #2c3e50;
             margin-bottom: 8px;
-            text-align: left;
         }
 
         .character-search-box {
             display: flex;
             gap: 5px;
             width: 100%;
-        }
-
-        .character-search-clear {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            width: 24px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .character-search-clear:hover {
-            background: #c0392b;
         }
 
         .character-results-container {
@@ -926,6 +907,73 @@
             font-style: italic;
             text-align: center;
             border-top: 1px solid #e0e0e0;
+        }
+
+        /* Updated styles for the character search */
+        .character-search-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .character-search-input {
+            width: 100%;
+            padding: 8px 32px 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #2c3e50;
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        .character-search-clear {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .character-search-clear:hover {
+            background: #c0392b;
+        }
+
+        /* Updated filter section spacing */
+        .filter-section-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            flex-grow: 1;
+        }
+
+        .filter-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-controls .sort-container {
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-controls .image-toggle-container {
+            margin-bottom: 0;
+        }
+
+        .filter-controls .image-toggle-row {
+            gap: 0.25rem;
         }
     </style>
 </head>
@@ -1002,81 +1050,80 @@
                 <h3>Filters</h3>
 
                 <div class="filter-section-content">
-                    <!-- Sort Dropdowns -->
-                    <div class="sort-container">
-                        <select class="sort-select" id="sort-by">
-                            <option value="skills">Skills</option>
-                            <option value="rarity">Rarity</option>
-                            <option value="character">Name</option>
-                            <option value="type">Type</option>
-                            <option value="release" selected>Release Date</option>
-                        </select>
-                        <select class="sort-select" id="sort-order">
-                            <option value="asc">Ascending</option>
-                            <option value="desc" selected>Descending</option>
-                        </select>
-                    </div>
-
-                    <!-- Rarity Image Toggles -->
-                    <div class="image-toggle-container">
-                        <div class="filter-header">Rarity</div>
-                        <div class="image-toggle-row">
-                            <label class="image-toggle rarity inactive" data-rarity="SSR">
-                                <input type="checkbox">
-                                <img src="./images/utx_txt_rarity/utx_txt_rarity_03.png" alt="SSR">
-                            </label>
-                            <label class="image-toggle rarity inactive" data-rarity="SR">
-                                <input type="checkbox">
-                                <img src="./images/utx_txt_rarity/utx_txt_rarity_02.png" alt="SR">
-                            </label>
-                            <label class="image-toggle rarity inactive" data-rarity="R">
-                                <input type="checkbox">
-                                <img src="./images/utx_txt_rarity/utx_txt_rarity_01.png" alt="R">
-                            </label>
+                    <div class="filter-controls">
+                        <!-- Sort Dropdowns -->
+                        <div class="sort-container">
+                            <select class="sort-select" id="sort-by">
+                                <option value="skills">Skills</option>
+                                <option value="rarity">Rarity</option>
+                                <option value="character">Name</option>
+                                <option value="type">Type</option>
+                                <option value="release" selected>Release Date</option>
+                            </select>
+                            <select class="sort-select" id="sort-order">
+                                <option value="asc">Ascending</option>
+                                <option value="desc" selected>Descending</option>
+                            </select>
                         </div>
-                    </div>
 
-                    <!-- Type Image Toggles -->
-                    <div class="image-toggle-container">
-                        <div class="filter-header">Type</div>
-                        <div class="image-toggle-row">
-                            <label class="image-toggle type-toggle inactive" data-type="speed">
-                                <input type="checkbox">
-                                <img src="./images/utx_ico_obtain/utx_ico_obtain_00.png" alt="Speed">
-                            </label>
-                            <label class="image-toggle type-toggle inactive" data-type="stamina">
-                                <input type="checkbox">
-                                <img src="./images/utx_ico_obtain/utx_ico_obtain_01.png" alt="Stamina">
-                            </label>
-                            <label class="image-toggle type-toggle inactive" data-type="power">
-                                <input type="checkbox">
-                                <img src="./images/utx_ico_obtain/utx_ico_obtain_02.png" alt="Power">
-                            </label>
-                            <label class="image-toggle type-toggle inactive" data-type="guts">
-                                <input type="checkbox">
-                                <img src="./images/utx_ico_obtain/utx_ico_obtain_03.png" alt="Guts">
-                            </label>
-                            <label class="image-toggle type-toggle inactive" data-type="intelligence">
-                                <input type="checkbox">
-                                <img src="./images/utx_ico_obtain/utx_ico_obtain_04.png" alt="Intelligence">
-                            </label>
-                            <label class="image-toggle type-toggle inactive" data-type="friend">
-                                <input type="checkbox">
-                                <img src="./images/utx_ico_obtain/utx_ico_obtain_05.png" alt="Friend">
-                            </label>
-                            <label class="image-toggle type-toggle inactive" data-type="group">
-                                <input type="checkbox">
-                                <img src="./images/utx_ico_obtain/utx_ico_obtain_06.png" alt="Group">
-                            </label>
+                        <!-- Rarity Image Toggles -->
+                        <div class="image-toggle-container">
+                            <div class="image-toggle-row">
+                                <label class="image-toggle rarity inactive" data-rarity="SSR">
+                                    <input type="checkbox">
+                                    <img src="./images/utx_txt_rarity/utx_txt_rarity_03.png" alt="SSR">
+                                </label>
+                                <label class="image-toggle rarity inactive" data-rarity="SR">
+                                    <input type="checkbox">
+                                    <img src="./images/utx_txt_rarity/utx_txt_rarity_02.png" alt="SR">
+                                </label>
+                                <label class="image-toggle rarity inactive" data-rarity="R">
+                                    <input type="checkbox">
+                                    <img src="./images/utx_txt_rarity/utx_txt_rarity_01.png" alt="R">
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Type Image Toggles -->
+                        <div class="image-toggle-container">
+                            <div class="image-toggle-row">
+                                <label class="image-toggle type-toggle inactive" data-type="speed">
+                                    <input type="checkbox">
+                                    <img src="./images/utx_ico_obtain/utx_ico_obtain_00.png" alt="Speed">
+                                </label>
+                                <label class="image-toggle type-toggle inactive" data-type="stamina">
+                                    <input type="checkbox">
+                                    <img src="./images/utx_ico_obtain/utx_ico_obtain_01.png" alt="Stamina">
+                                </label>
+                                <label class="image-toggle type-toggle inactive" data-type="power">
+                                    <input type="checkbox">
+                                    <img src="./images/utx_ico_obtain/utx_ico_obtain_02.png" alt="Power">
+                                </label>
+                                <label class="image-toggle type-toggle inactive" data-type="guts">
+                                    <input type="checkbox">
+                                    <img src="./images/utx_ico_obtain/utx_ico_obtain_03.png" alt="Guts">
+                                </label>
+                                <label class="image-toggle type-toggle inactive" data-type="intelligence">
+                                    <input type="checkbox">
+                                    <img src="./images/utx_ico_obtain/utx_ico_obtain_04.png" alt="Intelligence">
+                                </label>
+                                <label class="image-toggle type-toggle inactive" data-type="friend">
+                                    <input type="checkbox">
+                                    <img src="./images/utx_ico_obtain/utx_ico_obtain_05.png" alt="Friend">
+                                </label>
+                                <label class="image-toggle type-toggle inactive" data-type="group">
+                                    <input type="checkbox">
+                                    <img src="./images/utx_ico_obtain/utx_ico_obtain_06.png" alt="Group">
+                                </label>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Character Search at the bottom of filters -->
                     <div class="character-search-section">
                         <div class="character-search-header">Character Search</div>
-                        <div class="character-search-box">
-                            <input type="text" class="search-input character-search-input"
-                                placeholder="Search for characters...">
+                        <div class="character-search-wrapper">
+                            <input type="text" class="character-search-input" placeholder="Search for characters...">
                             <button class="character-search-clear">✖</button>
                         </div>
                     </div>
@@ -1087,7 +1134,7 @@
         <!-- Character Results Container -->
         <div id="character-results-container" class="character-results-container"></div>
 
-        <!-- Character Results Divider -->
+        <!-- Character Results Divider - MOVED BELOW character results -->
         <div id="character-divider" class="character-divider"></div>
 
         <!-- Normal Results Container -->
@@ -1115,40 +1162,390 @@
     <div id="footer-placeholder"></div>
 
     <script>
-        // ... [All the JavaScript code remains exactly the same as in the previous complete version] ...
-        // Only adding the new clear character search function
-        function setupCharacterSearchClear() {
-            const clearBtn = document.querySelector('.character-search-clear');
-            const characterSearchInput = document.querySelector('.search-input.character-search-input');
+        let allSupportCards = [];
+        let allCharacters = [];
+        let skillsMap = new Map();
+        let selectedCharacter = null;
+        let deck = Array(6).fill(null);
+        let currentSearchTerms = [];
+        let activeSearchTerms = [];
+        let draggedCard = null;
+        let draggedCardIndex = null;
+        let characterSearchTerm = '';
+        let searchTimeout = null;
+        let skillNameCache = new Map();
+        let cardCache = new Map();
 
-            clearBtn.addEventListener('click', function () {
+        // Pre-compiled regex for performance
+        const nonWordRegex = /[^\w\s]/g;
+
+        fetch('header.html').then(response => response.text()).then(data => {
+            document.getElementById('header-placeholder').innerHTML = data;
+        });
+
+        fetch('footer.html').then(response => response.text()).then(data => {
+            document.getElementById('footer-placeholder').innerHTML = data;
+        });
+
+        async function loadSkillsData() {
+            const response = await fetch('./data/skills.json');
+            const skills = await response.json();
+            skills.forEach(skill => {
+                skillsMap.set(skill.id, skill);
+                // Pre-cache skill names for performance
+                skillNameCache.set(skill.id, getSkillName(skill).toLowerCase());
+            });
+            return skillsMap;
+        }
+
+        function getSkillName(skillData) {
+            if (!skillData) return 'Unknown Skill';
+            let skillName = skillData.name_en || skillData.enname || 'Unknown Skill';
+            return skillName.replace(/\s+○$/, '');
+        }
+
+        // Optimized search function
+        function matchesSearchTerm(skillName, term) {
+            if (skillName.includes(term) || term.includes(skillName)) {
+                return true;
+            }
+
+            const cleanSkillName = skillName.replace(nonWordRegex, '');
+            const cleanTerm = term.replace(nonWordRegex, '');
+
+            return cleanSkillName.includes(cleanTerm) || cleanTerm.includes(cleanSkillName);
+        }
+
+        function setupSearch() {
+            const addSearchBtn = document.getElementById('add-search-btn');
+            addSearchBtn.addEventListener('click', addSearchBox);
+
+            // Set up the character search box with clear button
+            const characterSearchWrapper = document.querySelector('.character-search-wrapper');
+            const characterSearchInput = characterSearchWrapper.querySelector('.character-search-input');
+            const characterSearchClear = characterSearchWrapper.querySelector('.character-search-clear');
+
+            characterSearchInput.addEventListener('input', handleCharacterSearch);
+            characterSearchClear.addEventListener('click', function () {
                 characterSearchInput.value = '';
+                handleCharacterSearch();
+            });
+
+            // Set up normal search boxes
+            const normalInputs = document.querySelectorAll('.search-input:not(.character-search-input)');
+            normalInputs.forEach(input => {
+                input.addEventListener('input', handleSearch);
+                const toggleBtn = input.parentElement.querySelector('.toggle-search-btn');
+                toggleBtn.addEventListener('click', function () {
+                    this.classList.toggle('active');
+                    const searchBox = this.parentElement;
+                    const input = searchBox.querySelector('.search-input');
+                    input.classList.toggle('active');
+                    updateActiveSearchTerms();
+                    updateCharacterSkillsHighlight();
+                    updateCardDisplay();
+                    updateDeckDisplay();
+                });
+                const removeBtn = input.parentElement.querySelector('.remove-search-btn');
+                removeBtn.addEventListener('click', function () {
+                    const searchBoxes = document.querySelectorAll('.search-box');
+                    if (searchBoxes.length <= 1) {
+                        // Don't remove the last search box, just clear it
+                        const input = this.parentElement.querySelector('.search-input');
+                        input.value = '';
+                        input.classList.remove('active');
+                        const toggleBtn = this.parentElement.querySelector('.toggle-search-btn');
+                        toggleBtn.classList.remove('active');
+                    } else {
+                        this.parentElement.remove();
+                    }
+                    updateSearchTerms();
+                    updateActiveSearchTerms();
+                    filterAndRenderCards();
+                    updateDeckDisplay();
+                    updateCharacterSkillsHighlight();
+                });
+            });
+        }
+
+        function handleCharacterSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                filterAndRenderCards();
+                updateDeckDisplay();
+                updateCharacterSkillsHighlight();
+            }, 150);
+        }
+
+        function addSearchBox() {
+            const searchBoxesContainer = document.getElementById('search-boxes');
+            const searchBox = document.createElement('div');
+            searchBox.className = 'search-box';
+            searchBox.innerHTML = `
+                    <input type="text" class="search-input" placeholder="Enter skill or character name...">
+                    <button class="toggle-search-btn">✔</button>
+                    <button class="remove-search-btn">✖</button>
+                `;
+            searchBoxesContainer.appendChild(searchBox);
+
+            const input = searchBox.querySelector('.search-input');
+            input.addEventListener('input', handleSearch);
+            const toggleBtn = searchBox.querySelector('.toggle-search-btn');
+            toggleBtn.addEventListener('click', function () {
+                this.classList.toggle('active');
+                const searchBox = this.parentElement;
+                const input = searchBox.querySelector('.search-input');
+                input.classList.toggle('active');
+                updateActiveSearchTerms();
+                updateCharacterSkillsHighlight();
+                updateCardDisplay();
+                updateDeckDisplay();
+            });
+            const removeBtn = searchBox.querySelector('.remove-search-btn');
+            removeBtn.addEventListener('click', function () {
+                const searchBoxes = document.querySelectorAll('.search-box');
+                if (searchBoxes.length <= 1) {
+                    // Don't remove the last search box, just clear it
+                    const input = this.parentElement.querySelector('.search-input');
+                    input.value = '';
+                    input.classList.remove('active');
+                    const toggleBtn = this.parentElement.querySelector('.toggle-search-btn');
+                    toggleBtn.classList.remove('active');
+                } else {
+                    this.parentElement.remove();
+                }
+                updateSearchTerms();
+                updateActiveSearchTerms();
                 filterAndRenderCards();
                 updateDeckDisplay();
                 updateCharacterSkillsHighlight();
             });
         }
 
-        // Update the loadCardsWithSkills function to include the new setup
-        async function loadCardsWithSkills() {
-            const [skillsData, supportCardsResponse] = await Promise.all([
-                loadSkillsData(),
-                fetch('./data/support-cards.json')
-            ]);
-            allSupportCards = await supportCardsResponse.json();
-            setupSearch();
-            setupDeckSlots();
-            updateCharacterSlotDisplay();
-            setupImageToggles();
-            setupDeckButtons();
-            setupModalClose();
-            setupSorting();
-            setupCharacterSearchClear(); // Add this line
-            // Show full list by default
-            filterAndRenderCards();
+        function handleSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                updateSearchTerms();
+                filterAndRenderCards();
+                updateDeckDisplay();
+                updateCharacterSkillsHighlight();
+            }, 150);
         }
 
-        // Update the renderCards function to move the divider below character results
+        function updateSearchTerms() {
+            const inputs = document.querySelectorAll('.search-input:not(.character-search-input)');
+            currentSearchTerms = Array.from(inputs)
+                .map(input => input.value.trim().toLowerCase())
+                .filter(term => term.length > 0);
+        }
+
+        function updateActiveSearchTerms() {
+            const searchBoxes = document.querySelectorAll('.search-box');
+            activeSearchTerms = [];
+
+            searchBoxes.forEach(box => {
+                const input = box.querySelector('.search-input');
+                const toggleBtn = box.querySelector('.toggle-search-btn');
+                // Skip character search box which doesn't have a toggle button
+                if (toggleBtn) {
+                    const term = input.value.trim().toLowerCase();
+
+                    if (term.length > 0 && toggleBtn.classList.contains('active')) {
+                        activeSearchTerms.push(term);
+                    }
+                }
+            });
+        }
+
+        // Optimized card filtering
+        function filterAndRenderCards() {
+            const characterSearchInput = document.querySelector('.character-search-input');
+            const characterSearchTerm = characterSearchInput.value.trim().toLowerCase();
+
+            const cacheKey = currentSearchTerms.join('|') + getActiveFiltersKey() + '|char:' + characterSearchTerm;
+            if (cardCache.has(cacheKey)) {
+                renderCards(cardCache.get(cacheKey), currentSearchTerms, characterSearchTerm);
+                return;
+            }
+
+            let filteredCards = allSupportCards.filter(card => {
+                // Apply rarity filter
+                const rarityFilter = getActiveRarityFilter();
+                if (rarityFilter.length > 0 && !rarityFilter.includes(getRarityText(card.rarity))) {
+                    return false;
+                }
+
+                // Apply type filter
+                const typeFilter = getActiveTypeFilter();
+                if (typeFilter.length > 0 && !typeFilter.includes(card.type)) {
+                    return false;
+                }
+
+                // If we have normal search terms, filter by them
+                if (currentSearchTerms.length > 0) {
+                    const eventSkills = card.event_skills || [];
+                    const hasEventSkill = eventSkills.some(skillId => {
+                        const skillName = skillNameCache.get(skillId);
+                        if (!skillName) return false;
+                        return currentSearchTerms.some(term => matchesSearchTerm(skillName, term));
+                    });
+
+                    const hintSkills = card.hints?.hint_skills || [];
+                    const hasHintSkill = hintSkills.some(skillId => {
+                        const skillName = skillNameCache.get(skillId);
+                        if (!skillName) return false;
+                        return currentSearchTerms.some(term => matchesSearchTerm(skillName, term));
+                    });
+
+                    return hasEventSkill || hasHintSkill;
+                }
+
+                // If no normal search terms, show all cards that match filters
+                return true;
+            });
+
+            // Apply sorting
+            const sortBy = document.getElementById('sort-by').value;
+            const sortOrder = document.getElementById('sort-order').value;
+            const sortedCards = sortCards(filteredCards, sortBy, sortOrder);
+
+            cardCache.set(cacheKey, sortedCards);
+            renderCards(sortedCards, currentSearchTerms, characterSearchTerm);
+        }
+
+        function getActiveFiltersKey() {
+            return [
+                getActiveRarityFilter().join(','),
+                getActiveTypeFilter().join(',')
+            ].join('|');
+        }
+
+        function showWelcomeMessage() {
+            const container = document.getElementById('cards-container');
+            container.innerHTML = '<div class="welcome-message">Enter search terms to find support cards</div>';
+        }
+
+        // Sorting function with updated secondary sorting
+        function sortCards(cards, sortBy, sortOrder) {
+            const sortedCards = [...cards];
+
+            sortedCards.sort((a, b) => {
+                let primaryComparison = 0;
+                let secondaryComparison = 0;
+                let tertiaryComparison = 0;
+
+                switch (sortBy) {
+                    case 'skills':
+                        // Sort by number of highlighted skills (descending by default)
+                        const aHighlighted = countHighlightedSkills(a);
+                        const bHighlighted = countHighlightedSkills(b);
+                        primaryComparison = bHighlighted - aHighlighted;
+                        // Secondary: release date (latest first)
+                        if (a.release && b.release) {
+                            secondaryComparison = new Date(b.release) - new Date(a.release);
+                        } else if (a.release && !b.release) {
+                            secondaryComparison = -1;
+                        } else if (!a.release && b.release) {
+                            secondaryComparison = 1;
+                        }
+                        // Tertiary: rarity (SSR > SR > R)
+                        tertiaryComparison = b.rarity - a.rarity;
+                        break;
+
+                    case 'rarity':
+                        // Sort by rarity: SSR (3) > SR (2) > R (1)
+                        primaryComparison = b.rarity - a.rarity;
+                        // Secondary: release date (latest first)
+                        if (a.release && b.release) {
+                            secondaryComparison = new Date(b.release) - new Date(a.release);
+                        } else if (a.release && !b.release) {
+                            secondaryComparison = -1;
+                        } else if (!a.release && b.release) {
+                            secondaryComparison = 1;
+                        }
+                        break;
+
+                    case 'character':
+                        // Sort by name Z-A, then by rarity
+                        primaryComparison = b.char_name.localeCompare(a.char_name);
+                        secondaryComparison = b.rarity - a.rarity;
+                        break;
+
+                    case 'type':
+                        // Sort by type order, then by release date (latest first), then by rarity
+                        const typeOrder = {
+                            'speed': 0, 'stamina': 1, 'power': 2, 'guts': 3,
+                            'intelligence': 4, 'friend': 5, 'group': 6
+                        };
+                        primaryComparison = typeOrder[a.type] - typeOrder[b.type];
+                        if (a.release && b.release) {
+                            secondaryComparison = new Date(b.release) - new Date(a.release);
+                        } else if (a.release && !b.release) {
+                            secondaryComparison = -1;
+                        } else if (!a.release && b.release) {
+                            secondaryComparison = 1;
+                        }
+                        // Tertiary: rarity (SSR > SR > R)
+                        tertiaryComparison = b.rarity - a.rarity;
+                        break;
+
+                    case 'release':
+                        // Sort by release date (most recent first), then by rarity
+                        if (a.release && b.release) {
+                            primaryComparison = new Date(b.release) - new Date(a.release);
+                        } else if (a.release && !b.release) {
+                            primaryComparison = -1;
+                        } else if (!a.release && b.release) {
+                            primaryComparison = 1;
+                        }
+                        secondaryComparison = b.rarity - a.rarity;
+                        break;
+
+                    default:
+                        // Default: skills (number of highlighted skills)
+                        const aDefaultHighlighted = countHighlightedSkills(a);
+                        const bDefaultHighlighted = countHighlightedSkills(b);
+                        primaryComparison = bDefaultHighlighted - aDefaultHighlighted;
+                        // Secondary: release date (latest first)
+                        if (a.release && b.release) {
+                            secondaryComparison = new Date(b.release) - new Date(a.release);
+                        } else if (a.release && !b.release) {
+                            secondaryComparison = -1;
+                        } else if (!a.release && b.release) {
+                            secondaryComparison = 1;
+                        }
+                        // Tertiary: rarity (SSR > SR > R)
+                        tertiaryComparison = b.rarity - a.rarity;
+                }
+
+                // Apply sort order
+                if (sortOrder === 'asc') {
+                    primaryComparison = -primaryComparison;
+                    secondaryComparison = -secondaryComparison;
+                    tertiaryComparison = -tertiaryComparison;
+                }
+
+                // If primary comparison is equal, use secondary comparison, then tertiary
+                return primaryComparison !== 0 ? primaryComparison :
+                    (secondaryComparison !== 0 ? secondaryComparison : tertiaryComparison);
+            });
+
+            return sortedCards;
+        }
+
+        function countHighlightedSkills(card) {
+            const eventSkills = card.event_skills || [];
+            const hintSkills = card.hints?.hint_skills || [];
+            const allSkills = [...eventSkills, ...hintSkills];
+
+            return allSkills.filter(skillId => {
+                const skillName = skillNameCache.get(skillId);
+                if (!skillName) return false;
+
+                return currentSearchTerms.some(term => matchesSearchTerm(skillName, term));
+            }).length;
+        }
+
         function renderCards(cards, searchTerms = [], characterSearchTerm = '') {
             const characterResultsContainer = document.getElementById('character-results-container');
             const characterDivider = document.getElementById('character-divider');
@@ -1184,7 +1581,7 @@
                 });
                 characterResultsContainer.appendChild(fragment);
 
-                // Show divider AFTER character results
+                // Show divider BELOW character results
                 characterDivider.style.display = 'block';
             } else {
                 // Hide divider when no character results
