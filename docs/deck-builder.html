@@ -243,6 +243,11 @@
             margin: 0;
         }
 
+        .search-header-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
         .add-search-icon {
             background: #2ecc71;
             color: white;
@@ -260,6 +265,25 @@
 
         .add-search-icon:hover {
             background: #27ae60;
+        }
+
+        .clear-search-icon {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .clear-search-icon:hover {
+            background: #c0392b;
         }
 
         .search-boxes {
@@ -975,8 +999,11 @@
         <div class="control-sections">
             <div class="control-section search-section">
                 <div class="search-header">
-                    <h3>Search List</h3>
-                    <button class="add-search-icon" id="add-search-btn">+</button>
+                    <h3>Skill Search</h3>
+                    <div class="search-header-buttons">
+                        <button class="add-search-icon" id="add-search-btn" title="Add search box">+</button>
+                        <button class="clear-search-icon" id="clear-search-btn" title="Clear all searches">🗑️</button>
+                    </div>
                 </div>
                 <div class="search-boxes" id="search-boxes">
                     <!-- Normal search boxes -->
@@ -1206,6 +1233,9 @@
             const addSearchBtn = document.getElementById('add-search-btn');
             addSearchBtn.addEventListener('click', addSearchBox);
 
+            const clearSearchBtn = document.getElementById('clear-search-btn');
+            clearSearchBtn.addEventListener('click', clearAllSearches);
+
             const characterSearchWrapper = document.querySelector('.character-search-wrapper');
             const characterSearchInput = characterSearchWrapper.querySelector('.character-search-input');
             const characterSearchClear = characterSearchWrapper.querySelector('.character-search-clear');
@@ -1249,6 +1279,22 @@
                     updateCharacterSkillsHighlight();
                 });
             });
+        }
+
+        function clearAllSearches() {
+            if (confirm('Are you sure you want to clear all search boxes?')) {
+                const searchBoxesContainer = document.getElementById('search-boxes');
+                searchBoxesContainer.innerHTML = '';
+
+                // Add back one empty search box
+                addSearchBox();
+
+                updateSearchTerms();
+                updateActiveSearchTerms();
+                filterAndRenderCards();
+                updateDeckDisplay();
+                updateCharacterSkillsHighlight();
+            }
         }
 
         function handleCharacterSearch() {
@@ -2272,28 +2318,24 @@
             if (!skillData) return;
 
             const skillName = getSkillName(skillData);
-            addSkillToSearch(skillName);
-        }
 
-        function addSkillToSearch(skillName) {
+            // Check if skill is already in active search
             const existingSearch = Array.from(document.querySelectorAll('.search-input:not(.character-search-input)'))
-                .find(input => input.value.toLowerCase() === skillName.toLowerCase());
+                .find(input => {
+                    const toggleBtn = input.parentElement.querySelector('.toggle-search-btn');
+                    return input.value.toLowerCase() === skillName.toLowerCase() &&
+                        toggleBtn.classList.contains('active');
+                });
 
             if (existingSearch) {
+                // Skill is already highlighted - remove it (toggle off)
                 const searchBox = existingSearch.closest('.search-box');
                 const toggleBtn = searchBox.querySelector('.toggle-search-btn');
-                toggleBtn.classList.toggle('active');
-                existingSearch.classList.toggle('active');
+                toggleBtn.classList.remove('active');
+                existingSearch.classList.remove('active');
             } else {
-                addSearchBox();
-                const searchBoxes = document.querySelectorAll('.search-box');
-                const lastSearchBox = searchBoxes[searchBoxes.length - 1];
-                const input = lastSearchBox.querySelector('.search-input');
-                const toggleBtn = lastSearchBox.querySelector('.toggle-search-btn');
-
-                input.value = skillName;
-                toggleBtn.classList.add('active');
-                input.classList.add('active');
+                // Skill is not highlighted - add it to search
+                addSkillToSearch(skillName, false); // Don't auto-highlight
             }
 
             updateSearchTerms();
@@ -2301,6 +2343,58 @@
             filterAndRenderCards();
             updateDeckDisplay();
             updateCharacterSkillsHighlight();
+        }
+
+        function addSkillToSearch(skillName, autoHighlight = true) {
+            // Check if skill is already in any search box (active or inactive)
+            const existingSearch = Array.from(document.querySelectorAll('.search-input:not(.character-search-input)'))
+                .find(input => input.value.toLowerCase() === skillName.toLowerCase());
+
+            if (existingSearch) {
+                // If skill exists, just toggle the highlight
+                const searchBox = existingSearch.closest('.search-box');
+                const toggleBtn = searchBox.querySelector('.toggle-search-btn');
+
+                if (autoHighlight) {
+                    toggleBtn.classList.toggle('active');
+                    existingSearch.classList.toggle('active');
+                }
+                // If autoHighlight is false, we don't change the highlight state
+            } else {
+                // Check if we should use the first empty search box
+                const searchBoxes = document.querySelectorAll('.search-box');
+                let usedExisting = false;
+
+                // Try to find an empty search box to use
+                for (let i = 0; i < searchBoxes.length; i++) {
+                    const input = searchBoxes[i].querySelector('.search-input');
+                    if (input.value.trim() === '') {
+                        input.value = skillName;
+                        if (autoHighlight) {
+                            const toggleBtn = searchBoxes[i].querySelector('.toggle-search-btn');
+                            toggleBtn.classList.add('active');
+                            input.classList.add('active');
+                        }
+                        usedExisting = true;
+                        break;
+                    }
+                }
+
+                // If no empty search box found, add a new one
+                if (!usedExisting) {
+                    addSearchBox();
+                    const newSearchBoxes = document.querySelectorAll('.search-box');
+                    const lastSearchBox = newSearchBoxes[newSearchBoxes.length - 1];
+                    const input = lastSearchBox.querySelector('.search-input');
+                    const toggleBtn = lastSearchBox.querySelector('.toggle-search-btn');
+
+                    input.value = skillName;
+                    if (autoHighlight) {
+                        toggleBtn.classList.add('active');
+                        input.classList.add('active');
+                    }
+                }
+            }
         }
 
         function updateCharacterSkillsHighlight() {
